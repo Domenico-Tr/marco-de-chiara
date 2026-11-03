@@ -1,37 +1,47 @@
 /* =====================================================================
-   Vetrina d'artista — stile
-   Idea: una parete di galleria. Il nome dell'artista grande in apertura,
-   le opere "appese" in colonne libere, didascalie come nei musei.
+   Sito di Marco De Chiara — stile
+   Palette e caratteri presi dal suo quadro: il verde quasi nero dei bordi,
+   l'alone verde acido al centro, i gialli, i magenta e i turchesi dei
+   riccioli. Un solo tema scuro, su cui le opere risaltano.
    Tutti i colori e i caratteri sono variabili: si cambiano qui in :root.
    ===================================================================== */
 
+/* Layout: nome a caratteri pieni e stretti su un alone verde acido, opere in colonne libere, didascalie da museo */
 :root {
-  /* Colori — tema chiaro */
-  --parete: #EEEFEC;        /* sfondo, come un muro intonacato */
-  --passepartout: #F9F9F7;  /* superfici rialzate: sottomenu, cornice */
-  --inchiostro: #1D1E20;    /* testo principale */
-  --grafite: #64656A;       /* testo secondario */
-  --linea: #D4D5D0;         /* filetti e bordi */
-  --oltremare: #2D3BC0;     /* unico colore d'accento */
-  --bollino: #C0352A;       /* il "bollino rosso" delle opere vendute */
-  --ombra: rgba(29, 30, 32, 0.10);
-  --ombra-forte: rgba(29, 30, 32, 0.30);
+  /* Colori */
+  --parete: #0F1E15;        /* sfondo: il verde quasi nero dei bordi del quadro */
+  --passepartout: #172A1E;  /* superfici rialzate: sottomenu, cornice, video */
+  --inchiostro: #F3EFDD;    /* testo principale: bianco caldo */
+  --grafite: #A7B5A0;       /* testo secondario: verde salvia */
+  --linea: #2C4535;         /* filetti e bordi */
+  --accento: #C8EF3C;       /* verde acido dell'alone: filtro attivo, "In corso", pulsanti */
+  --alone: rgba(200, 239, 60, 0.15); /* la luce verde dietro l'opera in apertura */
+  --pellicola: #050A07;     /* fondo dei video */
+  --bollino: #FF6B3D;       /* arancio cadmio: il "bollino" delle opere vendute */
+  --ombra: rgba(0, 0, 0, 0.35);
+  --ombra-forte: rgba(0, 0, 0, 0.6);
+
+  /* Pigmenti dei riccioli: colorano le sottolineature a pennello del menu */
+  --giallo: #F4C534;
+  --magenta: #E6588F;
+  --turchese: #43BDB4;
 
   /* Colori delle pennellate nel passaggio tra sezioni, dall'alto in basso.
-     Tavolozza attuale: inchiostro (neri e grigi di Payne).
+     Tavolozza attuale: Alone (i verdi del fondo del quadro, dal buio alla luce).
      Per cambiarla, sostituisci i quattro valori con una di queste:
-       Oltremare   #141C4A  #22337A  #2D3BC0  #4A5FD0
-       Terre       #3E2C22  #5B3A29  #7A5230  #A66A3F
-       Sanguigna   #4A1E1A  #7A2E24  #A0452F  #C2785A          */
-  --pennellata-1: #1B1C1E;  /* nero d'avorio */
-  --pennellata-2: #2E3440;  /* grigio di Payne scuro */
-  --pennellata-3: #3F4752;  /* grigio di Payne */
-  --pennellata-4: #23262B;  /* nero fumo */
-  --velatura: rgba(45, 59, 192, 0.12);  /* pennellata leggera dietro le voci del sottomenu */
+       Pelle       #F4C534  #F08A2E  #E6588F  #B83A7A
+       Riccioli    #43BDB4  #6A55B8  #E6588F  #F4C534
+       Inchiostro  #1B1C1E  #2E3440  #3F4752  #23262B          */
+  --pennellata-1: #0B2316;  /* verde notte */
+  --pennellata-2: #1D5230;  /* verde bosco */
+  --pennellata-3: #4C9A2B;  /* verde prato */
+  --pennellata-4: #B9E43A;  /* verde acido */
+  --velatura: rgba(200, 239, 60, 0.14);  /* pennellata leggera dietro le voci del sottomenu */
 
   /* Caratteri */
-  --font-titoli: "Bodoni Moda", "Bodoni 72", Didot, "Times New Roman", serif;
-  --font-testo: "Hanken Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Cormorant", "Cormorant Garamond", Garamond, Georgia, serif;  /* nome, titoli delle sezioni e delle opere: alto contrasto, corsivo calligrafico */
+  --font-titoli: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-testo: "Bricolage Grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* Scala tipografica */
   --t-xs: 0.8125rem;
@@ -39,44 +49,18 @@
   --t-m: 1.0625rem;
   --t-l: clamp(1.1875rem, 1.6vw, 1.375rem);
   --t-xl: clamp(1.625rem, 3vw, 2.25rem);
-  --t-xxl: clamp(2.5rem, 6vw, 4.25rem);
-  --t-nome: clamp(3.25rem, 9.6vw, 8.5rem);
+  --t-xxl: clamp(2.75rem, 7vw, 5rem);
+  --t-nome: clamp(3.4rem, 9vw, 8.5rem);
 
   /* Spazi */
   --margine: clamp(16px, 4vw, 48px);
   --larghezza: 1320px;
   --sezione: clamp(4.5rem, 10vw, 8.5rem);
-}
 
-/* Tema scuro: segue l'impostazione del sistema */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --parete: #161719;
-    --passepartout: #1F2023;
-    --inchiostro: #EAEAE6;
-    --grafite: #9C9DA2;
-    --linea: #2E2F33;
-    --oltremare: #9AA5FF;
-    --bollino: #FF7A6E;
-    --ombra: rgba(0, 0, 0, 0.35);
-    --ombra-forte: rgba(0, 0, 0, 0.65);
-    --velatura: rgba(154, 165, 255, 0.14);
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --parete: #161719;
-  --passepartout: #1F2023;
-  --inchiostro: #EAEAE6;
-  --grafite: #9C9DA2;
-  --linea: #2E2F33;
-  --oltremare: #9AA5FF;
-  --bollino: #FF7A6E;
-  --ombra: rgba(0, 0, 0, 0.35);
-  --ombra-forte: rgba(0, 0, 0, 0.65);
-  --velatura: rgba(154, 165, 255, 0.14);
   color-scheme: dark;
 }
+
+::selection { background: var(--accento); color: var(--parete); }
 
 /* Forme dei pennelli, generate come immagini SVG: servono da maschera
    per far comparire le cose "dipinte" e per le sottolineature a pennello. */
@@ -113,7 +97,7 @@ button { font: inherit; color: inherit; }
 h1, h2, h3 { text-wrap: balance; }
 [hidden] { display: none !important; }
 
-:focus-visible { outline: 2px solid var(--oltremare); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accento); outline-offset: 3px; }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -162,8 +146,11 @@ body::before {
 }
 
 .marchio {
-  font-family: var(--font-titoli);
-  font-size: 1.3rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -187,14 +174,15 @@ body::before {
 }
 .menu-freccia { width: 0.6rem; height: 0.4rem; transition: transform 0.2s ease; }
 
-/* Sottolineatura a pennello nel colore d'accento.
-   Si dipinge da sinistra al passaggio del mouse e resta sulla sezione che stai guardando. */
+/* Sottolineatura a pennello: ogni voce ha un pigmento dei riccioli del quadro
+   (--pigmento in index.html). Si dipinge da sinistra al passaggio del mouse
+   e resta sulla sezione che stai guardando. */
 .menu-link::after {
   content: "";
   position: absolute; left: -0.2em; right: -0.2em; bottom: 0.3rem;
   height: 0.55em;
   z-index: -1;
-  background: var(--oltremare);
+  background: var(--pigmento, var(--accento));
   -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -264,7 +252,11 @@ body::before {
 }
 
 /* ---------- Apertura ---------- */
-.apertura { padding-block: clamp(2.5rem, 7vw, 6rem) var(--sezione); }
+/* L'alone verde acido del quadro, dietro l'opera in evidenza */
+.apertura {
+  padding-block: clamp(2.5rem, 7vw, 6rem) var(--sezione);
+  background: radial-gradient(ellipse 55% 70% at 74% 42%, var(--alone), transparent 70%);
+}
 
 .apertura-inner {
   display: grid;
@@ -275,14 +267,16 @@ body::before {
 
 .nome {
   margin: 0;
-  font-family: var(--font-titoli);
-  font-weight: 400;
+  /* corsivo calligrafico, come tracciato a pennino */
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
   font-size: var(--t-nome);
-  line-height: 0.9;
-  letter-spacing: -0.025em;
+  line-height: 0.88;
+  letter-spacing: -0.015em;
 }
 .nome span { display: block; }
-.nome span + span { padding-left: 0.9em; }
+.nome span + span { padding-left: 0.75em; }
 
 .presentazione {
   margin: clamp(1.75rem, 4vw, 3rem) 0 0;
@@ -303,10 +297,10 @@ body::before {
   flex: none;
   width: 0.55rem; height: 0.55rem;
   border-radius: 50%;
-  background: var(--oltremare);
+  background: var(--accento);
   transform: translateY(-0.1em);
 }
-.adesso.is-futuro::before { background: transparent; border: 1px solid var(--oltremare); }
+.adesso.is-futuro::before { background: transparent; border: 1px solid var(--accento); }
 .adesso a { color: var(--inchiostro); }
 
 .evidenza {
@@ -394,11 +388,11 @@ body::before {
 }
 .titolo-sezione {
   margin: 0;
-  font-family: var(--font-titoli);
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 500;
   font-size: var(--t-xxl);
   line-height: 1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 .nota-sezione {
   margin: 0;
@@ -433,7 +427,7 @@ body::before {
   content: "";
   position: absolute; left: -0.25em; right: -0.25em; bottom: 0;
   height: 0.5rem;
-  background: var(--oltremare);
+  background: var(--accento);
   -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -479,12 +473,14 @@ body::before {
 }
 .didascalia p { margin: 0; }
 .didascalia-titolo { color: var(--inchiostro); }
+/* Titoli delle opere in corsivo, come nelle didascalie dei musei */
 .didascalia-titolo em,
 .scheda-titolo em {
-  font-family: var(--font-titoli);
+  font-family: var(--font-display);
   font-style: italic;
+  font-weight: 600;
 }
-.didascalia-titolo em { font-size: 1.22em; }
+.didascalia-titolo em { font-size: 1.32em; }
 .opera-apri:hover + .didascalia em,
 .evidenza-apri:hover + .didascalia em {
   text-decoration: underline;
@@ -502,11 +498,127 @@ body::before {
   content: "";
   width: 0.55rem; height: 0.55rem;
   border-radius: 50%;
-  background: var(--oltremare);
+  background: var(--accento);
 }
 .stato--venduta { color: var(--grafite); }
 .stato--venduta::before { background: var(--bollino); }
 .stato--riservata::before { background: transparent; border: 1px solid var(--grafite); }
+
+/* ---------- Processo creativo ----------
+   Una striscia che scorre in orizzontale, come una pellicola.
+   I video verticali (telefono) hanno tutti la stessa altezza,
+   quelli orizzontali (YouTube) sono più larghi. */
+.processo-lato {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end;
+  gap: 1rem 1.75rem;
+}
+.processo-comandi { display: flex; gap: 0.5rem; }
+.freccia {
+  display: inline-grid; place-items: center;
+  width: 2.75rem; height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  background: none;
+  color: var(--inchiostro);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.freccia svg { width: 1.15rem; height: 1.15rem; }
+.freccia:hover:not(:disabled) { border-color: var(--accento); color: var(--accento); }
+.freccia:disabled { opacity: 0.35; cursor: default; }
+
+.processo-striscia {
+  --altezza-video: clamp(22rem, 64vh, 36rem);
+  display: flex; align-items: flex-start;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--linea) transparent;
+}
+.processo-striscia:focus-visible { outline-offset: 6px; }
+.processo-striscia > .vuoto { flex: 1; }
+
+/* La larghezza di ogni scheda dipende dal formato del video */
+.video {
+  flex: none;
+  display: grid; gap: 1rem;
+  scroll-snap-align: start;
+}
+.video--verticale { width: min(82vw, calc(var(--altezza-video) * 9 / 16)); }
+.video--quadrato { width: min(82vw, var(--altezza-video)); }
+.video--orizzontale { width: min(82vw, 40rem); }
+
+.video-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  margin: 0; padding: 0; border: 0;
+  overflow: hidden;
+  background: var(--pellicola);
+  color: var(--inchiostro);
+  text-decoration: none;
+}
+.video--orizzontale .video-media { aspect-ratio: 16 / 9; }
+.video--quadrato .video-media { aspect-ratio: 1 / 1; }
+.video-media video,
+.video-media iframe,
+.video-media img {
+  display: block;
+  width: 100%; height: 100%;
+  border: 0;
+}
+.video-media video { object-fit: contain; background: var(--pellicola); }
+.video-media img { object-fit: cover; }
+.video-media .media-mancante { height: 100%; aspect-ratio: auto; }
+
+/* Copertina cliccabile (YouTube, Instagram, TikTok) */
+.video-facciata { cursor: pointer; }
+.video-fondo {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  /* senza copertina: l'alone verde del quadro */
+  background: radial-gradient(circle at 50% 42%, var(--accento) 0%, var(--pennellata-3) 28%, var(--pennellata-2) 52%, var(--parete) 80%);
+  color: var(--parete);
+}
+.video-fondo .icona { font-size: 3.25rem; }
+.video-gioca {
+  position: absolute; left: 1rem; bottom: 1rem;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.55rem 1rem 0.55rem 0.7rem;
+  border-radius: 999px;
+  background: var(--accento);
+  color: var(--parete);
+  font-size: var(--t-s);
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+.video-gioca svg { width: 1rem; height: 1rem; }
+.video-gioca .icona { font-size: 1rem; }
+.video-facciata:hover .video-gioca,
+.video-facciata:focus-visible .video-gioca { transform: scale(1.05); }
+.video-facciata:focus-visible { outline-offset: 4px; }
+
+.video-testo { display: grid; gap: 0.35rem; }
+.video-data { margin: 0; font-size: var(--t-xs); color: var(--grafite); font-variant-numeric: tabular-nums; }
+.video-titolo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--t-xl);
+  line-height: 1.1;
+}
+.video-descrizione { margin: 0; font-size: var(--t-s); color: var(--grafite); }
+.video-opera { justify-self: start; margin-top: 0.3rem; font-size: var(--t-s); }
+
+@media (max-width: 640px) {
+  .processo-striscia { --altezza-video: min(68vh, 32rem); }
+  .processo-lato { justify-content: flex-start; }
+}
 
 /* ---------- Eventi ---------- */
 .eventi { list-style: none; margin: 0; padding: 0; }
@@ -524,9 +636,11 @@ body::before {
 .evento-data { margin: 0; line-height: 1; font-variant-numeric: tabular-nums; }
 .evento-giorno {
   display: block;
-  font-family: var(--font-titoli);
-  font-size: 3rem;
-  line-height: 0.9;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-size: 3.5rem;
+  line-height: 0.85;
 }
 .evento-mese {
   display: block;
@@ -538,8 +652,8 @@ body::before {
 .evento-corpo { min-width: 0; }
 .evento-titolo {
   margin: 0;
-  font-family: var(--font-titoli);
-  font-weight: 400;
+  font-family: var(--font-display);
+  font-weight: 600;
   font-size: var(--t-xl);
   line-height: 1.1;
 }
@@ -562,8 +676,8 @@ body::before {
   white-space: nowrap;
 }
 .pill--ora {
-  background: var(--oltremare);
-  border-color: var(--oltremare);
+  background: var(--accento);
+  border-color: var(--accento);
   color: var(--parete);
 }
 
@@ -603,8 +717,9 @@ body::before {
   min-width: 0;
   justify-self: start;
   display: inline-flex; align-items: center; gap: 0.4em;
-  font-family: var(--font-titoli);
-  font-size: clamp(1.5rem, 4.2vw, 3rem);
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 4.4vw, 3.2rem);
   line-height: 1.15;
   text-decoration: none;
 }
@@ -623,7 +738,7 @@ body::before {
 }
 .icona svg { width: 1em; height: 1em; }
 .contatto-valore .icona { font-size: 0.62em; color: var(--grafite); transition: color 0.2s ease; }
-.contatto-valore:hover .icona { color: var(--oltremare); }
+.contatto-valore:hover .icona { color: var(--accento); }
 
 .copia {
   padding: 0.4rem 0.9rem;
@@ -655,7 +770,7 @@ body::before {
   text-decoration: none;
   transition: color 0.2s ease;
 }
-.piede-social a:hover { color: var(--oltremare); }
+.piede-social a:hover { color: var(--accento); }
 .piede-social .icona { font-size: 1.05rem; }
 
 /* Riquadro mostrato al posto di una foto che non si trova */
@@ -684,7 +799,7 @@ body::before {
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
-.bottone:hover { background: var(--oltremare); border-color: var(--oltremare); }
+.bottone:hover { background: var(--accento); border-color: var(--accento); }
 .bottone--leggero {
   padding: 0.6rem 1rem;
   background: transparent;
@@ -845,9 +960,9 @@ body::before {
   .menu.is-closing { animation: pannello-fuori 0.38s cubic-bezier(0.55, 0.05, 0.3, 1) both; }
 
   .menu-lista { flex-direction: column; align-items: stretch; gap: 0; }
-  .menu-link { font-family: var(--font-titoli); font-size: 1.85rem; padding-block: 0.55rem; align-self: flex-start; }
-  .menu-link::after { bottom: 0.55rem; height: 0.42em; }
-  /* All'apertura le tre voci vengono sottolineate una dopo l'altra */
+  .menu-link { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 2.4rem; padding-block: 0.4rem; align-self: flex-start; }
+  .menu-link::after { bottom: 0.5rem; height: 0.42em; }
+  /* All'apertura le voci vengono sottolineate una dopo l'altra, ognuna col suo pigmento */
   .menu.is-open .menu-voce > .menu-link::after {
     animation: tratto-dentro 0.45s cubic-bezier(0.6, 0.05, 0.3, 1) calc(0.28s + var(--n, 0) * 0.1s) both;
   }

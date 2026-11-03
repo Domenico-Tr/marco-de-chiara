@@ -34,6 +34,9 @@
   let OPERE = [];
   let EVENTI = [];
   let CONTATTI = {};
+  let PROCESSO = [];
+
+  const percorsoLocale = (p) => String(p || "").trim().replace(/^\/+/, "");
 
   const slug = (s) =>
     String(s || "")
@@ -80,11 +83,22 @@
       if (!risposta.ok) throw new Error(`${percorso}: errore ${risposta.status}`);
       return risposta.json();
     };
-    const [opere, eventi, sito] = await Promise.all([
+    const [opere, eventi, sito, processo] = await Promise.all([
       leggi("contenuti/opere.json"),
       leggi("contenuti/eventi.json"),
       leggi("contenuti/sito.json"),
+      // facoltativo: se il file non c'è ancora la sezione resta vuota
+      leggi("contenuti/processo.json").catch(() => []),
     ]);
+    PROCESSO = (Array.isArray(processo) ? processo : [])
+      .filter((v) => v && v.titolo && (v.video || v.link))
+      .map((v) => ({
+        ...v,
+        video: percorsoLocale(v.video),
+        copertina: percorsoLocale(v.copertina),
+        link: String(v.link || "").trim(),
+        data: v.data ? String(v.data).slice(0, 10) : "",
+      }));
     OPERE = (Array.isArray(opere) ? opere : []).filter(Boolean).map(normalizzaOpera);
     EVENTI = (Array.isArray(eventi) ? eventi : [])
       .filter((e) => e && e.titolo && e.inizio)
@@ -1193,6 +1207,196 @@
   }
 
   /* ------------------------------------------------------------------
+     5b. Processo creativo
+     Ogni video può essere un file caricato dal pannello (cartella video/)
+     oppure un link a YouTube, Instagram o TikTok.
+     - file:      lettore del browser, senza uscire dal sito
+     - YouTube:   copertina con "Guarda"; al clic parte il video nel sito
+     - Instagram, TikTok: copertina che apre il video sul social
+     I video con la data più recente compaiono per primi.
+     ------------------------------------------------------------------ */
+  const ICONA_PLAY =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>';
+
+  function analizzaLink(indirizzo) {
+    let u;
+    try {
+      u = new URL(indirizzo);
+    } catch (e) {
+      return null;
+    }
+    const host = u.hostname.replace(/^(www|m)\./, "");
+    const idValido = (id) => (/^[\w-]{6,20}$/.test(id || "") ? id : null);
+    if (host === "youtu.be") {
+      const id = idValido(u.pathname.split("/")[1]);
+      return id ? { tipo: "youtube", id, verticale: false } : null;
+    }
+    if (host.endsWith("youtube.com") || host.endsWith("youtube-nocookie.com")) {
+      const parti = u.pathname.split("/");
+      if (parti[1] === "shorts" || parti[1] === "embed" || parti[1] === "live") {
+        const id = idValido(parti[2]);
+        return id ? { tipo: "youtube", id, verticale: parti[1] === "shorts" } : null;
+      }
+      const id = idValido(u.searchParams.get("v"));
+      return id ? { tipo: "youtube", id, verticale: false } : null;
+    }
+    if (host.endsWith("instagram.com")) return { tipo: "instagram", url: u.href, verticale: true };
+    if (host.endsWith("tiktok.com")) return { tipo: "tiktok", url: u.href, verticale: true };
+    return { tipo: "altro", url: u.href, verticale: false };
+  }
+
+  function avvisoVideoMancante(percorso) {
+    const avviso = document.createElement("div");
+    avviso.className = "media-mancante";
+    avviso.innerHTML = `<strong>Video non trovato</strong><span>${esc(percorso)}</span><span>Ricaricalo dal pannello</span>`;
+    return avviso;
+  }
+
+  // Restituisce il riquadro del video e il suo orientamento
+  function mediaVideo(v, scheda) {
+    // 1. File caricato
+    if (v.video) {
+      const box = document.createElement("div");
+      box.className = "video-media";
+      const el = document.createElement("video");
+      el.controls = true;
+      el.playsInline = true;
+      el.preload = "metadata";
+      if (v.copertina) el.poster = v.copertina;
+      // senza copertina, "#t=0.1" mostra il primo fotogramma anche su iPhone
+      el.src = v.copertina ? v.video : `${v.video}#t=0.1`;
+      el.setAttribute("aria-label", v.titolo);
+      el.addEventListener("loadedmetadata", () => {
+        const r = el.videoWidth / el.videoHeight;
+        scheda.classList.remove("video--verticale", "video--orizzontale", "video--quadrato");
+        scheda.classList.add(r > 1.15 ? "video--orizzontale" : r > 0.87 ? "video--quadrato" : "video--verticale");
+        aggiornaFrecce();
+      });
+      el.addEventListener("error", () => box.replaceChildren(avvisoVideoMancante(v.video)), { once: true });
+      box.append(el);
+      return { box, orientamento: "verticale" };
+    }
+
+    // 2. Link
+    const info = analizzaLink(v.link);
+    if (!info) return null;
+    const orientamento = info.verticale ? "verticale" : "orizzontale";
+    const copertina = v.copertina || (info.tipo === "youtube" ? `https://i.ytimg.com/vi/${info.id}/hqdefault.jpg` : "");
+    const nomi = { youtube: "YouTube", instagram: "Instagram", tiktok: "TikTok", altro: "il sito" };
+    const icone = { instagram: ICONE.instagram, tiktok: ICONE.tiktok };
+
+    const fondo = `<span class="video-fondo">${icone[info.tipo] ? `<span class="icona">${icone[info.tipo]}</span>` : ""}</span>`;
+    const immagine = copertina ? `<img src="${esc(copertina)}" alt="" loading="lazy">` : "";
+
+    if (info.tipo === "youtube") {
+      const box = document.createElement("button");
+      box.type = "button";
+      box.className = "video-media video-facciata";
+      box.setAttribute("aria-label", `Guarda il video ${v.titolo}`);
+      box.innerHTML = `${fondo}${immagine}<span class="video-gioca">${ICONA_PLAY}Guarda</span>`;
+      const img = box.querySelector("img");
+      if (img) img.addEventListener("error", () => img.remove(), { once: true });
+      box.addEventListener("click", () => {
+        const contenitore = document.createElement("div");
+        contenitore.className = "video-media";
+        contenitore.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${info.id}?autoplay=1&rel=0&playsinline=1" title="${esc(v.titolo)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+        box.replaceWith(contenitore);
+      });
+      return { box, orientamento };
+    }
+
+    const box = document.createElement("a");
+    box.className = "video-media video-facciata";
+    box.href = info.url;
+    box.target = "_blank";
+    box.rel = "noopener";
+    box.setAttribute("aria-label", `Guarda ${v.titolo} su ${nomi[info.tipo]}`);
+    const etichetta = icone[info.tipo] ? `<span class="icona">${icone[info.tipo]}</span>` : ICONA_PLAY;
+    box.innerHTML = `${fondo}${immagine}<span class="video-gioca">${etichetta}Guarda su ${nomi[info.tipo]}</span>`;
+    const img = box.querySelector("img");
+    if (img) img.addEventListener("error", () => img.remove(), { once: true });
+    return { box, orientamento };
+  }
+
+  function schedaVideo(v) {
+    const scheda = document.createElement("article");
+    scheda.className = "video";
+    const media = mediaVideo(v, scheda);
+    if (!media) return null;
+    scheda.classList.add(`video--${media.orientamento}`);
+
+    const testo = document.createElement("div");
+    testo.className = "video-testo";
+    const data = v.data ? leggiData(v.data) : null;
+    testo.innerHTML = `
+      ${data && !isNaN(data) ? `<p class="video-data">${giornoMese(data)} ${data.getFullYear()}</p>` : ""}
+      <h3 class="video-titolo">${esc(v.titolo)}</h3>
+      ${v.descrizione ? `<p class="video-descrizione">${esc(v.descrizione)}</p>` : ""}`;
+
+    // Collegamento all'opera finita, se il titolo corrisponde a un'opera
+    const cercato = String(v.opera || "").trim().toLowerCase();
+    const indiceOpera = cercato ? OPERE.findIndex((o) => o.titolo.trim().toLowerCase() === cercato) : -1;
+    if (indiceOpera >= 0) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "link-bottone video-opera";
+      btn.textContent = "Guarda l'opera finita";
+      btn.addEventListener("click", () => apriScheda(OPERE, indiceOpera, btn));
+      testo.append(btn);
+    }
+
+    scheda.append(media.box, testo);
+    return scheda;
+  }
+
+  function aggiornaFrecce() {
+    const striscia = $("#processo-striscia");
+    const comandi = $("#processo-comandi");
+    if (!striscia || !comandi) return;
+    const scorre = striscia.scrollWidth > striscia.clientWidth + 4;
+    comandi.hidden = !scorre;
+    $("#processo-prec").disabled = striscia.scrollLeft <= 4;
+    $("#processo-succ").disabled = striscia.scrollLeft + striscia.clientWidth >= striscia.scrollWidth - 4;
+  }
+
+  function costruisciProcesso() {
+    const striscia = $("#processo-striscia");
+    const ordinati = PROCESSO.map((v, i) => ({ v, i })).sort((a, b) => {
+      if (a.v.data && b.v.data && a.v.data !== b.v.data) return a.v.data < b.v.data ? 1 : -1;
+      if (a.v.data && !b.v.data) return -1;
+      if (!a.v.data && b.v.data) return 1;
+      return a.i - b.i;
+    });
+    const schede = ordinati.map(({ v }) => schedaVideo(v)).filter(Boolean);
+    if (!schede.length) {
+      striscia.innerHTML = `<p class="vuoto">Presto qui i video dallo studio.</p>`;
+      striscia.removeAttribute("tabindex");
+      return;
+    }
+    striscia.replaceChildren(...schede);
+
+    const passo = (verso) =>
+      striscia.scrollBy({ left: verso * striscia.clientWidth * 0.8, behavior: menoMovimento() ? "auto" : "smooth" });
+    $("#processo-prec").addEventListener("click", () => passo(-1));
+    $("#processo-succ").addEventListener("click", () => passo(1));
+    striscia.addEventListener("scroll", aggiornaFrecce, { passive: true });
+    window.addEventListener("resize", aggiornaFrecce);
+    striscia.querySelectorAll("img").forEach((img) => img.addEventListener("load", aggiornaFrecce, { once: true }));
+    aggiornaFrecce();
+  }
+
+  // Un solo video alla volta: quando ne parte uno, gli altri si fermano
+  document.addEventListener(
+    "play",
+    (e) => {
+      document.querySelectorAll("video").forEach((v) => {
+        if (v !== e.target) v.pause();
+      });
+    },
+    true
+  );
+
+  /* ------------------------------------------------------------------
      6. Contatti
      ------------------------------------------------------------------ */
   // Busta per l'email, disegnata qui; Instagram e TikTok usano le icone di Font Awesome
@@ -1421,6 +1625,7 @@
     costruisciEvidenza();
     costruisciEventi();
     costruisciContatti();
+    costruisciProcesso();
 
     // Il bottone "Mostra tutte le opere" nella griglia vuota
     $("#opere-griglia").addEventListener("click", (e) => {

@@ -106,7 +106,9 @@ La palette viene da un quadro di Marco: il verde quasi nero dei bordi, l'alone v
 
 - `--parete` è lo sfondo, `--accento` il verde acido (filtro attivo, pulsanti, "In corso"), `--alone` la luce verde dietro l'opera in apertura.
 - `--giallo`, `--magenta`, `--turchese`: colori delle sottolineature a pennello del menu. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
-- Caratteri, da Google Fonts (link in `index.html`): Bricolage Grotesque per nome, titoli e testi (`--font-titoli`, `--font-testo`), Fraunces corsivo per i titoli delle opere (`--font-corsivo`).
+- Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico), i titoli delle sezioni, delle opere, degli eventi e dei video (`--font-display`); Bricolage Grotesque per i testi (`--font-testo`).
+
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03c` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
