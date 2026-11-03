@@ -882,7 +882,62 @@
       }
     }
 
-    return { transizione };
+    // Sipario della prima visita: lo schermo parte coperto di colore e le
+    // pennellate lo puliscono. aMeta viene chiamata quando il colore inizia a
+    // ritirarsi, per far partire le animazioni dell'apertura.
+    async function sipario(aMeta, pronto) {
+      const togliCopertura = () => document.documentElement.classList.remove("js-sipario");
+      if (occupata || menoMovimento()) {
+        togliCopertura();
+        aMeta();
+        return;
+      }
+      occupata = true;
+      let partita = false;
+      const via = () => {
+        if (!partita) {
+          partita = true;
+          aMeta();
+        }
+      };
+      try {
+        if (!tela) prepara();
+        dimensiona();
+        tela.classList.remove("is-sfuma");
+        tela.classList.add("is-attiva");
+        const colori = pigmenti();
+        // copre tutto all'istante: fondo pieno e pennellate già stese
+        ctx.fillStyle = colori[0];
+        ctx.fillRect(0, 0, W, H);
+        const coperta = creaPennellate(colori, false);
+        ctx.save();
+        ctx.lineCap = "butt";
+        ctx.lineJoin = "round";
+        for (const pen of coperta.pennellate) {
+          for (const setola of pen.setole) traccia(coperta, pen, setola, 0, 1, false);
+        }
+        ctx.restore();
+        togliCopertura();
+        // aspetta che opere e contenuti siano pronti (al massimo un secondo e mezzo)
+        await Promise.race([pronto || Promise.resolve(), attendi(1500)]);
+        await attendi(150);
+        setTimeout(via, 300);
+        await anima(creaPennellate(colori, true), true, 0.5);
+        tela.classList.add("is-sfuma");
+        await attendi(220);
+      } catch (err) {
+        togliCopertura();
+      } finally {
+        via();
+        if (tela) {
+          tela.classList.remove("is-attiva", "is-sfuma");
+          ctx.clearRect(0, 0, W, H);
+        }
+        occupata = false;
+      }
+    }
+
+    return { transizione, sipario };
   })();
 
   /* ------------------------------------------------------------------
@@ -967,6 +1022,12 @@
       media.style.setProperty("--ritardo", `${ritardo}s`);
       cap.classList.add("appare");
       cap.style.setProperty("--ritardo", `${ritardo + 0.35}s`);
+    } else if (!menoMovimento()) {
+      // Primo caricamento: ogni opera si dipinge quando entra nello schermo
+      art.setAttribute("data-rivela", "");
+      media.classList.add("rivela");
+      media.style.setProperty("--ritardo", `${(i % 3) * 0.12}s`);
+      media.style.setProperty("--durata", "1s");
     }
     art.append(btn, cap);
     return art;
@@ -1043,6 +1104,7 @@
     if (verso < 0) media.classList.add("rivela--indietro");
     media.style.setProperty("--durata", "0.75s");
     $("#scheda-media").replaceChildren(media);
+    collegaLente(media);
     const info = $(".scheda-info");
     info.classList.remove("is-nuova");
     void info.offsetWidth; // fa ripartire l'animazione dei testi
@@ -1089,7 +1151,51 @@
     }
   }
 
+  /* Lente d'ingrandimento: con il mouse sopra l'opera, un cerchio mostra
+     i dettagli della pennellata ingranditi due volte e mezzo */
+  const conMouse = () => window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  let lente = null;
+
+  function collegaLente(media) {
+    if (!lente) return;
+    lente.classList.remove("is-attiva");
+    lente.style.backgroundImage = "";
+    const adatto = conMouse() && (media.tagName === "IMG" || media.tagName === "CANVAS");
+    $("#scheda-nota-lente").hidden = !adatto;
+    if (!adatto) return;
+    media.classList.add("con-lente");
+    const ZOOM = 2.5;
+    const RAGGIO = 105;
+    let sorgente = null;
+    const prendiSorgente = () => {
+      if (sorgente !== null) return sorgente;
+      try {
+        sorgente = media.tagName === "IMG" ? media.currentSrc || media.src : media.toDataURL("image/jpeg", 0.92);
+      } catch (e) {
+        sorgente = "";
+      }
+      if (sorgente) lente.style.backgroundImage = `url("${sorgente}")`;
+      return sorgente;
+    };
+    media.addEventListener("pointermove", (e) => {
+      if (!prendiSorgente()) return;
+      const r = media.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      lente.style.backgroundSize = `${r.width * ZOOM}px ${r.height * ZOOM}px`;
+      lente.style.backgroundPosition = `${-(x * ZOOM - RAGGIO)}px ${-(y * ZOOM - RAGGIO)}px`;
+      lente.style.left = `${e.clientX - RAGGIO}px`;
+      lente.style.top = `${e.clientY - RAGGIO}px`;
+      lente.classList.add("is-attiva");
+    });
+    media.addEventListener("pointerleave", () => lente.classList.remove("is-attiva"));
+  }
+
   function preparaScheda() {
+    lente = document.createElement("div");
+    lente.className = "lente";
+    lente.setAttribute("aria-hidden", "true");
+    scheda.append(lente);
     $("#scheda-chiudi").addEventListener("click", chiudiScheda);
     $("#scheda-prec").addEventListener("click", () => sposta(-1));
     $("#scheda-succ").addEventListener("click", () => sposta(1));
@@ -1146,7 +1252,7 @@
     return { tipo: "futuro" };
   }
 
-  function eventoHTML(ev) {
+  function eventoHTML(ev, n = 0) {
     const a = leggiData(ev.inizio);
     const b = leggiData(ev.fine || ev.inizio);
     const st = statoEvento(ev);
@@ -1157,7 +1263,7 @@
       : "";
     const sito = ev.link ? `<a class="evento-link" href="${esc(ev.link)}" target="_blank" rel="noopener">Pagina dell'evento</a>` : "";
     return `
-      <li class="evento">
+      <li class="evento" data-rivela style="--i: ${Math.min(n, 6)}">
         <p class="evento-data">
           <span class="evento-giorno">${giorno(a)}</span>
           <span class="evento-mese">${MESI_BREVI[a.getMonth()]} ${a.getFullYear()}</span>
@@ -1184,11 +1290,11 @@
       .sort((x, y) => leggiData(y.fine || y.inizio) - leggiData(x.fine || x.inizio));
 
     $("#eventi-lista").innerHTML = prossimi.length
-      ? prossimi.map(eventoHTML).join("")
+      ? prossimi.map((ev, n) => eventoHTML(ev, n)).join("")
       : `<li class="nessun-evento">Al momento non ci sono eventi in programma. Le nuove date escono prima su Instagram.</li>`;
 
     if (passati.length) {
-      $("#eventi-passati").innerHTML = passati.map(eventoHTML).join("");
+      $("#eventi-passati").innerHTML = passati.map((ev, n) => eventoHTML(ev, n)).join("");
       $("#archivio").hidden = false;
     }
 
@@ -1321,6 +1427,7 @@
   function schedaVideo(v) {
     const scheda = document.createElement("article");
     scheda.className = "video";
+    scheda.setAttribute("data-rivela", "");
     const media = mediaVideo(v, scheda);
     if (!media) return null;
     scheda.classList.add(`video--${media.orientamento}`);
@@ -1373,6 +1480,7 @@
       striscia.removeAttribute("tabindex");
       return;
     }
+    schede.forEach((s, n) => s.style.setProperty("--i", Math.min(n, 5)));
     striscia.replaceChildren(...schede);
 
     const passo = (verso) =>
@@ -1427,8 +1535,8 @@
     const lista = $("#contatti-lista");
     lista.innerHTML = voci
       .map(
-        (v) => `
-        <li class="contatto">
+        (v, n) => `
+        <li class="contatto" data-rivela style="--i: ${n}">
           <span class="contatto-etichetta">${v.etichetta}</span>
           <a class="contatto-valore" ${attributiLink(v)}>
             <span class="icona">${ICONE[v.tipo]}</span>
@@ -1600,14 +1708,313 @@
   }
 
   /* ------------------------------------------------------------------
+     9. Effetti a tema pittura
+     ------------------------------------------------------------------ */
+
+  // Divide il nome in lettere, per farle comparire una alla volta
+  function preparaNome() {
+    const nome = $(".nome");
+    if (!nome || nome.dataset.diviso) return;
+    nome.dataset.diviso = "1";
+    nome.setAttribute("aria-label", nome.textContent.replace(/\s+/g, " ").trim());
+    let i = 0;
+    nome.querySelectorAll(":scope > span").forEach((riga) => {
+      const testo = riga.textContent;
+      riga.textContent = "";
+      riga.setAttribute("aria-hidden", "true");
+      for (const ch of testo) {
+        const lettera = document.createElement("span");
+        lettera.className = "lettera";
+        lettera.textContent = ch === " " ? " " : ch;
+        lettera.style.setProperty("--i", i++);
+        riga.append(lettera);
+      }
+    });
+  }
+
+  function leggiColore(nome, riserva) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
+    return /^#[0-9a-f]{6}$/i.test(v) ? v : riserva;
+  }
+  const inRgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+
+  // Macchie d'acquerello che il mouse lascia sull'apertura e che svaniscono piano
+  function preparaAcquerello() {
+    if (!conMouse() || menoMovimento()) return;
+    const sezione = $(".apertura");
+    if (!sezione) return;
+    const tela = document.createElement("canvas");
+    tela.className = "acquerello";
+    tela.setAttribute("aria-hidden", "true");
+    sezione.prepend(tela);
+    const ctx = tela.getContext("2d");
+    const colori = [
+      leggiColore("--acido", "#C3EA36"),
+      leggiColore("--giallo", "#F4C534"),
+      leggiColore("--magenta", "#E6588F"),
+      leggiColore("--turchese", "#43BDB4"),
+    ].map(inRgb);
+    let W = 0;
+    let H = 0;
+    const dimensiona = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = sezione.clientWidth;
+      H = sezione.clientHeight;
+      tela.width = Math.round(W * dpr);
+      tela.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    dimensiona();
+    if ("ResizeObserver" in window) new ResizeObserver(dimensiona).observe(sezione);
+    else window.addEventListener("resize", dimensiona);
+
+    let ultimo = null;
+    let ultimoTempo = 0;
+    let fermo = true;
+
+    // una goccia: più chiara al centro e più carica sul bordo, come l'acquerello
+    const goccia = (x, y, raggio, c) => {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, raggio);
+      g.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},0.05)`);
+      g.addColorStop(0.72, `rgba(${c[0]},${c[1]},${c[2]},0.12)`);
+      g.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, raggio, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    const svanisci = () => {
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "rgba(0,0,0,0.02)";
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+      if (performance.now() - ultimoTempo > 6000) {
+        ctx.clearRect(0, 0, W, H);
+        fermo = true;
+        return;
+      }
+      requestAnimationFrame(svanisci);
+    };
+
+    sezione.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      const r = sezione.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      const ora = performance.now();
+      const c = colori[Math.floor(ora / 1400) % colori.length];
+      if (ultimo) {
+        const d = Math.hypot(x - ultimo.x, y - ultimo.y);
+        const passi = Math.min(10, Math.ceil(d / 14));
+        const raggio = Math.max(16, Math.min(46, 14 + d * 0.6));
+        for (let k = 1; k <= passi; k++) {
+          const t = k / passi;
+          goccia(
+            ultimo.x + (x - ultimo.x) * t + (Math.random() - 0.5) * 6,
+            ultimo.y + (y - ultimo.y) * t + (Math.random() - 0.5) * 6,
+            raggio * (0.8 + Math.random() * 0.4),
+            c
+          );
+        }
+      }
+      ultimo = { x, y };
+      ultimoTempo = ora;
+      if (fermo) {
+        fermo = false;
+        requestAnimationFrame(svanisci);
+      }
+    });
+    sezione.addEventListener("pointerleave", () => {
+      ultimo = null;
+    });
+  }
+
+  // Cursore da galleria: un cerchio che segue il mouse, "Guarda" sulle opere
+  function preparaCursore() {
+    if (!conMouse()) return;
+    const cursore = document.createElement("div");
+    cursore.className = "cursore";
+    cursore.setAttribute("aria-hidden", "true");
+    cursore.innerHTML = '<span class="cursore-testo">Guarda</span>';
+    document.body.append(cursore);
+    document.documentElement.classList.add("cursore-attivo");
+
+    let x = -200;
+    let y = -200;
+    let cx = x;
+    let cy = y;
+    const morbidezza = menoMovimento() ? 1 : 0.2;
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        if (e.pointerType !== "mouse") return;
+        x = e.clientX;
+        y = e.clientY;
+        if (!cursore.classList.contains("is-visibile")) {
+          cx = x;
+          cy = y;
+          cursore.classList.add("is-visibile");
+        }
+      },
+      { passive: true }
+    );
+    document.addEventListener("mouseout", (e) => {
+      if (!e.relatedTarget) cursore.classList.remove("is-visibile");
+    });
+    document.addEventListener("pointerover", (e) => {
+      const guarda = e.target.closest(".opera-apri, .evidenza-apri, .video-facciata");
+      const link = !guarda && e.target.closest("a, button, summary, label, input, [tabindex='0']");
+      cursore.classList.toggle("is-guarda", !!guarda);
+      cursore.classList.toggle("is-link", !!link);
+    });
+    const muovi = () => {
+      cx += (x - cx) * morbidezza;
+      cy += (y - cy) * morbidezza;
+      cursore.style.transform = `translate3d(${cx.toFixed(1)}px, ${cy.toFixed(1)}px, 0)`;
+      requestAnimationFrame(muovi);
+    };
+    requestAnimationFrame(muovi);
+  }
+
+  // Le opere si inclinano appena verso il mouse, con un riflesso di luce
+  function preparaInclinazione() {
+    if (!conMouse() || menoMovimento()) return;
+    let attiva = null;
+    const lascia = (el) => {
+      el.classList.remove("is-inclinato");
+      el.style.setProperty("--rx", "0deg");
+      el.style.setProperty("--ry", "0deg");
+    };
+    document.addEventListener(
+      "pointermove",
+      (e) => {
+        const el = e.target.closest(".opera-apri, .evidenza-apri");
+        if (el !== attiva) {
+          if (attiva) lascia(attiva);
+          attiva = el;
+        }
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        el.style.setProperty("--rx", `${((0.5 - py) * 6).toFixed(2)}deg`);
+        el.style.setProperty("--ry", `${((px - 0.5) * 8).toFixed(2)}deg`);
+        el.style.setProperty("--gx", `${(px * 100).toFixed(1)}%`);
+        el.style.setProperty("--gy", `${(py * 100).toFixed(1)}%`);
+        el.classList.add("is-inclinato");
+      },
+      { passive: true }
+    );
+  }
+
+  // La pennellata sotto la testata si allunga mentre si scorre la pagina
+  function preparaProgresso() {
+    const testata = $(".testata");
+    let inAttesa = false;
+    const aggiorna = () => {
+      inAttesa = false;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      testata.style.setProperty("--progresso", `${(p * 100).toFixed(2)}%`);
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!inAttesa) {
+          inAttesa = true;
+          requestAnimationFrame(aggiorna);
+        }
+      },
+      { passive: true }
+    );
+    window.addEventListener("resize", aggiorna);
+    aggiorna();
+  }
+
+  // Comparse allo scorrimento: gli elementi con data-rivela entrano quando diventano visibili
+  let osservatoreRivela = null;
+  function osservaRivelazioni(radice = document) {
+    const elementi = radice.querySelectorAll("[data-rivela]:not(.visibile)");
+    if (!("IntersectionObserver" in window) || menoMovimento()) {
+      elementi.forEach((el) => el.classList.add("visibile"));
+      return;
+    }
+    if (!osservatoreRivela) {
+      osservatoreRivela = new IntersectionObserver(
+        (voci) => {
+          voci.forEach((v) => {
+            if (v.isIntersecting) {
+              v.target.classList.add("visibile");
+              osservatoreRivela.unobserve(v.target);
+            }
+          });
+        },
+        { rootMargin: "0px 0px -6% 0px", threshold: 0.06 }
+      );
+    }
+    elementi.forEach((el) => osservatoreRivela.observe(el));
+  }
+
+  // Nastro delle categorie: le voci si ripetono quanto basta a riempire lo schermo
+  function costruisciNastro() {
+    const voci = CATEGORIE.filter((c) => conta(c.id) > 0);
+    if (!voci.length) return;
+    const giro = [];
+    while (giro.length < 10) giro.push(...voci);
+    const gruppo = (copia) =>
+      `<div class="nastro-gruppo"${copia ? ' aria-hidden="true"' : ""}>` +
+      giro
+        .map((c, i) => {
+          const fuoriTab = copia || i >= voci.length;
+          return (
+            `<a class="nastro-voce${i % 2 ? " nastro-voce--contorno" : ""}" href="#opere" data-categoria="${esc(c.id)}"${fuoriTab ? ' tabindex="-1"' : ""}>${esc(c.nome)}</a>` +
+            `<span class="macchia macchia--${i % 4}" aria-hidden="true"></span>`
+          );
+        })
+        .join("") +
+      "</div>";
+    // due metà identiche: scorrendo di metà larghezza il giro si chiude senza salti
+    $("#nastro-traccia").innerHTML = gruppo(false) + gruppo(true);
+    $("#nastro").hidden = false;
+  }
+
+  /* ------------------------------------------------------------------
      8. Avvio
      ------------------------------------------------------------------ */
   async function avvia() {
+    const radice = document.documentElement;
+    radice.classList.add("js-pronto");
+
+    // Apertura: alla prima visita il sipario di pittura, poi il nome lettera per lettera
+    preparaNome();
+    const avviaApertura = () => radice.classList.add("apertura-pronta");
+    let segnalaPronto = () => {};
+    const pronto = new Promise((risolvi) => {
+      segnalaPronto = risolvi;
+    });
+    if (radice.classList.contains("js-sipario")) {
+      try {
+        sessionStorage.setItem("sipario-visto", "1");
+      } catch (e) {
+        /* nessun problema: il sipario tornerà alla prossima visita */
+      }
+      Pittura.sipario(avviaApertura, pronto);
+    } else {
+      avviaApertura();
+    }
+
     // Queste parti non dipendono dai contenuti
     preparaScheda();
     preparaMenu();
     preparaNavigazione();
     preparaSezioneCorrente();
+    preparaProgresso();
+    preparaCursore();
+    preparaInclinazione();
     $("#anno").textContent = String(new Date().getFullYear());
 
     try {
@@ -1616,6 +2023,8 @@
       costruisciSottomenu();
       costruisciFiltri();
       mostraErroreContenuti(errore);
+      osservaRivelazioni();
+      segnalaPronto();
       return;
     }
 
@@ -1623,9 +2032,11 @@
     costruisciSottomenu();
     costruisciFiltri();
     costruisciEvidenza();
+    costruisciNastro();
     costruisciEventi();
     costruisciContatti();
     costruisciProcesso();
+    preparaAcquerello();
 
     // Il bottone "Mostra tutte le opere" nella griglia vuota
     $("#opere-griglia").addEventListener("click", (e) => {
@@ -1640,6 +2051,16 @@
       $("#opere").scrollIntoView();
     } else {
       disegnaGriglia();
+    }
+    osservaRivelazioni();
+
+    // il sipario si apre quando anche la foto dell'opera in apertura è pronta
+    const fotoApertura = $("#evidenza img");
+    if (fotoApertura && !fotoApertura.complete) {
+      fotoApertura.addEventListener("load", segnalaPronto, { once: true });
+      fotoApertura.addEventListener("error", segnalaPronto, { once: true });
+    } else {
+      segnalaPronto();
     }
   }
 

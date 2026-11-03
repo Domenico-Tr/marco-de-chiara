@@ -66,10 +66,10 @@
 /* Forme dei pennelli, generate come immagini SVG: servono da maschera
    per far comparire le cose "dipinte" e per le sottolineature a pennello. */
 :root {
-  --maschera-destra: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20100'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0.0%200.00h153.4v1.20h-153.4zM0.0%201.00h156.3v1.20h-156.3zM0.0%202.00h152.2v1.20h-152.2zM0.0%203.00h160.6v1.20h-160.6zM0.0%204.00h147.6v1.20h-147.6zM0.0%205.00h145.8v1.20h-145.8zM0.0%206.00h111.9v1.20h-111.9zM120.7%206.00h35.6v1.20h-35.6zM0.0%207.00h105.3v1.20h-105.3zM113.4%207.00h35.7v1.20h-35.7zM0.0%208.00h158.4v1.20h-158.4zM0.0%209.00h164.2v1.20h-164.2zM0.0%2010.00h162.0v1.20h-162.0zM0.0%2011.00h168.9v1.20h-168.9zM0.0%2012.00h111.9v1.20h-111.9zM123.3%2012.00h30.8v1.20h-30.8zM0.0%2013.00h150.6v1.20h-150.6zM0.0%2014.00h118.2v1.20h-118.2zM131.2%2014.00h23.8v1.20h-23.8zM0.0%2015.00h144.5v1.20h-144.5zM0.0%2016.00h137.5v1.20h-137.5zM0.0%2017.00h141.7v1.20h-141.7zM0.0%2018.00h119.0v1.20h-119.0zM123.2%2018.00h31.3v1.20h-31.3zM0.0%2019.00h117.6v1.20h-117.6zM125.5%2019.00h15.3v1.20h-15.3zM0.0%2020.00h122.1v1.20h-122.1zM126.4%2020.00h15.6v1.20h-15.6zM0.0%2021.00h143.1v1.20h-143.1zM0.0%2022.00h108.1v1.20h-108.1zM120.5%2022.00h17.2v1.20h-17.2zM0.0%2023.00h140.1v1.20h-140.1zM0.0%2024.00h132.0v1.20h-132.0zM0.0%2025.00h103.0v1.20h-103.0zM112.4%2025.00h22.7v1.20h-22.7zM0.0%2026.00h137.2v1.20h-137.2zM0.0%2027.00h145.3v1.20h-145.3zM0.0%2028.00h112.6v1.20h-112.6zM125.6%2028.00h26.0v1.20h-26.0zM0.0%2029.00h142.2v1.20h-142.2zM155.5%2029.00h2.8v1.20h-2.8zM0.0%2030.00h149.2v1.20h-149.2zM0.0%2031.00h111.3v1.20h-111.3zM124.9%2031.00h29.9v1.20h-29.9zM0.0%2032.00h134.6v1.20h-134.6zM144.1%2032.00h3.3v1.20h-3.3zM0.0%2033.00h147.6v1.20h-147.6zM0.0%2034.00h145.0v1.20h-145.0zM0.0%2035.00h151.1v1.20h-151.1zM156.4%2035.00h4.0v1.20h-4.0zM0.0%2036.00h150.8v1.20h-150.8zM0.0%2037.00h155.0v1.20h-155.0zM0.0%2038.00h164.9v1.20h-164.9zM0.0%2039.00h169.3v1.20h-169.3zM0.0%2040.00h119.4v1.20h-119.4zM122.6%2040.00h40.4v1.20h-40.4zM0.0%2041.00h162.1v1.20h-162.1zM0.0%2042.00h143.6v1.20h-143.6zM0.0%2043.00h152.2v1.20h-152.2zM0.0%2044.00h140.8v1.20h-140.8zM0.0%2045.00h154.9v1.20h-154.9zM0.0%2046.00h154.6v1.20h-154.6zM0.0%2047.00h153.5v1.20h-153.5zM0.0%2048.00h148.1v1.20h-148.1zM0.0%2049.00h147.6v1.20h-147.6zM0.0%2050.00h123.6v1.20h-123.6zM137.6%2050.00h6.1v1.20h-6.1zM0.0%2051.00h144.6v1.20h-144.6zM0.0%2052.00h140.0v1.20h-140.0zM0.0%2053.00h141.9v1.20h-141.9zM0.0%2054.00h131.5v1.20h-131.5zM0.0%2055.00h138.8v1.20h-138.8zM0.0%2056.00h104.4v1.20h-104.4zM110.7%2056.00h38.2v1.20h-38.2zM0.0%2057.00h152.8v1.20h-152.8zM0.0%2058.00h149.8v1.20h-149.8zM0.0%2059.00h152.6v1.20h-152.6zM0.0%2060.00h153.4v1.20h-153.4zM0.0%2061.00h146.0v1.20h-146.0zM0.0%2062.00h143.2v1.20h-143.2zM0.0%2063.00h157.6v1.20h-157.6zM0.0%2064.00h152.8v1.20h-152.8zM0.0%2065.00h157.0v1.20h-157.0zM0.0%2066.00h165.4v1.20h-165.4zM0.0%2067.00h169.1v1.20h-169.1zM0.0%2068.00h150.3v1.20h-150.3zM159.5%2068.00h8.1v1.20h-8.1zM0.0%2069.00h115.2v1.20h-115.2zM123.2%2069.00h31.7v1.20h-31.7zM0.0%2070.00h107.0v1.20h-107.0zM110.5%2070.00h36.0v1.20h-36.0zM0.0%2071.00h153.5v1.20h-153.5zM0.0%2072.00h153.2v1.20h-153.2zM0.0%2073.00h154.5v1.20h-154.5zM0.0%2074.00h157.2v1.20h-157.2zM0.0%2075.00h148.7v1.20h-148.7zM0.0%2076.00h155.9v1.20h-155.9zM0.0%2077.00h153.7v1.20h-153.7zM0.0%2078.00h151.6v1.20h-151.6zM0.0%2079.00h144.1v1.20h-144.1zM0.0%2080.00h139.4v1.20h-139.4zM0.0%2081.00h137.6v1.20h-137.6zM0.0%2082.00h145.3v1.20h-145.3zM0.0%2083.00h136.7v1.20h-136.7zM0.0%2084.00h147.2v1.20h-147.2zM0.0%2085.00h155.0v1.20h-155.0zM0.0%2086.00h145.1v1.20h-145.1zM0.0%2087.00h144.6v1.20h-144.6zM0.0%2088.00h146.2v1.20h-146.2zM0.0%2089.00h123.2v1.20h-123.2zM128.1%2089.00h8.9v1.20h-8.9zM0.0%2090.00h103.6v1.20h-103.6zM112.3%2090.00h30.5v1.20h-30.5zM0.0%2091.00h152.1v1.20h-152.1zM0.0%2092.00h160.3v1.20h-160.3zM0.0%2093.00h151.3v1.20h-151.3zM0.0%2094.00h158.2v1.20h-158.2zM0.0%2095.00h163.2v1.20h-163.2zM0.0%2096.00h158.7v1.20h-158.7zM0.0%2097.00h165.3v1.20h-165.3zM0.0%2098.00h163.2v1.20h-163.2zM0.0%2099.00h148.7v1.20h-148.7z'/%3E%3C/svg%3E");
-  --maschera-sinistra: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20100'%20preserveAspectRatio='none'%3E%3Cg%20transform='matrix%28-1%200%200%201%20300%200%29'%3E%3Cpath%20d='M0.0%200.00h153.4v1.20h-153.4zM0.0%201.00h156.3v1.20h-156.3zM0.0%202.00h152.2v1.20h-152.2zM0.0%203.00h160.6v1.20h-160.6zM0.0%204.00h147.6v1.20h-147.6zM0.0%205.00h145.8v1.20h-145.8zM0.0%206.00h111.9v1.20h-111.9zM120.7%206.00h35.6v1.20h-35.6zM0.0%207.00h105.3v1.20h-105.3zM113.4%207.00h35.7v1.20h-35.7zM0.0%208.00h158.4v1.20h-158.4zM0.0%209.00h164.2v1.20h-164.2zM0.0%2010.00h162.0v1.20h-162.0zM0.0%2011.00h168.9v1.20h-168.9zM0.0%2012.00h111.9v1.20h-111.9zM123.3%2012.00h30.8v1.20h-30.8zM0.0%2013.00h150.6v1.20h-150.6zM0.0%2014.00h118.2v1.20h-118.2zM131.2%2014.00h23.8v1.20h-23.8zM0.0%2015.00h144.5v1.20h-144.5zM0.0%2016.00h137.5v1.20h-137.5zM0.0%2017.00h141.7v1.20h-141.7zM0.0%2018.00h119.0v1.20h-119.0zM123.2%2018.00h31.3v1.20h-31.3zM0.0%2019.00h117.6v1.20h-117.6zM125.5%2019.00h15.3v1.20h-15.3zM0.0%2020.00h122.1v1.20h-122.1zM126.4%2020.00h15.6v1.20h-15.6zM0.0%2021.00h143.1v1.20h-143.1zM0.0%2022.00h108.1v1.20h-108.1zM120.5%2022.00h17.2v1.20h-17.2zM0.0%2023.00h140.1v1.20h-140.1zM0.0%2024.00h132.0v1.20h-132.0zM0.0%2025.00h103.0v1.20h-103.0zM112.4%2025.00h22.7v1.20h-22.7zM0.0%2026.00h137.2v1.20h-137.2zM0.0%2027.00h145.3v1.20h-145.3zM0.0%2028.00h112.6v1.20h-112.6zM125.6%2028.00h26.0v1.20h-26.0zM0.0%2029.00h142.2v1.20h-142.2zM155.5%2029.00h2.8v1.20h-2.8zM0.0%2030.00h149.2v1.20h-149.2zM0.0%2031.00h111.3v1.20h-111.3zM124.9%2031.00h29.9v1.20h-29.9zM0.0%2032.00h134.6v1.20h-134.6zM144.1%2032.00h3.3v1.20h-3.3zM0.0%2033.00h147.6v1.20h-147.6zM0.0%2034.00h145.0v1.20h-145.0zM0.0%2035.00h151.1v1.20h-151.1zM156.4%2035.00h4.0v1.20h-4.0zM0.0%2036.00h150.8v1.20h-150.8zM0.0%2037.00h155.0v1.20h-155.0zM0.0%2038.00h164.9v1.20h-164.9zM0.0%2039.00h169.3v1.20h-169.3zM0.0%2040.00h119.4v1.20h-119.4zM122.6%2040.00h40.4v1.20h-40.4zM0.0%2041.00h162.1v1.20h-162.1zM0.0%2042.00h143.6v1.20h-143.6zM0.0%2043.00h152.2v1.20h-152.2zM0.0%2044.00h140.8v1.20h-140.8zM0.0%2045.00h154.9v1.20h-154.9zM0.0%2046.00h154.6v1.20h-154.6zM0.0%2047.00h153.5v1.20h-153.5zM0.0%2048.00h148.1v1.20h-148.1zM0.0%2049.00h147.6v1.20h-147.6zM0.0%2050.00h123.6v1.20h-123.6zM137.6%2050.00h6.1v1.20h-6.1zM0.0%2051.00h144.6v1.20h-144.6zM0.0%2052.00h140.0v1.20h-140.0zM0.0%2053.00h141.9v1.20h-141.9zM0.0%2054.00h131.5v1.20h-131.5zM0.0%2055.00h138.8v1.20h-138.8zM0.0%2056.00h104.4v1.20h-104.4zM110.7%2056.00h38.2v1.20h-38.2zM0.0%2057.00h152.8v1.20h-152.8zM0.0%2058.00h149.8v1.20h-149.8zM0.0%2059.00h152.6v1.20h-152.6zM0.0%2060.00h153.4v1.20h-153.4zM0.0%2061.00h146.0v1.20h-146.0zM0.0%2062.00h143.2v1.20h-143.2zM0.0%2063.00h157.6v1.20h-157.6zM0.0%2064.00h152.8v1.20h-152.8zM0.0%2065.00h157.0v1.20h-157.0zM0.0%2066.00h165.4v1.20h-165.4zM0.0%2067.00h169.1v1.20h-169.1zM0.0%2068.00h150.3v1.20h-150.3zM159.5%2068.00h8.1v1.20h-8.1zM0.0%2069.00h115.2v1.20h-115.2zM123.2%2069.00h31.7v1.20h-31.7zM0.0%2070.00h107.0v1.20h-107.0zM110.5%2070.00h36.0v1.20h-36.0zM0.0%2071.00h153.5v1.20h-153.5zM0.0%2072.00h153.2v1.20h-153.2zM0.0%2073.00h154.5v1.20h-154.5zM0.0%2074.00h157.2v1.20h-157.2zM0.0%2075.00h148.7v1.20h-148.7zM0.0%2076.00h155.9v1.20h-155.9zM0.0%2077.00h153.7v1.20h-153.7zM0.0%2078.00h151.6v1.20h-151.6zM0.0%2079.00h144.1v1.20h-144.1zM0.0%2080.00h139.4v1.20h-139.4zM0.0%2081.00h137.6v1.20h-137.6zM0.0%2082.00h145.3v1.20h-145.3zM0.0%2083.00h136.7v1.20h-136.7zM0.0%2084.00h147.2v1.20h-147.2zM0.0%2085.00h155.0v1.20h-155.0zM0.0%2086.00h145.1v1.20h-145.1zM0.0%2087.00h144.6v1.20h-144.6zM0.0%2088.00h146.2v1.20h-146.2zM0.0%2089.00h123.2v1.20h-123.2zM128.1%2089.00h8.9v1.20h-8.9zM0.0%2090.00h103.6v1.20h-103.6zM112.3%2090.00h30.5v1.20h-30.5zM0.0%2091.00h152.1v1.20h-152.1zM0.0%2092.00h160.3v1.20h-160.3zM0.0%2093.00h151.3v1.20h-151.3zM0.0%2094.00h158.2v1.20h-158.2zM0.0%2095.00h163.2v1.20h-163.2zM0.0%2096.00h158.7v1.20h-158.7zM0.0%2097.00h165.3v1.20h-165.3zM0.0%2098.00h163.2v1.20h-163.2zM0.0%2099.00h148.7v1.20h-148.7z'/%3E%3C/g%3E%3C/svg%3E");
-  --maschera-giu: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0.00%200.0h1.20v169.6h-1.20zM1.00%200.0h1.20v155.3h-1.20zM2.00%200.0h1.20v133.1h-1.20zM2.00%20140.7h1.20v16.4h-1.20zM3.00%200.0h1.20v136.7h-1.20zM3.00%20141.1h1.20v22.2h-1.20zM4.00%200.0h1.20v153.1h-1.20zM5.00%200.0h1.20v131.9h-1.20zM5.00%20145.0h1.20v7.7h-1.20zM6.00%200.0h1.20v110.4h-1.20zM6.00%20115.9h1.20v31.9h-1.20zM7.00%200.0h1.20v159.2h-1.20zM8.00%200.0h1.20v161.2h-1.20zM9.00%200.0h1.20v118.6h-1.20zM9.00%20127.5h1.20v28.5h-1.20zM10.00%200.0h1.20v161.7h-1.20zM11.00%200.0h1.20v141.1h-1.20zM11.00%20151.1h1.20v10.4h-1.20zM12.00%200.0h1.20v157.6h-1.20zM13.00%200.0h1.20v157.9h-1.20zM14.00%200.0h1.20v152.7h-1.20zM15.00%200.0h1.20v142.0h-1.20zM16.00%200.0h1.20v138.4h-1.20zM17.00%200.0h1.20v141.5h-1.20zM18.00%200.0h1.20v116.5h-1.20zM18.00%20127.0h1.20v18.8h-1.20zM19.00%200.0h1.20v140.1h-1.20zM20.00%200.0h1.20v128.3h-1.20zM20.00%20139.6h1.20v13.9h-1.20zM21.00%200.0h1.20v103.0h-1.20zM21.00%20107.2h1.20v37.3h-1.20zM22.00%200.0h1.20v133.5h-1.20zM23.00%200.0h1.20v103.0h-1.20zM23.00%20115.2h1.20v23.7h-1.20zM24.00%200.0h1.20v103.0h-1.20zM24.00%20116.5h1.20v28.0h-1.20zM25.00%200.0h1.20v137.2h-1.20zM26.00%200.0h1.20v140.8h-1.20zM27.00%200.0h1.20v158.9h-1.20zM28.00%200.0h1.20v145.3h-1.20zM29.00%200.0h1.20v126.7h-1.20zM29.00%20129.9h1.20v21.8h-1.20zM30.00%200.0h1.20v160.3h-1.20zM31.00%200.0h1.20v158.9h-1.20zM32.00%200.0h1.20v153.2h-1.20zM33.00%200.0h1.20v155.8h-1.20zM34.00%200.0h1.20v155.8h-1.20zM35.00%200.0h1.20v153.2h-1.20zM36.00%200.0h1.20v161.7h-1.20zM37.00%200.0h1.20v128.8h-1.20zM37.00%20137.0h1.20v23.5h-1.20zM38.00%200.0h1.20v156.0h-1.20zM39.00%200.0h1.20v165.0h-1.20zM40.00%200.0h1.20v162.6h-1.20zM41.00%200.0h1.20v156.7h-1.20zM42.00%200.0h1.20v159.3h-1.20zM43.00%200.0h1.20v131.7h-1.20zM43.00%20142.8h1.20v9.9h-1.20zM44.00%200.0h1.20v106.4h-1.20zM44.00%20113.5h1.20v30.2h-1.20zM45.00%200.0h1.20v142.0h-1.20zM46.00%200.0h1.20v150.7h-1.20zM47.00%200.0h1.20v151.6h-1.20zM48.00%200.0h1.20v164.8h-1.20zM49.00%200.0h1.20v112.6h-1.20zM49.00%20117.5h1.20v21.7h-1.20zM50.00%200.0h1.20v142.3h-1.20zM51.00%200.0h1.20v138.9h-1.20zM52.00%200.0h1.20v132.8h-1.20zM53.00%200.0h1.20v103.0h-1.20zM53.00%20108.7h1.20v24.3h-1.20zM54.00%200.0h1.20v131.7h-1.20zM55.00%200.0h1.20v141.3h-1.20zM56.00%200.0h1.20v140.0h-1.20zM57.00%200.0h1.20v143.1h-1.20zM58.00%200.0h1.20v125.8h-1.20zM58.00%20139.1h1.20v11.3h-1.20zM59.00%200.0h1.20v153.5h-1.20zM60.00%200.0h1.20v133.0h-1.20zM60.00%20141.0h1.20v12.6h-1.20zM61.00%200.0h1.20v125.2h-1.20zM61.00%20135.5h1.20v17.4h-1.20zM62.00%200.0h1.20v148.3h-1.20zM63.00%200.0h1.20v150.8h-1.20zM64.00%200.0h1.20v164.4h-1.20zM65.00%200.0h1.20v156.5h-1.20zM66.00%200.0h1.20v167.9h-1.20zM67.00%200.0h1.20v160.0h-1.20zM68.00%200.0h1.20v163.0h-1.20zM69.00%200.0h1.20v153.0h-1.20zM70.00%200.0h1.20v118.1h-1.20zM70.00%20124.1h1.20v36.6h-1.20zM71.00%200.0h1.20v126.4h-1.20zM71.00%20130.2h1.20v20.1h-1.20zM72.00%200.0h1.20v144.1h-1.20zM73.00%200.0h1.20v153.7h-1.20zM74.00%200.0h1.20v148.4h-1.20zM75.00%200.0h1.20v165.3h-1.20zM76.00%200.0h1.20v126.3h-1.20zM76.00%20132.1h1.20v22.6h-1.20zM77.00%200.0h1.20v154.6h-1.20zM78.00%200.0h1.20v153.0h-1.20zM79.00%200.0h1.20v144.5h-1.20zM80.00%200.0h1.20v135.3h-1.20zM81.00%200.0h1.20v129.8h-1.20zM82.00%200.0h1.20v123.2h-1.20zM82.00%20127.0h1.20v10.9h-1.20zM83.00%200.0h1.20v103.7h-1.20zM83.00%20114.6h1.20v22.2h-1.20zM84.00%200.0h1.20v117.0h-1.20zM84.00%20128.0h1.20v20.1h-1.20zM85.00%200.0h1.20v145.2h-1.20zM86.00%200.0h1.20v149.1h-1.20zM87.00%200.0h1.20v153.6h-1.20zM88.00%200.0h1.20v142.3h-1.20zM89.00%200.0h1.20v120.6h-1.20zM89.00%20127.6h1.20v23.9h-1.20zM90.00%200.0h1.20v143.3h-1.20zM91.00%200.0h1.20v143.6h-1.20zM92.00%200.0h1.20v153.8h-1.20zM93.00%200.0h1.20v152.8h-1.20zM94.00%200.0h1.20v167.7h-1.20zM95.00%200.0h1.20v163.9h-1.20zM96.00%200.0h1.20v176.5h-1.20zM97.00%200.0h1.20v152.3h-1.20zM98.00%200.0h1.20v162.1h-1.20zM99.00%200.0h1.20v147.8h-1.20z'/%3E%3C/svg%3E");
-  --tratto: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2024'%20preserveAspectRatio='none'%3E%3Cg%20transform='rotate%28-1.5%20120%2012%29'%3E%3Cpath%20d='M19.5%203.00h184.1v1.45h-184.1zM17.8%204.20h129.7v1.45h-129.7zM159.2%204.20h39.7v1.45h-39.7zM15.7%205.40h194.3v1.45h-194.3zM13.2%206.60h197.6v1.45h-197.6zM9.0%207.80h204.1v1.45h-204.1zM9.6%209.00h207.7v1.45h-207.7zM8.2%2010.20h209.0v1.45h-209.0zM5.1%2011.40h218.7v1.45h-218.7zM5.4%2012.60h193.3v1.45h-193.3zM210.7%2012.60h17.3v1.45h-17.3zM6.7%2013.80h176.7v1.45h-176.7zM189.1%2013.80h41.0v1.45h-41.0zM12.3%2015.00h152.4v1.45h-152.4zM173.5%2015.00h54.9v1.45h-54.9zM13.6%2016.20h163.1v1.45h-163.1zM184.9%2016.20h36.5v1.45h-36.5zM17.1%2017.40h142.2v1.45h-142.2zM164.3%2017.40h54.9v1.45h-54.9zM16.1%2018.60h183.7v1.45h-183.7zM19.3%2019.80h124.4v1.45h-124.4zM153.6%2019.80h50.7v1.45h-50.7z'/%3E%3C/g%3E%3C/svg%3E");
+  --maschera-destra: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20100'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0.0%200.00h153.4v1.20h-153.4zM0.0%201.00h156.3v1.20h-156.3zM0.0%202.00h152.2v1.20h-152.2zM0.0%203.00h160.6v1.20h-160.6zM0.0%204.00h147.6v1.20h-147.6zM0.0%205.00h145.8v1.20h-145.8zM0.0%206.00h156.3v1.20h-156.3zM0.0%207.00h123.0v1.20h-123.0zM125.9%207.00h22.5v1.20h-22.5zM0.0%208.00h151.8v1.20h-151.8zM0.0%209.00h167.4v1.20h-167.4zM0.0%2010.00h162.7v1.20h-162.7zM0.0%2011.00h157.5v1.20h-157.5zM0.0%2012.00h162.6v1.20h-162.6zM0.0%2013.00h136.3v1.20h-136.3zM139.9%2013.00h8.0v1.20h-8.0zM0.0%2014.00h153.3v1.20h-153.3zM0.0%2015.00h157.4v1.20h-157.4zM0.0%2016.00h143.8v1.20h-143.8zM0.0%2017.00h138.6v1.20h-138.6zM0.0%2018.00h143.3v1.20h-143.3zM0.0%2019.00h131.2v1.20h-131.2zM133.6%2019.00h21.7v1.20h-21.7zM0.0%2020.00h139.9v1.20h-139.9zM0.0%2021.00h145.3v1.20h-145.3zM0.0%2022.00h144.6v1.20h-144.6zM0.0%2023.00h131.7v1.20h-131.7zM0.0%2024.00h132.9v1.20h-132.9zM0.0%2025.00h134.7v1.20h-134.7zM0.0%2026.00h139.6v1.20h-139.6zM0.0%2027.00h139.6v1.20h-139.6zM0.0%2028.00h146.6v1.20h-146.6zM0.0%2029.00h155.8v1.20h-155.8zM0.0%2030.00h149.9v1.20h-149.9zM0.0%2031.00h152.4v1.20h-152.4zM0.0%2032.00h152.8v1.20h-152.8zM0.0%2033.00h145.4v1.20h-145.4zM0.0%2034.00h147.9v1.20h-147.9zM0.0%2035.00h161.8v1.20h-161.8zM0.0%2036.00h164.7v1.20h-164.7zM0.0%2037.00h169.3v1.20h-169.3zM0.0%2038.00h167.1v1.20h-167.1zM0.0%2039.00h164.6v1.20h-164.6zM0.0%2040.00h170.6v1.20h-170.6zM0.0%2041.00h161.2v1.20h-161.2zM0.0%2042.00h134.4v1.20h-134.4zM138.2%2042.00h19.8v1.20h-19.8zM0.0%2043.00h141.4v1.20h-141.4zM0.0%2044.00h148.8v1.20h-148.8zM0.0%2045.00h154.7v1.20h-154.7zM0.0%2046.00h152.9v1.20h-152.9zM0.0%2047.00h156.3v1.20h-156.3zM0.0%2048.00h167.6v1.20h-167.6zM0.0%2049.00h150.2v1.20h-150.2zM0.0%2050.00h135.6v1.20h-135.6zM0.0%2051.00h144.9v1.20h-144.9zM0.0%2052.00h140.9v1.20h-140.9zM0.0%2053.00h139.4v1.20h-139.4zM0.0%2054.00h137.7v1.20h-137.7zM0.0%2055.00h144.3v1.20h-144.3zM0.0%2056.00h133.8v1.20h-133.8zM139.8%2056.00h8.7v1.20h-8.7zM0.0%2057.00h156.0v1.20h-156.0zM0.0%2058.00h154.5v1.20h-154.5zM0.0%2059.00h155.4v1.20h-155.4zM0.0%2060.00h141.0v1.20h-141.0zM0.0%2061.00h143.6v1.20h-143.6zM0.0%2062.00h150.8v1.20h-150.8zM0.0%2063.00h144.2v1.20h-144.2zM0.0%2064.00h151.6v1.20h-151.6zM0.0%2065.00h163.2v1.20h-163.2zM0.0%2066.00h160.6v1.20h-160.6zM0.0%2067.00h162.6v1.20h-162.6zM0.0%2068.00h167.7v1.20h-167.7zM0.0%2069.00h155.0v1.20h-155.0zM0.0%2070.00h159.5v1.20h-159.5zM0.0%2071.00h158.7v1.20h-158.7zM0.0%2072.00h149.9v1.20h-149.9zM0.0%2073.00h150.2v1.20h-150.2zM0.0%2074.00h150.1v1.20h-150.1zM0.0%2075.00h158.3v1.20h-158.3zM0.0%2076.00h145.4v1.20h-145.4zM0.0%2077.00h119.8v1.20h-119.8zM123.7%2077.00h22.9v1.20h-22.9zM0.0%2078.00h137.5v1.20h-137.5zM0.0%2079.00h145.5v1.20h-145.5zM0.0%2080.00h139.4v1.20h-139.4zM0.0%2081.00h143.9v1.20h-143.9zM0.0%2082.00h119.1v1.20h-119.1zM123.9%2082.00h13.8v1.20h-13.8zM0.0%2083.00h136.3v1.20h-136.3zM0.0%2084.00h148.1v1.20h-148.1zM0.0%2085.00h151.5v1.20h-151.5zM0.0%2086.00h154.5v1.20h-154.5zM0.0%2087.00h150.6v1.20h-150.6zM0.0%2088.00h147.4v1.20h-147.4zM0.0%2089.00h145.6v1.20h-145.6zM0.0%2090.00h152.6v1.20h-152.6zM0.0%2091.00h143.8v1.20h-143.8zM0.0%2092.00h155.4v1.20h-155.4zM0.0%2093.00h164.4v1.20h-164.4zM0.0%2094.00h162.1v1.20h-162.1zM0.0%2095.00h169.4v1.20h-169.4zM0.0%2096.00h155.1v1.20h-155.1zM0.0%2097.00h152.6v1.20h-152.6zM154.9%2097.00h8.3v1.20h-8.3zM0.0%2098.00h160.5v1.20h-160.5zM0.0%2099.00h158.1v1.20h-158.1z'/%3E%3C/svg%3E");
+  --maschera-sinistra: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20100'%20preserveAspectRatio='none'%3E%3Cg%20transform='matrix%28-1%200%200%201%20300%200%29'%3E%3Cpath%20d='M0.0%200.00h153.4v1.20h-153.4zM0.0%201.00h156.3v1.20h-156.3zM0.0%202.00h152.2v1.20h-152.2zM0.0%203.00h160.6v1.20h-160.6zM0.0%204.00h147.6v1.20h-147.6zM0.0%205.00h145.8v1.20h-145.8zM0.0%206.00h156.3v1.20h-156.3zM0.0%207.00h123.0v1.20h-123.0zM125.9%207.00h22.5v1.20h-22.5zM0.0%208.00h151.8v1.20h-151.8zM0.0%209.00h167.4v1.20h-167.4zM0.0%2010.00h162.7v1.20h-162.7zM0.0%2011.00h157.5v1.20h-157.5zM0.0%2012.00h162.6v1.20h-162.6zM0.0%2013.00h136.3v1.20h-136.3zM139.9%2013.00h8.0v1.20h-8.0zM0.0%2014.00h153.3v1.20h-153.3zM0.0%2015.00h157.4v1.20h-157.4zM0.0%2016.00h143.8v1.20h-143.8zM0.0%2017.00h138.6v1.20h-138.6zM0.0%2018.00h143.3v1.20h-143.3zM0.0%2019.00h131.2v1.20h-131.2zM133.6%2019.00h21.7v1.20h-21.7zM0.0%2020.00h139.9v1.20h-139.9zM0.0%2021.00h145.3v1.20h-145.3zM0.0%2022.00h144.6v1.20h-144.6zM0.0%2023.00h131.7v1.20h-131.7zM0.0%2024.00h132.9v1.20h-132.9zM0.0%2025.00h134.7v1.20h-134.7zM0.0%2026.00h139.6v1.20h-139.6zM0.0%2027.00h139.6v1.20h-139.6zM0.0%2028.00h146.6v1.20h-146.6zM0.0%2029.00h155.8v1.20h-155.8zM0.0%2030.00h149.9v1.20h-149.9zM0.0%2031.00h152.4v1.20h-152.4zM0.0%2032.00h152.8v1.20h-152.8zM0.0%2033.00h145.4v1.20h-145.4zM0.0%2034.00h147.9v1.20h-147.9zM0.0%2035.00h161.8v1.20h-161.8zM0.0%2036.00h164.7v1.20h-164.7zM0.0%2037.00h169.3v1.20h-169.3zM0.0%2038.00h167.1v1.20h-167.1zM0.0%2039.00h164.6v1.20h-164.6zM0.0%2040.00h170.6v1.20h-170.6zM0.0%2041.00h161.2v1.20h-161.2zM0.0%2042.00h134.4v1.20h-134.4zM138.2%2042.00h19.8v1.20h-19.8zM0.0%2043.00h141.4v1.20h-141.4zM0.0%2044.00h148.8v1.20h-148.8zM0.0%2045.00h154.7v1.20h-154.7zM0.0%2046.00h152.9v1.20h-152.9zM0.0%2047.00h156.3v1.20h-156.3zM0.0%2048.00h167.6v1.20h-167.6zM0.0%2049.00h150.2v1.20h-150.2zM0.0%2050.00h135.6v1.20h-135.6zM0.0%2051.00h144.9v1.20h-144.9zM0.0%2052.00h140.9v1.20h-140.9zM0.0%2053.00h139.4v1.20h-139.4zM0.0%2054.00h137.7v1.20h-137.7zM0.0%2055.00h144.3v1.20h-144.3zM0.0%2056.00h133.8v1.20h-133.8zM139.8%2056.00h8.7v1.20h-8.7zM0.0%2057.00h156.0v1.20h-156.0zM0.0%2058.00h154.5v1.20h-154.5zM0.0%2059.00h155.4v1.20h-155.4zM0.0%2060.00h141.0v1.20h-141.0zM0.0%2061.00h143.6v1.20h-143.6zM0.0%2062.00h150.8v1.20h-150.8zM0.0%2063.00h144.2v1.20h-144.2zM0.0%2064.00h151.6v1.20h-151.6zM0.0%2065.00h163.2v1.20h-163.2zM0.0%2066.00h160.6v1.20h-160.6zM0.0%2067.00h162.6v1.20h-162.6zM0.0%2068.00h167.7v1.20h-167.7zM0.0%2069.00h155.0v1.20h-155.0zM0.0%2070.00h159.5v1.20h-159.5zM0.0%2071.00h158.7v1.20h-158.7zM0.0%2072.00h149.9v1.20h-149.9zM0.0%2073.00h150.2v1.20h-150.2zM0.0%2074.00h150.1v1.20h-150.1zM0.0%2075.00h158.3v1.20h-158.3zM0.0%2076.00h145.4v1.20h-145.4zM0.0%2077.00h119.8v1.20h-119.8zM123.7%2077.00h22.9v1.20h-22.9zM0.0%2078.00h137.5v1.20h-137.5zM0.0%2079.00h145.5v1.20h-145.5zM0.0%2080.00h139.4v1.20h-139.4zM0.0%2081.00h143.9v1.20h-143.9zM0.0%2082.00h119.1v1.20h-119.1zM123.9%2082.00h13.8v1.20h-13.8zM0.0%2083.00h136.3v1.20h-136.3zM0.0%2084.00h148.1v1.20h-148.1zM0.0%2085.00h151.5v1.20h-151.5zM0.0%2086.00h154.5v1.20h-154.5zM0.0%2087.00h150.6v1.20h-150.6zM0.0%2088.00h147.4v1.20h-147.4zM0.0%2089.00h145.6v1.20h-145.6zM0.0%2090.00h152.6v1.20h-152.6zM0.0%2091.00h143.8v1.20h-143.8zM0.0%2092.00h155.4v1.20h-155.4zM0.0%2093.00h164.4v1.20h-164.4zM0.0%2094.00h162.1v1.20h-162.1zM0.0%2095.00h169.4v1.20h-169.4zM0.0%2096.00h155.1v1.20h-155.1zM0.0%2097.00h152.6v1.20h-152.6zM154.9%2097.00h8.3v1.20h-8.3zM0.0%2098.00h160.5v1.20h-160.5zM0.0%2099.00h158.1v1.20h-158.1z'/%3E%3C/g%3E%3C/svg%3E");
+  --maschera-giu: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0.00%200.0h1.20v154.5h-1.20zM1.00%200.0h1.20v159.9h-1.20zM2.00%200.0h1.20v164.4h-1.20zM3.00%200.0h1.20v156.4h-1.20zM4.00%200.0h1.20v156.4h-1.20zM5.00%200.0h1.20v154.1h-1.20zM6.00%200.0h1.20v159.3h-1.20zM7.00%200.0h1.20v161.8h-1.20zM8.00%200.0h1.20v160.5h-1.20zM9.00%200.0h1.20v155.3h-1.20zM9.00%20159.3h1.20v2.7h-1.20zM10.00%200.0h1.20v161.1h-1.20zM11.00%200.0h1.20v143.8h-1.20zM11.00%20147.4h1.20v13.4h-1.20zM12.00%200.0h1.20v164.4h-1.20zM13.00%200.0h1.20v151.8h-1.20zM14.00%200.0h1.20v152.8h-1.20zM15.00%200.0h1.20v142.0h-1.20zM16.00%200.0h1.20v151.1h-1.20zM17.00%200.0h1.20v137.7h-1.20zM18.00%200.0h1.20v150.0h-1.20zM19.00%200.0h1.20v149.8h-1.20zM20.00%200.0h1.20v140.9h-1.20zM21.00%200.0h1.20v139.5h-1.20zM22.00%200.0h1.20v138.9h-1.20zM23.00%200.0h1.20v132.4h-1.20zM24.00%200.0h1.20v138.8h-1.20zM25.00%200.0h1.20v139.6h-1.20zM26.00%200.0h1.20v145.2h-1.20zM27.00%200.0h1.20v143.1h-1.20zM28.00%200.0h1.20v145.9h-1.20zM29.00%200.0h1.20v147.4h-1.20zM30.00%200.0h1.20v150.2h-1.20zM31.00%200.0h1.20v131.5h-1.20zM31.00%20136.3h1.20v15.6h-1.20zM32.00%200.0h1.20v143.9h-1.20zM33.00%200.0h1.20v139.6h-1.20zM33.00%20144.7h1.20v12.8h-1.20zM34.00%200.0h1.20v152.0h-1.20zM35.00%200.0h1.20v131.1h-1.20zM35.00%20135.2h1.20v12.7h-1.20zM36.00%200.0h1.20v159.7h-1.20zM37.00%200.0h1.20v157.3h-1.20zM38.00%200.0h1.20v163.4h-1.20zM38.00%20167.3h1.20v3.3h-1.20zM39.00%200.0h1.20v167.3h-1.20zM40.00%200.0h1.20v160.2h-1.20zM41.00%200.0h1.20v147.8h-1.20zM42.00%200.0h1.20v146.2h-1.20zM43.00%200.0h1.20v146.9h-1.20zM44.00%200.0h1.20v160.9h-1.20zM45.00%200.0h1.20v151.7h-1.20zM46.00%200.0h1.20v148.3h-1.20zM47.00%200.0h1.20v158.2h-1.20zM48.00%200.0h1.20v156.0h-1.20zM49.00%200.0h1.20v151.5h-1.20zM50.00%200.0h1.20v148.4h-1.20zM51.00%200.0h1.20v142.7h-1.20zM52.00%200.0h1.20v129.4h-1.20zM53.00%200.0h1.20v128.6h-1.20zM54.00%200.0h1.20v141.0h-1.20zM55.00%200.0h1.20v145.8h-1.20zM56.00%200.0h1.20v148.3h-1.20zM57.00%200.0h1.20v157.9h-1.20zM58.00%200.0h1.20v139.7h-1.20zM58.00%20144.7h1.20v10.3h-1.20zM59.00%200.0h1.20v120.7h-1.20zM59.00%20124.2h1.20v21.8h-1.20zM60.00%200.0h1.20v142.1h-1.20zM61.00%200.0h1.20v148.7h-1.20zM62.00%200.0h1.20v150.1h-1.20zM63.00%200.0h1.20v167.4h-1.20zM64.00%200.0h1.20v149.1h-1.20zM65.00%200.0h1.20v160.2h-1.20zM66.00%200.0h1.20v178.7h-1.20zM67.00%200.0h1.20v164.1h-1.20zM68.00%200.0h1.20v158.2h-1.20zM69.00%200.0h1.20v154.5h-1.20zM70.00%200.0h1.20v120.1h-1.20zM70.00%20125.1h1.20v21.2h-1.20zM71.00%200.0h1.20v149.7h-1.20zM72.00%200.0h1.20v143.5h-1.20zM73.00%200.0h1.20v144.8h-1.20zM74.00%200.0h1.20v152.7h-1.20zM75.00%200.0h1.20v154.2h-1.20zM76.00%200.0h1.20v152.2h-1.20zM77.00%200.0h1.20v151.3h-1.20zM78.00%200.0h1.20v127.1h-1.20zM78.00%20129.6h1.20v14.8h-1.20zM79.00%200.0h1.20v139.6h-1.20zM80.00%200.0h1.20v133.6h-1.20zM81.00%200.0h1.20v141.0h-1.20zM82.00%200.0h1.20v145.4h-1.20zM83.00%200.0h1.20v135.2h-1.20zM84.00%200.0h1.20v146.9h-1.20zM85.00%200.0h1.20v150.3h-1.20zM86.00%200.0h1.20v150.1h-1.20zM87.00%200.0h1.20v143.0h-1.20zM88.00%200.0h1.20v157.0h-1.20zM89.00%200.0h1.20v126.3h-1.20zM89.00%20128.6h1.20v14.7h-1.20zM90.00%200.0h1.20v138.8h-1.20zM91.00%200.0h1.20v150.6h-1.20zM92.00%200.0h1.20v148.5h-1.20zM93.00%200.0h1.20v169.5h-1.20zM94.00%200.0h1.20v163.5h-1.20zM95.00%200.0h1.20v161.7h-1.20zM96.00%200.0h1.20v159.6h-1.20zM97.00%200.0h1.20v156.1h-1.20zM98.00%200.0h1.20v162.4h-1.20zM99.00%200.0h1.20v119.1h-1.20zM99.00%20123.3h1.20v23.8h-1.20z'/%3E%3C/svg%3E");
+  --tratto: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2024'%20preserveAspectRatio='none'%3E%3Cg%20transform='rotate%28-1.5%20120%2012%29'%3E%3Cpath%20d='M20.9%203.00h146.0v1.45h-146.0zM170.6%203.00h23.7v1.45h-23.7zM16.0%204.20h131.7v1.45h-131.7zM157.2%204.20h43.8v1.45h-43.8zM15.8%205.40h148.1v1.45h-148.1zM173.4%205.40h40.8v1.45h-40.8zM11.1%206.60h211.6v1.45h-211.6zM9.9%207.80h201.3v1.45h-201.3zM9.9%209.00h214.7v1.45h-214.7zM4.7%2010.20h206.7v1.45h-206.7zM222.5%2010.20h7.5v1.45h-7.5zM3.5%2011.40h177.3v1.45h-177.3zM187.3%2011.40h43.5v1.45h-43.5zM5.2%2012.60h227.3v1.45h-227.3zM9.2%2013.80h213.4v1.45h-213.4zM9.9%2015.00h216.2v1.45h-216.2zM14.2%2016.20h163.6v1.45h-163.6zM185.7%2016.20h33.7v1.45h-33.7zM15.1%2017.40h185.5v1.45h-185.5zM19.5%2018.60h193.4v1.45h-193.4zM22.7%2019.80h154.1v1.45h-154.1zM187.9%2019.80h18.4v1.45h-18.4z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ---------- Base ---------- */
@@ -255,11 +255,14 @@ body::before {
 /* ---------- Apertura ---------- */
 /* L'alone verde acido del quadro, dietro l'opera in evidenza */
 .apertura {
-  padding-block: clamp(2.5rem, 7vw, 6rem) var(--sezione);
+  position: relative;
+  padding-block: clamp(2.5rem, 7vw, 6rem) clamp(3.5rem, 8vw, 6rem);
   background: radial-gradient(ellipse 55% 70% at 74% 42%, var(--alone), transparent 70%);
 }
 
 .apertura-inner {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   gap: clamp(2.5rem, 6vw, 6rem);
@@ -276,8 +279,8 @@ body::before {
   line-height: 0.88;
   letter-spacing: -0.015em;
 }
-.nome span { display: block; }
-.nome span + span { padding-left: 0.75em; }
+.nome > span { display: block; }
+.nome > span + span { padding-left: 0.75em; }
 
 .presentazione {
   margin: clamp(1.75rem, 4vw, 3rem) 0 0;
@@ -383,9 +386,18 @@ body::before {
   display: flex; flex-wrap: wrap;
   align-items: baseline; justify-content: space-between;
   gap: 1.25rem 3rem;
+  position: relative;
   margin-bottom: clamp(2.25rem, 5vw, 4rem);
   padding-top: 1.25rem;
-  border-top: 1px solid var(--inchiostro);
+}
+/* La linea sopra il titolo: si traccia da sinistra quando la sezione entra nello schermo */
+.intestazione::before {
+  content: "";
+  position: absolute; left: 0; right: 0; top: 0;
+  height: 1px;
+  background: var(--inchiostro);
+  transform-origin: left center;
+  transition: transform 1.2s cubic-bezier(0.7, 0, 0.2, 1);
 }
 .titolo-sezione {
   margin: 0;
@@ -752,10 +764,19 @@ body::before {
 
 /* ---------- Piè di pagina ---------- */
 .piede {
-  padding-block: 2rem;
-  border-top: 1px solid var(--linea);
+  padding-block: 0 2rem;
   font-size: var(--t-xs);
   color: var(--grafite);
+}
+.piede-inner { position: relative; padding-top: 2rem; }
+/* filetto allineato ai margini del contenuto */
+.piede-inner::before {
+  content: "";
+  position: absolute; top: 0;
+  left: max(var(--margine), env(safe-area-inset-left, 0px));
+  right: max(var(--margine), env(safe-area-inset-right, 0px));
+  height: 1px;
+  background: var(--linea);
 }
 .piede-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem 2rem; }
 .piede-testo { display: grid; gap: 0.2rem; }
@@ -999,6 +1020,262 @@ body::before {
   .contatto-valore { grid-column: 1 / -1; grid-row: 2; font-size: clamp(1.35rem, 6.2vw, 2rem); }
 }
 
+/* =====================================================================
+   EFFETTI A TEMA PITTURA
+   Tutti si spengono per chi ha chiesto meno animazioni al sistema;
+   cursore, acquerello e inclinazione ci sono solo con il mouse.
+   ===================================================================== */
+
+/* Grana di carta da acquerello su tutto il fondo, sotto i contenuti */
+body::after {
+  content: "";
+  position: fixed; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  opacity: 0.18;
+}
+
+/* Sipario della prima visita: copre la pagina finché le pennellate non la scoprono */
+html.js-sipario::after {
+  content: "";
+  position: fixed; inset: 0;
+  z-index: 99;
+  background: var(--pennellata-1);
+}
+
+@keyframes sale {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Apertura ---------- */
+
+/* Il nome compare lettera per lettera, come scritto a pennino */
+.nome .lettera { display: inline-block; }
+.js-anim .nome .lettera { opacity: 0; }
+.apertura-pronta .nome .lettera {
+  animation: lettera 1s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 45ms) both;
+}
+@keyframes lettera {
+  from { opacity: 0; transform: translateY(0.3em) rotate(5deg); filter: blur(10px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+/* Una pennellata verde acido si stende sotto "De Chiara" */
+.nome > span:last-child { position: relative; isolation: isolate; width: fit-content; }
+.nome > span:last-child::after {
+  content: "";
+  position: absolute; left: 0.55em; right: -0.15em; bottom: 0.04em;
+  height: 0.3em;
+  z-index: -1;
+  background: var(--acido);
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.js-anim .nome > span:last-child::after { clip-path: inset(0 100% 0 0); }
+.apertura-pronta .nome > span:last-child::after {
+  animation: tratto-dentro 0.9s cubic-bezier(0.6, 0.05, 0.3, 1) 0.85s both;
+}
+
+.js-anim .presentazione,
+.js-anim .adesso { opacity: 0; }
+.apertura-pronta .presentazione { animation: sale 0.9s ease 0.75s both; }
+.apertura-pronta .adesso { animation: sale 0.9s ease 0.95s both; }
+
+/* L'opera in apertura aspetta che il sipario si apra prima di dipingersi */
+.js-anim:not(.apertura-pronta) .cornice .rivela { animation-play-state: paused; }
+
+/* Macchie d'acquerello lasciate dal mouse */
+.acquerello {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ---------- Nastro delle categorie ---------- */
+.nastro {
+  overflow: hidden;
+  padding-block: clamp(1.25rem, 3vw, 2.25rem);
+  margin-bottom: var(--sezione);
+  border-block: 1px solid var(--linea);
+}
+.nastro-traccia {
+  display: flex;
+  width: max-content;
+  animation: nastro 48s linear infinite;
+}
+.nastro:hover .nastro-traccia,
+.nastro:focus-within .nastro-traccia { animation-play-state: paused; }
+.nastro-gruppo {
+  display: flex; align-items: center;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+}
+.nastro-voce {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  line-height: 1.15;
+  color: var(--inchiostro);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s ease, -webkit-text-stroke-color 0.3s ease;
+}
+.nastro-voce--contorno { color: transparent; -webkit-text-stroke: 1px var(--inchiostro); }
+.nastro-voce:hover,
+.nastro-voce:focus-visible { color: var(--accento); -webkit-text-stroke-color: var(--accento); }
+/* Macchie di colore tra una voce e l'altra */
+.macchia {
+  flex: none;
+  width: clamp(1.1rem, 2.4vw, 1.9rem);
+  aspect-ratio: 1 / 1;
+  background: var(--acido);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M52 8C66 6 80 14 86 27C92 39 96 52 90 64C85 75 74 86 60 90C47 94 31 92 21 82C11 72 6 58 9 45C12 31 22 18 35 12C40 10 46 8 52 8Z'/%3E%3Ccircle cx='91' cy='88' r='5'/%3E%3Ccircle cx='11' cy='15' r='3.5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M52 8C66 6 80 14 86 27C92 39 96 52 90 64C85 75 74 86 60 90C47 94 31 92 21 82C11 72 6 58 9 45C12 31 22 18 35 12C40 10 46 8 52 8Z'/%3E%3Ccircle cx='91' cy='88' r='5'/%3E%3Ccircle cx='11' cy='15' r='3.5'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+.macchia--1 { background: var(--giallo); transform: rotate(80deg); }
+.macchia--2 { background: var(--magenta); transform: rotate(160deg); }
+.macchia--3 { background: var(--turchese); transform: rotate(250deg); }
+@keyframes nastro { to { transform: translateX(-50%); } }
+
+/* ---------- Barra di avanzamento a pennello sotto la testata ---------- */
+.testata::after {
+  content: "";
+  position: absolute; left: 0; bottom: -4px;
+  width: 100%; height: 7px;
+  pointer-events: none;
+  background: var(--acido);
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  clip-path: inset(0 calc(100% - var(--progresso, 0%)) 0 0);
+}
+
+/* ---------- Cursore da galleria (solo con il mouse) ---------- */
+.cursore {
+  position: fixed; left: 0; top: 0;
+  z-index: 95;
+  width: 0; height: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.cursore.is-visibile { opacity: 1; }
+.cursore::before {
+  content: "";
+  position: absolute; left: 0; top: 0;
+  width: 34px; height: 34px;
+  border: 1px solid var(--inchiostro);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), height 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.3s ease, border-color 0.3s ease;
+}
+.cursore.is-link::before { width: 12px; height: 12px; background: var(--acido); border-color: var(--acido); }
+.cursore.is-guarda::before { width: 96px; height: 96px; background: var(--inchiostro); border-color: var(--inchiostro); }
+.cursore-testo {
+  position: absolute; left: 0; top: 0;
+  transform: translate(-50%, -50%);
+  color: var(--parete);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.cursore.is-guarda .cursore-testo { opacity: 1; transition-delay: 0.1s; }
+.cursore-attivo .opera-apri,
+.cursore-attivo .evidenza-apri,
+.cursore-attivo .video-facciata { cursor: none; }
+
+/* ---------- Opere come sotto le luci della galleria ----------
+   Passandoci sopra si inclinano appena e un riflesso segue il mouse */
+.opera-apri,
+.evidenza-apri {
+  position: relative;
+  transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.opera-apri.is-inclinato,
+.evidenza-apri.is-inclinato { transition-duration: 0.15s; }
+.opera-apri::after,
+.evidenza-apri::after {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 42%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.opera-apri.is-inclinato::after,
+.evidenza-apri.is-inclinato::after { opacity: 1; }
+
+/* ---------- Lente d'ingrandimento nella scheda dell'opera ---------- */
+.lente {
+  position: fixed; left: 0; top: 0;
+  z-index: 5;
+  width: 210px; height: 210px;
+  border-radius: 50%;
+  pointer-events: none;
+  background-color: var(--passepartout);
+  background-repeat: no-repeat;
+  border: 3px solid var(--passepartout);
+  box-shadow: 0 14px 40px var(--ombra-forte), 0 0 0 1px var(--linea);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.lente.is-attiva { opacity: 1; transform: scale(1); }
+.con-lente { cursor: none; }
+.scheda-nota-lente { margin: 0; font-size: var(--t-xs); color: var(--grafite); }
+
+/* ---------- Firma nel piè di pagina ---------- */
+.piede-firma {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 3.5rem);
+}
+.piede-nome {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(3.2rem, 12vw, 10.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.015em;
+  color: var(--inchiostro);
+}
+.piede-su { font-size: var(--t-s); color: var(--inchiostro); text-underline-offset: 0.3em; }
+
+/* ---------- Comparse allo scorrimento (solo con JavaScript) ---------- */
+.js-anim .intestazione[data-rivela]:not(.visibile)::before { transform: scaleX(0); }
+.intestazione[data-rivela] > * {
+  transition: opacity 0.9s ease 0.2s, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s;
+}
+.js-anim .intestazione[data-rivela]:not(.visibile) > * { opacity: 0; transform: translateY(22px); }
+
+.evento[data-rivela],
+.contatto[data-rivela],
+.video[data-rivela],
+.piede-firma[data-rivela] {
+  transition: opacity 0.8s ease calc(var(--i, 0) * 90ms), transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 90ms);
+}
+.js-anim .evento[data-rivela]:not(.visibile),
+.js-anim .contatto[data-rivela]:not(.visibile),
+.js-anim .video[data-rivela]:not(.visibile),
+.js-anim .piede-firma[data-rivela]:not(.visibile) { opacity: 0; transform: translateY(26px); }
+
+/* Le opere si dipingono quando entrano nello schermo */
+.js-anim .opera[data-rivela]:not(.visibile) .media.rivela { animation-play-state: paused; }
+.opera[data-rivela] .didascalia { transition: opacity 0.7s ease 0.55s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s; }
+.js-anim .opera[data-rivela]:not(.visibile) .didascalia { opacity: 0; transform: translateY(10px); }
+
 /* Chi ha chiesto meno animazioni al sistema non ne vede */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -1006,5 +1283,7 @@ body::before {
     animation-duration: 0.01ms !important;
     animation-delay: 0s !important;
     transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
   }
+  .nastro-traccia { animation: none !important; }
 }

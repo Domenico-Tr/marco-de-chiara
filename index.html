@@ -14,9 +14,27 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-03d">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-03e">
 </head>
 <body>
+  <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi.
+       Alla prima visita (per sessione) lo schermo parte coperto di colore. -->
+  <script>
+    (function () {
+      var r = document.documentElement;
+      r.classList.add("js-anim");
+      try {
+        var ridotto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (!ridotto && !sessionStorage.getItem("sipario-visto")) r.classList.add("js-sipario");
+      } catch (e) {}
+      // sicurezza: se lo script principale non parte, mostra comunque tutto
+      setTimeout(function () {
+        r.classList.remove("js-sipario");
+        if (!r.classList.contains("js-pronto")) r.classList.remove("js-anim");
+      }, 3500);
+    })();
+  </script>
+
   <a class="salta" href="#opere">Vai alle opere</a>
 
   <!-- ============ TESTATA E MENU ============ -->
@@ -63,10 +81,16 @@
       </div>
     </section>
 
+    <!-- ============ NASTRO DELLE CATEGORIE ============ -->
+    <!-- Fascia che scorre con le categorie: cliccandone una si va alle opere filtrate -->
+    <nav class="nastro" id="nastro" aria-label="Categorie di opere" hidden>
+      <div class="nastro-traccia" id="nastro-traccia"></div>
+    </nav>
+
     <!-- ============ OPERE ============ -->
     <section class="sezione" id="opere" aria-labelledby="titolo-opere">
       <div class="wrap">
-        <div class="intestazione">
+        <div class="intestazione" data-rivela>
           <h2 class="titolo-sezione" id="titolo-opere">Opere</h2>
           <ul class="filtri" id="filtri" aria-label="Filtra le opere per categoria"></ul>
         </div>
@@ -80,7 +104,7 @@
     <!-- I video arrivano da contenuti/processo.json, gestito dal pannello -->
     <section class="sezione" id="processo" aria-labelledby="titolo-processo">
       <div class="wrap">
-        <div class="intestazione">
+        <div class="intestazione" data-rivela>
           <h2 class="titolo-sezione" id="titolo-processo">Processo creativo</h2>
           <div class="processo-lato">
             <p class="nota-sezione">Video dallo studio: dalla tela bianca all'opera finita.</p>
@@ -101,7 +125,7 @@
     <!-- ============ EVENTI ============ -->
     <section class="sezione" id="eventi" aria-labelledby="titolo-eventi">
       <div class="wrap">
-        <div class="intestazione">
+        <div class="intestazione" data-rivela>
           <h2 class="titolo-sezione" id="titolo-eventi">Eventi</h2>
           <p class="nota-sezione">Mostre, studi aperti e laboratori in programma.</p>
         </div>
@@ -116,7 +140,7 @@
     <!-- ============ CONTATTI ============ -->
     <section class="sezione" id="contatti" aria-labelledby="titolo-contatti">
       <div class="wrap">
-        <div class="intestazione">
+        <div class="intestazione" data-rivela>
           <h2 class="titolo-sezione" id="titolo-contatti">Contatti</h2>
           <p class="nota-sezione">Per acquisti, commissioni e collaborazioni scrivimi via email o in privato sui social. Rispondo entro due giorni lavorativi.</p>
         </div>
@@ -126,6 +150,11 @@
   </main>
 
   <footer class="piede">
+    <!-- La firma in grande, come in fondo a una tela -->
+    <div class="wrap piede-firma" data-rivela>
+      <p class="piede-nome" aria-hidden="true">Marco De Chiara</p>
+      <a class="piede-su" href="#inizio">Torna su</a>
+    </div>
     <div class="wrap piede-inner">
       <div class="piede-testo">
         <p>© <span id="anno">2026</span> Marco De Chiara</p>
@@ -144,6 +173,7 @@
         <h3 class="scheda-titolo" id="scheda-titolo"></h3>
         <p class="scheda-meta" id="scheda-meta"></p>
         <p class="scheda-descrizione" id="scheda-descrizione"></p>
+        <p class="scheda-nota-lente" id="scheda-nota-lente" hidden>Passa sopra l'opera per vedere da vicino la pennellata.</p>
         <div class="scheda-stato" id="scheda-stato"></div>
         <div class="scheda-azioni">
           <a class="bottone" id="scheda-richiesta" href="#contatti">Chiedi informazioni</a>
@@ -164,7 +194,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-03d"></script>
-  <script src="js/script.js?v=2026-11-03d"></script>
+  <script src="js/categorie.js?v=2026-11-03e"></script>
+  <script src="js/script.js?v=2026-11-03e"></script>
 </body>
 </html>

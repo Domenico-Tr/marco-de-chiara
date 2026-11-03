@@ -108,7 +108,7 @@ Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un qu
 - `--giallo`, `--magenta`, `--turchese`: colori delle sottolineature a pennello del menu. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03d` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03e` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -122,6 +122,21 @@ Cosa si può cambiare:
 - **Velocità del passaggio**: in `js/script.js` cerca `await anima(` (due righe): i numeri `0.42` e `0.36` sono i secondi di ogni pennellata.
 - **Velocità delle comparse**: la variabile `--durata` (in `.rivela` e `.cornice .rivela` nel CSS).
 - Chi ha attivato "riduci movimento" nelle impostazioni del telefono o del computer non vede animazioni: il sito salta direttamente alla sezione.
+
+## Effetti
+
+Sono tutti in `js/script.js` (sezione "9. Effetti a tema pittura") e in fondo a `css/style.css` (blocco "EFFETTI A TEMA PITTURA").
+
+- **Sipario d'apertura**: alla prima visita (una volta per sessione del browser) lo schermo è coperto di verde e le pennellate lo puliscono quando le opere sono pronte. Poi il nome compare lettera per lettera e una pennellata verde acido si stende sotto "De Chiara". Per toglierlo, in `index.html` cancella la riga che contiene `sipario-visto` nello script in cima a `<body>`.
+- **Acquerello**: muovendo il mouse sull'apertura si lasciano macchie d'acquerello nei colori dei riccioli, che svaniscono in pochi secondi.
+- **Cursore da galleria**: un cerchio segue il mouse; sulle opere e sui video diventa un disco con "Guarda", sui link un pallino verde acido.
+- **Opere sotto le luci**: con il mouse sopra, le opere si inclinano appena e un riflesso segue il puntatore.
+- **Lente**: nella scheda dell'opera, passando sopra l'immagine si vede la pennellata ingrandita due volte e mezzo.
+- **Nastro delle categorie**: fascia che scorre sotto l'apertura; cliccando una categoria si va alle opere filtrate. Compaiono solo le categorie che hanno almeno un'opera.
+- **Comparse allo scorrimento**: le linee sopra i titoli si tracciano, le opere si dipingono entrando nello schermo, eventi, contatti e video salgono in sequenza.
+- **Dettagli**: grana di carta da acquerello sul fondo, pennellata sotto la testata che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
+
+Cursore, acquerello, inclinazione e lente ci sono solo con il mouse: su telefono e tablet non compaiono.
 
 ## Dominio personale
 
