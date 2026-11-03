@@ -1276,6 +1276,206 @@ html.js-sipario::after {
 .opera[data-rivela] .didascalia { transition: opacity 0.7s ease 0.55s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s; }
 .js-anim .opera[data-rivela]:not(.visibile) .didascalia { opacity: 0; transform: translateY(10px); }
 
+/* =====================================================================
+   PROVALO NELLA TUA STANZA
+   ===================================================================== */
+.scheda-pulsanti { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+.stanza {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0;
+  background: var(--parete);
+  color: var(--inchiostro);
+  overflow: hidden;
+}
+.stanza::backdrop { background: var(--parete); }
+.stanza[open] { animation: entra 0.25s ease; }
+
+.stanza-inner {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem);
+}
+
+.stanza-area {
+  min-width: 0; min-height: 0;
+  display: grid; place-items: center;
+  padding: calc(4.5rem + env(safe-area-inset-top, 0px)) clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem);
+  padding-left: max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-left, 0px));
+}
+.stanza-area.is-sopra .stanza-inizio { border-color: var(--accento); background: var(--velatura); }
+
+/* Prima fase */
+.stanza-inizio {
+  display: grid; justify-items: center; gap: 1rem;
+  width: min(100%, 34rem);
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px dashed var(--grafite);
+  text-align: center;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.stanza-inizio-titolo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: var(--t-xl);
+  line-height: 1.15;
+}
+.stanza-guida { margin: 0; color: var(--grafite); font-size: var(--t-s); }
+.stanza-scelte { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-top: 0.5rem; }
+.stanza-scelte label.bottone { cursor: pointer; }
+#stanza-file:focus-visible + * { outline: 2px solid var(--accento); }
+
+/* Seconda fase: la foto con l'opera */
+.stanza-foto {
+  position: relative;
+  max-width: 100%;
+  line-height: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.stanza-foto > img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 7rem);
+  max-height: calc(100dvh - 7rem);
+  width: auto; height: auto;
+}
+.stanza-opera {
+  --spessore: 4px;
+  position: absolute; left: 50%; top: 40%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  touch-action: none;
+  box-shadow: 0 calc(var(--spessore) * 1.4 + 3px) calc(var(--spessore) * 4 + 10px) rgba(0, 0, 0, 0.32);
+}
+.stanza-opera:active { cursor: grabbing; }
+.stanza-opera:focus-visible { outline: 2px dashed var(--accento); outline-offset: 6px; }
+.stanza-opera > img { display: block; width: 100%; height: auto; pointer-events: none; }
+/* Cornici: colori dei materiali, uguali in ogni tema */
+.stanza-opera.cornice--nera { border: var(--spessore) solid #151515; }
+.stanza-opera.cornice--bianca {
+  border: var(--spessore) solid #1A1A1A;
+  padding: calc(var(--spessore) * 2.2);
+  background: #FBFAF6;
+}
+.stanza-opera.cornice--legno {
+  border: var(--spessore) solid #8A6239;
+  border-image: linear-gradient(135deg, #B08455, #6E4A28 35%, #A27648 65%, #5C3D21) 1;
+}
+.stanza-maniglia {
+  position: absolute; right: -15px; bottom: -15px;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--passepartout);
+  border: 2px solid var(--accento);
+  box-shadow: 0 2px 8px var(--ombra-forte);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+/* Righello per mettere in scala */
+.righello { position: absolute; inset: 0; pointer-events: none; }
+.righello-linea {
+  position: absolute; left: 0; top: 0;
+  height: 3px; margin-top: -1.5px;
+  background: var(--acido);
+  box-shadow: 0 0 0 1px var(--inchiostro);
+  transform-origin: 0 50%;
+}
+.righello-punto {
+  position: absolute; left: 0; top: 0;
+  width: 28px; height: 28px;
+  margin: -14px 0 0 -14px;
+  border-radius: 50%;
+  background: var(--acido);
+  border: 2px solid var(--inchiostro);
+  cursor: grab;
+  touch-action: none;
+  pointer-events: auto;
+}
+.righello-etichetta {
+  position: absolute; left: 0; top: 0;
+  transform: translate(-50%, -170%);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--inchiostro);
+  color: var(--parete);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Pannello dei comandi */
+.stanza-pannello {
+  min-width: 0;
+  overflow: auto;
+  display: flex; flex-direction: column; gap: 1.1rem;
+  padding: calc(5rem + env(safe-area-inset-top, 0px)) max(2rem, env(safe-area-inset-right, 0px)) 2rem 2rem;
+  border-left: 1px solid var(--linea);
+}
+.stanza-titolo {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--t-xl);
+  line-height: 1.1;
+}
+.stanza-nome-opera { margin: 0; color: var(--grafite); font-size: var(--t-s); }
+.stanza-nome-opera em { font-family: var(--font-display); font-weight: 600; font-size: 1.2em; color: var(--inchiostro); }
+.stanza-messaggio { margin: 0; font-size: var(--t-s); color: var(--bollino); }
+.stanza-messaggio:empty { display: none; }
+.stanza-comandi { display: grid; gap: 1.4rem; }
+.stanza-aiuto { margin: 0; font-size: var(--t-xs); color: var(--grafite); }
+.stanza-campo { display: grid; gap: 0.5rem; margin: 0; padding: 0; border: 0; min-width: 0; }
+.stanza-campo > label,
+.stanza-campo legend { font-size: var(--t-s); padding: 0; }
+.stanza-campo input[type="range"] { width: 100%; accent-color: var(--accento); }
+.stanza-cornici { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.stanza-cornici legend { width: 100%; margin-bottom: 0.5rem; }
+.stanza-cornici label {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  font-size: var(--t-s);
+  cursor: pointer;
+}
+.stanza-cornici label:has(input:checked) { border-color: var(--accento); background: var(--velatura); }
+.stanza-cornici input { accent-color: var(--accento); margin: 0; }
+.stanza-scala { justify-items: start; }
+.stanza-scala-info { margin: 0; font-size: var(--t-s); }
+.stanza-scala-form { display: grid; gap: 0.5rem; width: 100%; }
+.stanza-cm-riga { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.stanza-cm-riga input {
+  width: 6rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--linea);
+  background: var(--passepartout);
+  color: var(--inchiostro);
+  font: inherit;
+}
+.stanza-azioni { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.stanza-privacy { margin: auto 0 0; padding-top: 1rem; border-top: 1px solid var(--linea); font-size: var(--t-xs); color: var(--grafite); }
+
+@media (max-width: 820px) {
+  .stanza { overflow-y: auto; }
+  .stanza-inner { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); }
+  .stanza-area {
+    padding: calc(4.25rem + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 1rem max(16px, env(safe-area-inset-left, 0px));
+  }
+  .stanza-foto > img { max-height: 62vh; max-height: 62dvh; }
+  .stanza-pannello {
+    overflow: visible;
+    border-left: 0;
+    border-top: 1px solid var(--linea);
+    padding: 1.25rem max(16px, env(safe-area-inset-right, 0px)) 2rem max(16px, env(safe-area-inset-left, 0px));
+  }
+}
+
 /* Chi ha chiesto meno animazioni al sistema non ne vede */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -14,7 +14,7 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-03e">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-03f">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi.
@@ -176,8 +176,12 @@
         <p class="scheda-nota-lente" id="scheda-nota-lente" hidden>Passa sopra l'opera per vedere da vicino la pennellata.</p>
         <div class="scheda-stato" id="scheda-stato"></div>
         <div class="scheda-azioni">
-          <a class="bottone" id="scheda-richiesta" href="#contatti">Chiedi informazioni</a>
-          <p class="scheda-email">oppure scrivi a <span id="scheda-email"></span></p>
+          <div class="scheda-pulsanti">
+            <a class="bottone" id="scheda-richiesta" href="#contatti">Chiedi informazioni</a>
+            <!-- Solo per quadri e stampe: apre "Provalo nella tua stanza" -->
+            <button type="button" class="bottone bottone--leggero" id="scheda-stanza" hidden>Provalo nella tua stanza</button>
+          </div>
+          <p class="scheda-email" id="scheda-email-riga">oppure scrivi a <span id="scheda-email"></span></p>
         </div>
         <div class="scheda-nav" id="scheda-nav">
           <button type="button" class="bottone bottone--leggero" id="scheda-prec">Precedente</button>
@@ -189,12 +193,90 @@
     </div>
   </dialog>
 
+  <!-- ============ PROVALO NELLA TUA STANZA ============ -->
+  <!-- La foto della stanza resta nel browser del visitatore: non viene caricata da nessuna parte -->
+  <dialog class="stanza" id="stanza" aria-labelledby="stanza-titolo">
+    <div class="stanza-inner">
+      <div class="stanza-area" id="stanza-area">
+        <!-- Prima fase: scelta della foto -->
+        <div class="stanza-inizio" id="stanza-inizio">
+          <p class="stanza-inizio-titolo">Fotografa la parete dove vorresti l'opera</p>
+          <p class="stanza-guida">Mettiti il più possibile di fronte alla parete, con un po' di spazio intorno. Puoi anche trascinare qui una foto.</p>
+          <div class="stanza-scelte">
+            <label class="bottone" for="stanza-file">Carica una foto della stanza</label>
+            <button type="button" class="bottone bottone--leggero" id="stanza-esempio">Usa una stanza di esempio</button>
+          </div>
+          <input type="file" id="stanza-file" accept="image/*" class="visually-hidden">
+        </div>
+        <!-- Seconda fase: la foto con l'opera da spostare -->
+        <div class="stanza-foto" id="stanza-foto" hidden>
+          <img id="stanza-sfondo" alt="La stanza in cui provare l'opera">
+          <div class="stanza-opera cornice--nera" id="stanza-opera" tabindex="0" role="img" aria-label="Opera sulla parete: trascinala per spostarla">
+            <img id="stanza-opera-img" alt="">
+            <span class="stanza-maniglia" id="stanza-maniglia" aria-hidden="true"></span>
+          </div>
+          <div class="righello" id="righello" hidden>
+            <span class="righello-linea" id="righello-linea"></span>
+            <span class="righello-punto" id="righello-a"></span>
+            <span class="righello-punto" id="righello-b"></span>
+            <span class="righello-etichetta" id="righello-etichetta"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stanza-pannello">
+        <h2 class="stanza-titolo" id="stanza-titolo">Provalo nella tua stanza</h2>
+        <p class="stanza-nome-opera" id="stanza-nome-opera"></p>
+        <p class="stanza-messaggio" id="stanza-messaggio" role="status"></p>
+
+        <div class="stanza-comandi" id="stanza-comandi" hidden>
+          <p class="stanza-aiuto">Trascina l'opera per spostarla. Per ingrandirla usa il cursore qui sotto o il cerchio nell'angolo.</p>
+
+          <div class="stanza-campo">
+            <label for="stanza-dimensione">Dimensione</label>
+            <input type="range" id="stanza-dimensione" min="4" max="90" value="28">
+          </div>
+
+          <fieldset class="stanza-campo stanza-cornici">
+            <legend>Cornice</legend>
+            <label><input type="radio" name="cornice" value="nessuna"> Nessuna</label>
+            <label><input type="radio" name="cornice" value="nera" checked> Nera</label>
+            <label><input type="radio" name="cornice" value="bianca"> Bianca</label>
+            <label><input type="radio" name="cornice" value="legno"> Legno</label>
+          </fieldset>
+
+          <div class="stanza-campo stanza-scala">
+            <p class="stanza-scala-info" id="stanza-scala-info"></p>
+            <button type="button" class="bottone bottone--leggero" id="stanza-scala-btn">Metti in scala</button>
+            <div class="stanza-scala-form" id="stanza-scala-form" hidden>
+              <p class="stanza-aiuto">Sposta i due pallini sugli estremi di qualcosa di cui conosci la misura, per esempio un divano o una porta, e scrivi quanto è lungo.</p>
+              <label for="stanza-cm">Lunghezza reale</label>
+              <div class="stanza-cm-riga">
+                <input type="number" id="stanza-cm" min="1" step="1" value="200" inputmode="numeric"> <span>cm</span>
+                <button type="button" class="bottone" id="stanza-scala-applica">Applica</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stanza-azioni">
+            <button type="button" class="bottone" id="stanza-salva">Salva l'immagine</button>
+            <button type="button" class="bottone bottone--leggero" id="stanza-cambia">Cambia foto</button>
+          </div>
+        </div>
+
+        <p class="stanza-privacy">La foto resta sul tuo dispositivo: non viene caricata da nessuna parte.</p>
+      </div>
+
+      <button type="button" class="scheda-chiudi" id="stanza-chiudi">Chiudi</button>
+    </div>
+  </dialog>
+
   <!-- Icone di Instagram e TikTok: Font Awesome (gratuito), caricato da internet -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/brands.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-03e"></script>
-  <script src="js/script.js?v=2026-11-03e"></script>
+  <script src="js/categorie.js?v=2026-11-03f"></script>
+  <script src="js/script.js?v=2026-11-03f"></script>
 </body>
 </html>

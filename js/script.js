@@ -1122,16 +1122,16 @@
     $("#scheda-stato").innerHTML = statoHTML(o) + prezzo;
 
     const richiesta = $("#scheda-richiesta");
-    const azioni = richiesta.parentElement;
     if (CONTATTI.email) {
       const oggetto = `Informazioni su "${o.titolo}"${o.anno ? ` (${o.anno})` : ""}`;
       richiesta.href = `mailto:${CONTATTI.email}?subject=${encodeURIComponent(oggetto)}`;
       richiesta.textContent = o.stato === "venduta" ? "Chiedi di opere simili" : "Chiedi informazioni";
       $("#scheda-email").textContent = CONTATTI.email;
-      azioni.hidden = false;
-    } else {
-      azioni.hidden = true;
     }
+    richiesta.hidden = !CONTATTI.email;
+    $("#scheda-email-riga").hidden = !CONTATTI.email;
+    // "Provalo nella tua stanza" solo per le opere da appendere
+    $("#scheda-stanza").hidden = !daParete(o);
 
     $("#scheda-pos").textContent = `${indice + 1} di ${elenco.length}`;
     $("#scheda-nav").hidden = elenco.length < 2;
@@ -1959,9 +1959,9 @@
     elementi.forEach((el) => osservatoreRivela.observe(el));
   }
 
-  // Nastro delle categorie: le voci si ripetono quanto basta a riempire lo schermo
+  // Nastro delle categorie: tutte quelle del menu, ripetute quanto basta a riempire lo schermo
   function costruisciNastro() {
-    const voci = CATEGORIE.filter((c) => conta(c.id) > 0);
+    const voci = CATEGORIE.slice();
     if (!voci.length) return;
     const giro = [];
     while (giro.length < 10) giro.push(...voci);
@@ -1980,6 +1980,501 @@
     // due metà identiche: scorrendo di metà larghezza il giro si chiude senza salti
     $("#nastro-traccia").innerHTML = gruppo(false) + gruppo(true);
     $("#nastro").hidden = false;
+  }
+
+  /* ------------------------------------------------------------------
+     10. Provalo nella tua stanza
+     Il visitatore carica la foto di una parete (o usa la stanza di
+     esempio), sposta e ridimensiona l'opera, sceglie la cornice e può
+     metterla in scala con un righello. Tutto avviene nel browser:
+     la foto non viene mai inviata da nessuna parte.
+     ------------------------------------------------------------------ */
+  // Le categorie di opere da appendere: solo queste hanno il pulsante
+  const CATEGORIE_DA_PARETE = ["quadri", "stampe"];
+  function daParete(o) {
+    return !!o && CATEGORIE_DA_PARETE.includes(o.categoria);
+  }
+
+  // "90 × 120 cm" vuol dire altezza × base, come nelle didascalie dei musei
+  function misureReali(testo) {
+    const m = String(testo || "")
+      .replace(/,/g, ".")
+      .match(/(\d+(?:\.\d+)?)\s*[x×X*]\s*(\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    const altezza = parseFloat(m[1]);
+    const base = parseFloat(m[2]);
+    return altezza > 0 && base > 0 ? { altezza, base } : null;
+  }
+  const cm = (n) => String(Math.round(n * 10) / 10).replace(".", ",");
+  const limita = (v, min, max) => Math.min(max, Math.max(min, v));
+
+  const finestraStanza = $("#stanza");
+  const statoStanza = {
+    opera: null,
+    misura: null,
+    inScala: false,
+    notaScala: "",
+    cx: 0.5,
+    cy: 0.38,
+    larghezza: 0.28, // larghezza dell'opera rispetto alla foto
+    cornice: "nera",
+    urlCreato: null,
+    haFoto: false,
+    esempio: false,
+    righello: { ax: 0.3, ay: 0.72, bx: 0.7, by: 0.72 },
+    origine: null,
+  };
+
+  function messaggioStanza(testo) {
+    $("#stanza-messaggio").textContent = testo || "";
+  }
+
+  function faseStanza(conFoto) {
+    $("#stanza-inizio").hidden = conFoto;
+    $("#stanza-foto").hidden = !conFoto;
+    $("#stanza-comandi").hidden = !conFoto;
+    if (!conFoto) mostraRighello(false);
+  }
+
+  // Stanza di esempio disegnata qui: parete, pavimento in legno, divano e lampada.
+  // Il divano è largo 220 cm, così l'opera si mette subito in scala.
+  const ESEMPIO = { larghezza: 1600, altezza: 1100, divanoPx: 880, divanoCm: 220 };
+  let urlEsempio = "";
+  function stanzaDiEsempio() {
+    if (urlEsempio) return urlEsempio;
+    const c = document.createElement("canvas");
+    c.width = ESEMPIO.larghezza;
+    c.height = ESEMPIO.altezza;
+    const x = c.getContext("2d");
+    const rett = (px, py, w, h, r, colore) => {
+      x.fillStyle = colore;
+      x.beginPath();
+      if (x.roundRect) x.roundRect(px, py, w, h, r);
+      else x.rect(px, py, w, h);
+      x.fill();
+    };
+    // parete, con la luce di una finestra fuori campo
+    let g = x.createLinearGradient(0, 0, 0, 830);
+    g.addColorStop(0, "#ECE8DF");
+    g.addColorStop(1, "#DCD5C8");
+    x.fillStyle = g;
+    x.fillRect(0, 0, 1600, 830);
+    g = x.createRadialGradient(1300, 120, 40, 1300, 120, 1000);
+    g.addColorStop(0, "rgba(255,255,255,0.45)");
+    g.addColorStop(1, "rgba(255,255,255,0)");
+    x.fillStyle = g;
+    x.fillRect(0, 0, 1600, 830);
+    // battiscopa e pavimento in legno
+    x.fillStyle = "#F5F2EB";
+    x.fillRect(0, 810, 1600, 24);
+    g = x.createLinearGradient(0, 834, 0, 1100);
+    g.addColorStop(0, "#B0906C");
+    g.addColorStop(1, "#8A6B4D");
+    x.fillStyle = g;
+    x.fillRect(0, 834, 1600, 266);
+    x.strokeStyle = "rgba(60,40,20,0.16)";
+    x.lineWidth = 2;
+    for (let i = 0, y = 852; y < 1100; i++, y += 16 + i * 6) {
+      x.beginPath();
+      x.moveTo(0, y);
+      x.lineTo(1600, y);
+      x.stroke();
+    }
+    // ombra a terra e divano
+    x.fillStyle = "rgba(0,0,0,0.16)";
+    x.beginPath();
+    x.ellipse(800, 846, 480, 24, 0, 0, Math.PI * 2);
+    x.fill();
+    const sx = 370;
+    rett(sx + 30, 590, 800, 200, 30, "#5E7165");
+    rett(sx, 700, 860, 140, 28, "#6C8073");
+    rett(sx - 10, 640, 100, 200, 34, "#56685C");
+    rett(sx + 770, 640, 100, 200, 34, "#56685C");
+    rett(sx + 140, 640, 230, 120, 22, "#D1BE95");
+    rett(sx + 490, 640, 230, 120, 22, "#E4DACA");
+    x.fillStyle = "#2E2A26";
+    x.fillRect(sx + 40, 838, 16, 22);
+    x.fillRect(sx + 804, 838, 16, 22);
+    // lampada da terra
+    g = x.createRadialGradient(1390, 470, 10, 1390, 520, 280);
+    g.addColorStop(0, "rgba(255,238,200,0.4)");
+    g.addColorStop(1, "rgba(255,238,200,0)");
+    x.fillStyle = g;
+    x.fillRect(1100, 300, 580, 540);
+    x.strokeStyle = "#2B2B2B";
+    x.lineWidth = 6;
+    x.beginPath();
+    x.moveTo(1390, 834);
+    x.lineTo(1390, 470);
+    x.stroke();
+    x.fillStyle = "#2B2B2B";
+    x.beginPath();
+    x.ellipse(1390, 836, 60, 10, 0, 0, Math.PI * 2);
+    x.fill();
+    x.fillStyle = "#F3EEE3";
+    x.beginPath();
+    x.moveTo(1322, 472);
+    x.lineTo(1458, 472);
+    x.lineTo(1430, 378);
+    x.lineTo(1350, 378);
+    x.closePath();
+    x.fill();
+    // pianta in vaso
+    x.fillStyle = "#3E5C3A";
+    for (let i = 0; i < 9; i++) {
+      const a = -Math.PI / 2 + (i - 4) * 0.28;
+      x.beginPath();
+      x.ellipse(210 + Math.cos(a) * 70, 700 + Math.sin(a) * 110, 20, 68, a + Math.PI / 2, 0, Math.PI * 2);
+      x.fill();
+    }
+    rett(150, 720, 120, 115, 12, "#CBBCA6");
+    urlEsempio = c.toDataURL("image/jpeg", 0.9);
+    return urlEsempio;
+  }
+
+  // Sulla stanza di esempio la scala è nota: l'opera prende subito le sue misure reali
+  function scalaEsempio() {
+    if (!statoStanza.esempio || !statoStanza.misura) return;
+    const pxPerCm = ESEMPIO.divanoPx / ESEMPIO.divanoCm;
+    statoStanza.larghezza = limita((statoStanza.misura.base * pxPerCm) / ESEMPIO.larghezza, 0.02, 1.5);
+    statoStanza.inScala = true;
+    statoStanza.notaScala = "accanto a un divano di 220 cm";
+  }
+
+  function impostaSfondoStanza(url, esempio) {
+    const sfondo = $("#stanza-sfondo");
+    messaggioStanza("");
+    const pronta = () => {
+      statoStanza.haFoto = true;
+      statoStanza.esempio = esempio;
+      statoStanza.cx = 0.5;
+      statoStanza.cy = esempio ? 0.33 : 0.4;
+      statoStanza.larghezza = 0.28;
+      statoStanza.inScala = false;
+      statoStanza.notaScala = "";
+      scalaEsempio();
+      faseStanza(true);
+      requestAnimationFrame(aggiornaOperaStanza);
+    };
+    sfondo.onerror = () => messaggioStanza("Questa foto non si può aprire. Prova con una foto JPG o PNG.");
+    if (sfondo.getAttribute("src") === url && sfondo.complete && sfondo.naturalWidth) {
+      pronta();
+    } else {
+      sfondo.onload = pronta;
+      sfondo.src = url;
+    }
+  }
+
+  function caricaFotoStanza(file) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) {
+      messaggioStanza("Scegli una foto (JPG o PNG).");
+      return;
+    }
+    if (statoStanza.urlCreato) URL.revokeObjectURL(statoStanza.urlCreato);
+    statoStanza.urlCreato = URL.createObjectURL(file);
+    impostaSfondoStanza(statoStanza.urlCreato, false);
+  }
+
+  function aggiornaOperaStanza() {
+    const foto = $("#stanza-foto");
+    const opera = $("#stanza-opera");
+    const W = foto.clientWidth;
+    if (!W) return;
+    // la larghezza riguarda il dipinto; la cornice si aggiunge intorno
+    const contenuto = statoStanza.larghezza * W;
+    const s = statoStanza.cornice === "nessuna" ? 0 : Math.max(2, contenuto * 0.035);
+    const p = statoStanza.cornice === "bianca" ? s * 2.2 : 0;
+    opera.className = `stanza-opera cornice--${statoStanza.cornice}`;
+    opera.style.setProperty("--spessore", `${s}px`);
+    opera.style.width = `${contenuto + 2 * (s + p)}px`;
+    opera.style.left = `${statoStanza.cx * 100}%`;
+    opera.style.top = `${statoStanza.cy * 100}%`;
+    $("#stanza-dimensione").value = String(Math.round(statoStanza.larghezza * 100));
+
+    const m = statoStanza.misura;
+    const info = $("#stanza-scala-info");
+    $("#stanza-scala-btn").hidden = !m;
+    if (!m) {
+      info.textContent = "Per quest'opera non ci sono misure: regola la dimensione a occhio.";
+    } else if (statoStanza.inScala) {
+      info.textContent = `In scala: ${cm(m.altezza)} × ${cm(m.base)} cm${statoStanza.notaScala ? `, ${statoStanza.notaScala}` : ""}.`;
+    } else {
+      info.textContent = `Misure reali ${cm(m.altezza)} × ${cm(m.base)} cm. Ora la dimensione è a occhio.`;
+    }
+    if (!$("#righello").hidden) disegnaRighello();
+  }
+
+  function mostraRighello(attivo) {
+    $("#righello").hidden = !attivo;
+    $("#stanza-scala-form").hidden = !attivo;
+    $("#stanza-scala-btn").textContent = attivo ? "Annulla" : "Metti in scala";
+    if (attivo) disegnaRighello();
+  }
+
+  function disegnaRighello() {
+    const foto = $("#stanza-foto");
+    const W = foto.clientWidth;
+    const H = foto.clientHeight;
+    const g = statoStanza.righello;
+    const ax = g.ax * W;
+    const ay = g.ay * H;
+    const bx = g.bx * W;
+    const by = g.by * H;
+    const posa = (el, x, y) => {
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+    };
+    posa($("#righello-a"), ax, ay);
+    posa($("#righello-b"), bx, by);
+    const linea = $("#righello-linea");
+    posa(linea, ax, ay);
+    linea.style.width = `${Math.hypot(bx - ax, by - ay)}px`;
+    linea.style.transform = `rotate(${Math.atan2(by - ay, bx - ax)}rad)`;
+    const etichetta = $("#righello-etichetta");
+    posa(etichetta, (ax + bx) / 2, (ay + by) / 2);
+    etichetta.textContent = `${$("#stanza-cm").value || "?"} cm`;
+  }
+
+  // Rende trascinabile un elemento con mouse o dito
+  function trascinabile(el, alMovimento) {
+    let attivo = false;
+    el.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      attivo = true;
+      el.setPointerCapture(e.pointerId);
+      alMovimento(e, true);
+    });
+    el.addEventListener("pointermove", (e) => {
+      if (attivo) alMovimento(e, false);
+    });
+    const fine = () => {
+      attivo = false;
+    };
+    el.addEventListener("pointerup", fine);
+    el.addEventListener("pointercancel", fine);
+  }
+
+  function apriStanza(o, origine) {
+    if (!o) return;
+    statoStanza.opera = o;
+    statoStanza.origine = origine || null;
+    statoStanza.misura = misureReali(o.misure);
+    statoStanza.inScala = false;
+    statoStanza.notaScala = "";
+    messaggioStanza("");
+    $("#stanza-nome-opera").innerHTML = `<em>${esc(o.titolo)}</em>${o.misure ? `, ${esc(o.misure)}` : ""}`;
+    const img = $("#stanza-opera-img");
+    img.alt = o.titolo;
+    img.onload = () => aggiornaOperaStanza();
+    if (o.immagine) {
+      img.src = o.immagine;
+    } else {
+      const tela = document.createElement("canvas");
+      dipingi(tela, o, 900);
+      img.src = tela.toDataURL("image/jpeg", 0.9);
+    }
+    $("#stanza-opera").setAttribute(
+      "aria-label",
+      `${o.titolo} sulla parete. Trascinala per spostarla; con la tastiera usa le frecce per spostarla e i tasti più e meno per la dimensione.`
+    );
+    mostraRighello(false);
+    faseStanza(statoStanza.haFoto);
+    if (statoStanza.haFoto) scalaEsempio();
+    if (typeof finestraStanza.showModal === "function") finestraStanza.showModal();
+    else finestraStanza.setAttribute("open", "");
+    requestAnimationFrame(aggiornaOperaStanza);
+  }
+
+  // Unisce foto della stanza, cornice e opera in un'unica immagine da scaricare
+  function salvaImmagineStanza() {
+    const sfondo = $("#stanza-sfondo");
+    const operaImg = $("#stanza-opera-img");
+    const opera = $("#stanza-opera");
+    const foto = $("#stanza-foto");
+    const W = sfondo.naturalWidth;
+    const H = sfondo.naturalHeight;
+    if (!W || !operaImg.naturalWidth || !foto.clientWidth) return;
+    const k = W / foto.clientWidth;
+    const c = document.createElement("canvas");
+    c.width = W;
+    c.height = H;
+    const x = c.getContext("2d");
+    x.drawImage(sfondo, 0, 0, W, H);
+    const tw = opera.offsetWidth * k;
+    const th = opera.offsetHeight * k;
+    const px = statoStanza.cx * W - tw / 2;
+    const py = statoStanza.cy * H - th / 2;
+    const sMostrato = parseFloat(opera.style.getPropertyValue("--spessore")) || 0;
+    const s = sMostrato * k;
+    const pad = statoStanza.cornice === "bianca" ? s * 2.2 : 0;
+    // ombra sul muro
+    x.save();
+    x.shadowColor = "rgba(0,0,0,0.32)";
+    x.shadowBlur = (sMostrato * 4 + 10) * k;
+    x.shadowOffsetY = (sMostrato * 1.4 + 3) * k;
+    x.fillStyle = "#151515";
+    x.fillRect(px, py, tw, th);
+    x.restore();
+    // cornice
+    if (statoStanza.cornice === "legno") {
+      const g = x.createLinearGradient(px, py, px + tw, py + th);
+      g.addColorStop(0, "#B08455");
+      g.addColorStop(0.35, "#6E4A28");
+      g.addColorStop(0.65, "#A27648");
+      g.addColorStop(1, "#5C3D21");
+      x.fillStyle = g;
+      x.fillRect(px, py, tw, th);
+    } else if (statoStanza.cornice !== "nessuna") {
+      x.fillStyle = statoStanza.cornice === "bianca" ? "#1A1A1A" : "#151515";
+      x.fillRect(px, py, tw, th);
+    }
+    if (statoStanza.cornice === "bianca") {
+      x.fillStyle = "#FBFAF6";
+      x.fillRect(px + s, py + s, tw - 2 * s, th - 2 * s);
+    }
+    x.drawImage(operaImg, px + s + pad, py + s + pad, tw - 2 * (s + pad), th - 2 * (s + pad));
+    c.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${slug(statoStanza.opera.titolo) || "opera"}-nella-mia-stanza.jpg`;
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      },
+      "image/jpeg",
+      0.92
+    );
+  }
+
+  function preparaStanza() {
+    const foto = $("#stanza-foto");
+    $("#scheda-stanza").addEventListener("click", (e) => apriStanza(elenco[indice], e.currentTarget));
+    $("#stanza-chiudi").addEventListener("click", () => {
+      if (typeof finestraStanza.close === "function") finestraStanza.close();
+      else finestraStanza.removeAttribute("open");
+    });
+    finestraStanza.addEventListener("close", () => {
+      if (statoStanza.origine) statoStanza.origine.focus();
+    });
+
+    // scelta della foto: dal file, trascinandola o con la stanza di esempio
+    $("#stanza-file").addEventListener("change", (e) => {
+      caricaFotoStanza(e.target.files[0]);
+      e.target.value = "";
+    });
+    $("#stanza-esempio").addEventListener("click", () => impostaSfondoStanza(stanzaDiEsempio(), true));
+    $("#stanza-cambia").addEventListener("click", () => faseStanza(false));
+    const area = $("#stanza-area");
+    area.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      area.classList.add("is-sopra");
+    });
+    area.addEventListener("dragleave", () => area.classList.remove("is-sopra"));
+    area.addEventListener("drop", (e) => {
+      e.preventDefault();
+      area.classList.remove("is-sopra");
+      caricaFotoStanza(e.dataTransfer && e.dataTransfer.files[0]);
+    });
+
+    // spostare l'opera
+    const opera = $("#stanza-opera");
+    let inizio = null;
+    trascinabile(opera, (e, primo) => {
+      const r = foto.getBoundingClientRect();
+      if (primo) {
+        inizio = { x: e.clientX, y: e.clientY, cx: statoStanza.cx, cy: statoStanza.cy, w: r.width, h: r.height };
+        return;
+      }
+      statoStanza.cx = limita(inizio.cx + (e.clientX - inizio.x) / inizio.w, 0, 1);
+      statoStanza.cy = limita(inizio.cy + (e.clientY - inizio.y) / inizio.h, 0, 1);
+      aggiornaOperaStanza();
+    });
+    // ridimensionare dal cerchio nell'angolo
+    trascinabile($("#stanza-maniglia"), (e) => {
+      const r = foto.getBoundingClientRect();
+      const centroX = r.left + statoStanza.cx * r.width;
+      const meta = Math.max(8, e.clientX - centroX);
+      statoStanza.larghezza = limita((meta * 2 * 0.93) / r.width, 0.03, 1.5);
+      statoStanza.inScala = false;
+      aggiornaOperaStanza();
+    });
+    // tastiera: frecce per spostare, + e - per la dimensione
+    opera.addEventListener("keydown", (e) => {
+      const passo = e.shiftKey ? 0.05 : 0.01;
+      let usato = true;
+      if (e.key === "ArrowLeft") statoStanza.cx = limita(statoStanza.cx - passo, 0, 1);
+      else if (e.key === "ArrowRight") statoStanza.cx = limita(statoStanza.cx + passo, 0, 1);
+      else if (e.key === "ArrowUp") statoStanza.cy = limita(statoStanza.cy - passo, 0, 1);
+      else if (e.key === "ArrowDown") statoStanza.cy = limita(statoStanza.cy + passo, 0, 1);
+      else if (e.key === "+" || e.key === "=") {
+        statoStanza.larghezza = limita(statoStanza.larghezza + passo, 0.03, 1.5);
+        statoStanza.inScala = false;
+      } else if (e.key === "-") {
+        statoStanza.larghezza = limita(statoStanza.larghezza - passo, 0.03, 1.5);
+        statoStanza.inScala = false;
+      } else usato = false;
+      if (usato) {
+        e.preventDefault();
+        aggiornaOperaStanza();
+      }
+    });
+    $("#stanza-dimensione").addEventListener("input", (e) => {
+      statoStanza.larghezza = Number(e.target.value) / 100;
+      statoStanza.inScala = false;
+      aggiornaOperaStanza();
+    });
+    finestraStanza.querySelectorAll('input[name="cornice"]').forEach((r) =>
+      r.addEventListener("change", () => {
+        statoStanza.cornice = r.value;
+        aggiornaOperaStanza();
+      })
+    );
+
+    // righello per mettere in scala
+    $("#stanza-scala-btn").addEventListener("click", () => mostraRighello($("#righello").hidden));
+    const spostaPunto = (lettera) => (e) => {
+      const r = foto.getBoundingClientRect();
+      statoStanza.righello[`${lettera}x`] = limita((e.clientX - r.left) / r.width, 0, 1);
+      statoStanza.righello[`${lettera}y`] = limita((e.clientY - r.top) / r.height, 0, 1);
+      disegnaRighello();
+    };
+    trascinabile($("#righello-a"), spostaPunto("a"));
+    trascinabile($("#righello-b"), spostaPunto("b"));
+    $("#stanza-cm").addEventListener("input", disegnaRighello);
+    $("#stanza-scala-applica").addEventListener("click", () => {
+      const lunghezzaCm = parseFloat(String($("#stanza-cm").value).replace(",", "."));
+      if (!(lunghezzaCm > 0)) {
+        messaggioStanza("Scrivi la lunghezza reale in centimetri.");
+        return;
+      }
+      const W = foto.clientWidth;
+      const H = foto.clientHeight;
+      const g = statoStanza.righello;
+      const lunghezzaPx = Math.hypot((g.bx - g.ax) * W, (g.by - g.ay) * H);
+      if (lunghezzaPx < 10) {
+        messaggioStanza("Allontana i due pallini del righello.");
+        return;
+      }
+      statoStanza.larghezza = limita((statoStanza.misura.base * (lunghezzaPx / lunghezzaCm)) / W, 0.02, 1.5);
+      statoStanza.inScala = true;
+      statoStanza.notaScala = "";
+      messaggioStanza("");
+      mostraRighello(false);
+      aggiornaOperaStanza();
+    });
+
+    $("#stanza-salva").addEventListener("click", salvaImmagineStanza);
+    // dentro un'anteprima incorniciata (come quella di Claude) il browser non lascia scaricare file
+    if (window.self !== window.top) $("#stanza-salva").hidden = true;
+    window.addEventListener("resize", () => {
+      if (finestraStanza.open) aggiornaOperaStanza();
+    });
   }
 
   /* ------------------------------------------------------------------
@@ -2009,6 +2504,7 @@
 
     // Queste parti non dipendono dai contenuti
     preparaScheda();
+    preparaStanza();
     preparaMenu();
     preparaNavigazione();
     preparaSezioneCorrente();

@@ -108,7 +108,7 @@ Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un qu
 - `--giallo`, `--magenta`, `--turchese`: colori delle sottolineature a pennello del menu. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03e` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03f` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -132,11 +132,25 @@ Sono tutti in `js/script.js` (sezione "9. Effetti a tema pittura") e in fondo a 
 - **Cursore da galleria**: un cerchio segue il mouse; sulle opere e sui video diventa un disco con "Guarda", sui link un pallino verde acido.
 - **Opere sotto le luci**: con il mouse sopra, le opere si inclinano appena e un riflesso segue il puntatore.
 - **Lente**: nella scheda dell'opera, passando sopra l'immagine si vede la pennellata ingrandita due volte e mezzo.
-- **Nastro delle categorie**: fascia che scorre sotto l'apertura; cliccando una categoria si va alle opere filtrate. Compaiono solo le categorie che hanno almeno un'opera.
+- **Nastro delle categorie**: fascia che scorre sotto l'apertura con tutte le categorie del menu; cliccandone una si va alle opere filtrate.
 - **Comparse allo scorrimento**: le linee sopra i titoli si tracciano, le opere si dipingono entrando nello schermo, eventi, contatti e video salgono in sequenza.
 - **Dettagli**: grana di carta da acquerello sul fondo, pennellata sotto la testata che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
 
 Cursore, acquerello, inclinazione e lente ci sono solo con il mouse: su telefono e tablet non compaiono.
+
+## Provalo nella tua stanza
+
+Nella scheda di ogni quadro e stampa, accanto a "Chiedi informazioni", c'è il pulsante **Provalo nella tua stanza**. Il visitatore:
+
+1. carica la foto di una parete (dal telefono può scattarla al momento) oppure usa la **stanza di esempio**;
+2. trascina l'opera dove vuole e ne regola la dimensione con il cursore o con il cerchio nell'angolo (da tastiera: frecce per spostare, + e − per la dimensione);
+3. sceglie la cornice: nessuna, nera, bianca con passepartout, legno;
+4. con **Metti in scala** appoggia un righello su qualcosa di cui conosce la misura (un divano, una porta) e scrive quanto è lungo: l'opera prende le sue misure reali. Nella stanza di esempio la scala è già impostata, perché il divano è largo 220 cm;
+5. con **Salva l'immagine** scarica la foto con l'opera appesa, da tenere o mandare a qualcuno.
+
+La foto resta nel browser del visitatore: non viene caricata da nessuna parte.
+
+Perché la messa in scala funzioni, nel pannello il campo **Misure** dell'opera deve essere scritto come altezza × base, ad esempio `70 × 50 cm`. Senza misure il pulsante resta, ma la dimensione si regola solo a occhio. Le categorie che mostrano il pulsante sono in `js/script.js`, nella riga `CATEGORIE_DA_PARETE`.
 
 ## Dominio personale
 
