@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Marco De Chiara | Opere, mostre e contatti</title>
+  <meta name="description" content="Le opere di Marco De Chiara: quadri, stampe, sculture e accessori artistici. Mostre in programma e contatti.">
+
+  <!-- Caratteri: Bodoni Moda per titoli e nome, Hanken Grotesk per i testi -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..500&family=Hanken+Grotesk:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="salta" href="#opere">Vai alle opere</a>
+
+  <!-- ============ TESTATA E MENU ============ -->
+  <header class="testata">
+    <div class="wrap testata-inner">
+      <a class="marchio" href="#inizio">Marco De Chiara</a>
+
+      <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">
+        <span>Menu</span>
+      </button>
+
+      <nav class="menu" id="menu" aria-label="Menu principale">
+        <ul class="menu-lista">
+          <!-- --n è l'ordine in cui compare la sottolineatura a pennello nel menu del telefono -->
+          <li class="menu-voce menu-voce--opere" style="--n: 0">
+            <a class="menu-link" href="#opere">
+              Opere
+              <svg class="menu-freccia" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+            </a>
+            <!-- Le categorie vengono create da js/script.js leggendo js/categorie.js -->
+            <ul class="sottomenu" id="sottomenu-opere" aria-label="Categorie di opere"></ul>
+          </li>
+          <li class="menu-voce" style="--n: 1"><a class="menu-link" href="#eventi">Eventi</a></li>
+          <li class="menu-voce" style="--n: 2"><a class="menu-link" href="#contatti">Contatti</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inizio">
+
+    <!-- ============ APERTURA ============ -->
+    <section class="apertura" aria-labelledby="nome-artista">
+      <div class="wrap apertura-inner">
+        <div class="apertura-testo">
+          <h1 class="nome" id="nome-artista"><span>Marco</span> <span>De Chiara</span></h1>
+          <p class="presentazione">Pittura, incisione e scultura. Lavoro sul colore come su un paesaggio: orizzonti bassi, superfici lente, materia che trattiene la luce.</p>
+          <p class="adesso" id="adesso" hidden></p>
+        </div>
+        <!-- L'opera con "Opera grande in apertura" attivo (contenuti/opere.json) -->
+        <figure class="evidenza" id="evidenza"></figure>
+      </div>
+    </section>
+
+    <!-- ============ OPERE ============ -->
+    <section class="sezione" id="opere" aria-labelledby="titolo-opere">
+      <div class="wrap">
+        <div class="intestazione">
+          <h2 class="titolo-sezione" id="titolo-opere">Opere</h2>
+          <ul class="filtri" id="filtri" aria-label="Filtra le opere per categoria"></ul>
+        </div>
+        <p class="visually-hidden" id="stato-filtro" aria-live="polite"></p>
+        <div class="opere" id="opere-griglia"></div>
+        <noscript><p>Per vedere le opere attiva JavaScript nel browser.</p></noscript>
+      </div>
+    </section>
+
+    <!-- ============ EVENTI ============ -->
+    <section class="sezione" id="eventi" aria-labelledby="titolo-eventi">
+      <div class="wrap">
+        <div class="intestazione">
+          <h2 class="titolo-sezione" id="titolo-eventi">Eventi</h2>
+          <p class="nota-sezione">Mostre, studi aperti e laboratori in programma.</p>
+        </div>
+        <ol class="eventi" id="eventi-lista"></ol>
+        <details class="archivio" id="archivio" hidden>
+          <summary>Eventi passati</summary>
+          <ol class="eventi eventi--passati" id="eventi-passati"></ol>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ CONTATTI ============ -->
+    <section class="sezione" id="contatti" aria-labelledby="titolo-contatti">
+      <div class="wrap">
+        <div class="intestazione">
+          <h2 class="titolo-sezione" id="titolo-contatti">Contatti</h2>
+          <p class="nota-sezione">Per acquisti, commissioni e collaborazioni scrivimi via email o in privato sui social. Rispondo entro due giorni lavorativi.</p>
+        </div>
+        <ul class="contatti" id="contatti-lista"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="piede">
+    <div class="wrap piede-inner">
+      <div class="piede-testo">
+        <p>© <span id="anno">2026</span> Marco De Chiara</p>
+        <p>Le immagini delle opere sono protette da diritto d'autore.</p>
+      </div>
+      <!-- I link ai social vengono creati da js/script.js leggendo contenuti/sito.json -->
+      <ul class="piede-social" id="piede-social" aria-label="Social"></ul>
+    </div>
+  </footer>
+
+  <!-- ============ SCHEDA OPERA (finestra a tutto schermo) ============ -->
+  <dialog class="scheda" id="scheda" aria-labelledby="scheda-titolo">
+    <div class="scheda-inner">
+      <div class="scheda-media" id="scheda-media"></div>
+      <div class="scheda-info">
+        <h3 class="scheda-titolo" id="scheda-titolo"></h3>
+        <p class="scheda-meta" id="scheda-meta"></p>
+        <p class="scheda-descrizione" id="scheda-descrizione"></p>
+        <div class="scheda-stato" id="scheda-stato"></div>
+        <div class="scheda-azioni">
+          <a class="bottone" id="scheda-richiesta" href="#contatti">Chiedi informazioni</a>
+          <p class="scheda-email">oppure scrivi a <span id="scheda-email"></span></p>
+        </div>
+        <div class="scheda-nav" id="scheda-nav">
+          <button type="button" class="bottone bottone--leggero" id="scheda-prec">Precedente</button>
+          <span class="scheda-pos" id="scheda-pos"></span>
+          <button type="button" class="bottone bottone--leggero" id="scheda-succ">Successiva</button>
+        </div>
+      </div>
+      <button type="button" class="scheda-chiudi" id="scheda-chiudi">Chiudi</button>
+    </div>
+  </dialog>
+
+  <!-- Icone di Instagram e TikTok: Font Awesome (gratuito), caricato da internet -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/brands.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
+
+  <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
+  <script src="js/categorie.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

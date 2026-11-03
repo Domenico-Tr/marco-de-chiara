@@ -1,0 +1,68 @@
+[
+  {
+    "titolo": "Superfici",
+    "tipo": "Mostra personale",
+    "luogo": "Galleria Lume",
+    "citta": "Napoli",
+    "inizio": "2026-10-24",
+    "fine": "2026-11-22",
+    "note": "Dal martedì al sabato, ore 11–19",
+    "indirizzo": "",
+    "link": ""
+  },
+  {
+    "titolo": "Studio aperto d'inverno",
+    "tipo": "Studio aperto",
+    "luogo": "Studio dell'artista",
+    "citta": "Napoli",
+    "inizio": "2026-12-12",
+    "fine": "2026-12-13",
+    "note": "Visite libere dalle 10 alle 20. Stampe e accessori disponibili in studio.",
+    "indirizzo": "",
+    "link": ""
+  },
+  {
+    "titolo": "Materia prima",
+    "tipo": "Mostra collettiva",
+    "luogo": "Spazio Ottagono",
+    "citta": "Roma",
+    "inizio": "2027-01-15",
+    "fine": "2027-02-28",
+    "note": "Inaugurazione venerdì 15 gennaio, ore 18:30",
+    "indirizzo": "",
+    "link": ""
+  },
+  {
+    "titolo": "Incidere la luce",
+    "tipo": "Laboratorio di linoleografia",
+    "luogo": "Officina delle Arti",
+    "citta": "Milano",
+    "inizio": "2027-03-06",
+    "fine": "2027-03-07",
+    "note": "Massimo 12 partecipanti, iscrizioni via email",
+    "indirizzo": "",
+    "link": ""
+  },
+  {
+    "titolo": "Segni minimi",
+    "tipo": "Mostra personale",
+    "luogo": "Galleria Lume",
+    "citta": "Napoli",
+    "inizio": "2026-04-10",
+    "fine": "2026-05-30",
+    "note": "",
+    "indirizzo": "",
+    "link": ""
+  },
+  {
+    "titolo": "Carta e pietra",
+    "tipo": "Mostra a due voci",
+    "luogo": "Spazio Arca",
+    "citta": "Torino",
+    "inizio": "2025-11-07",
+    "fine": "2025-12-20",
+    "note": "",
+    "indirizzo": "",
+    "link": ""
+  }
+]

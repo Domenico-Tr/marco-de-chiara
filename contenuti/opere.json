@@ -1,0 +1,384 @@
+[
+  {
+    "titolo": "Orizzonte n. 3",
+    "immagine": "",
+    "categoria": "Quadri",
+    "anno": 2026,
+    "tecnica": "Olio su lino",
+    "misure": "90 × 120 cm",
+    "edizione": "",
+    "descrizione": "Una striscia di terra scura e un cielo che occupa quasi tutta la tela. Terza opera della serie dedicata alla costa tirrenica d'inverno.",
+    "stato": "Disponibile",
+    "prezzo": "",
+    "inEvidenza": true,
+    "id": "orizzonte-3",
+    "segnaposto": {
+      "stile": "orizzonte",
+      "proporzione": [
+        4,
+        3
+      ],
+      "colori": [
+        "#B9C1C6",
+        "#E6DCC9",
+        "#3B463A",
+        "#1E251D",
+        "#A63A2B"
+      ]
+    }
+  },
+  {
+    "titolo": "Marea bassa",
+    "immagine": "",
+    "categoria": "Quadri",
+    "anno": 2025,
+    "tecnica": "Olio su tela",
+    "misure": "100 × 80 cm",
+    "edizione": "",
+    "descrizione": "Tre campi di colore sovrapposti, stesi a velature sottili. Il titolo viene dalle ore in cui la sabbia bagnata riflette il cielo.",
+    "stato": "Disponibile",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "marea-bassa",
+    "segnaposto": {
+      "stile": "campi",
+      "proporzione": [
+        4,
+        5
+      ],
+      "colori": [
+        "#2F3E4C",
+        "#6F8899",
+        "#B9C5C7",
+        "#C7B287"
+      ]
+    }
+  },
+  {
+    "titolo": "Stanza a mezzogiorno",
+    "immagine": "",
+    "categoria": "Quadri",
+    "anno": 2024,
+    "tecnica": "Acrilico su tela",
+    "misure": "60 × 60 cm",
+    "edizione": "",
+    "descrizione": "Luce piena su una parete: un cerchio d'ocra, un rettangolo rosso scuro e una linea che li tiene insieme.",
+    "stato": "Venduta",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "stanza-mezzogiorno",
+    "segnaposto": {
+      "stile": "geometrie",
+      "proporzione": [
+        1,
+        1
+      ],
+      "colori": [
+        "#E3DBCA",
+        "#D3A23B",
+        "#7A3A2D",
+        "#25303D"
+      ]
+    }
+  },
+  {
+    "titolo": "Febbraio",
+    "immagine": "",
+    "categoria": "Quadri",
+    "anno": 2023,
+    "tecnica": "Tecnica mista su tavola",
+    "misure": "70 × 50 cm",
+    "edizione": "",
+    "descrizione": "Gesso, pigmenti e cera su tavola di pioppo. I colori vengono da un giardino d'inverno.",
+    "stato": "Riservata",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "febbraio",
+    "segnaposto": {
+      "stile": "campi",
+      "proporzione": [
+        5,
+        7
+      ],
+      "colori": [
+        "#D6D3CA",
+        "#97A096",
+        "#4A545E"
+      ]
+    }
+  },
+  {
+    "titolo": "Trama I",
+    "immagine": "",
+    "categoria": "Stampe",
+    "anno": 2025,
+    "tecnica": "Linoleografia su carta Hahnemühle",
+    "misure": "40 × 30 cm",
+    "edizione": "Edizione di 12 esemplari",
+    "descrizione": "Matrice incisa a mano e stampata al torchio. Ogni esemplare è numerato e firmato a matita.",
+    "stato": "Disponibile",
+    "prezzo": "280 €",
+    "inEvidenza": false,
+    "id": "trama-1",
+    "segnaposto": {
+      "stile": "trama",
+      "proporzione": [
+        3,
+        4
+      ],
+      "tiratura": "4/12",
+      "colori": [
+        "#F3F0E9",
+        "#1F2A44",
+        "#C9AB4C"
+      ]
+    }
+  },
+  {
+    "titolo": "Trama II",
+    "immagine": "",
+    "categoria": "Stampe",
+    "anno": 2025,
+    "tecnica": "Linoleografia su carta Hahnemühle",
+    "misure": "40 × 30 cm",
+    "edizione": "Edizione di 12 esemplari",
+    "descrizione": "Seconda matrice della serie, con un'ombra di colore stampata prima delle linee. Numerata e firmata.",
+    "stato": "Disponibile",
+    "prezzo": "280 €",
+    "inEvidenza": false,
+    "id": "trama-2",
+    "segnaposto": {
+      "stile": "trama",
+      "proporzione": [
+        3,
+        4
+      ],
+      "tiratura": "7/12",
+      "colori": [
+        "#F2EFEA",
+        "#5A2332",
+        "#9DB2B9"
+      ]
+    }
+  },
+  {
+    "titolo": "Campo aperto",
+    "immagine": "",
+    "categoria": "Stampe",
+    "anno": 2026,
+    "tecnica": "Serigrafia a tre colori",
+    "misure": "70 × 50 cm",
+    "edizione": "Edizione di 25 esemplari",
+    "descrizione": "Tre passaggi di colore stampati a mano in studio. Numerata, firmata e accompagnata da certificato di autenticità.",
+    "stato": "Disponibile",
+    "prezzo": "350 €",
+    "inEvidenza": false,
+    "id": "campo-aperto",
+    "segnaposto": {
+      "stile": "geometrie",
+      "proporzione": [
+        5,
+        7
+      ],
+      "colori": [
+        "#ECE6D8",
+        "#2E5C89",
+        "#E1B23A",
+        "#1C1C1C"
+      ]
+    }
+  },
+  {
+    "titolo": "Soglia",
+    "immagine": "",
+    "categoria": "Sculture",
+    "anno": 2024,
+    "tecnica": "Terracotta patinata",
+    "misure": "h 42 cm",
+    "edizione": "",
+    "descrizione": "Un arco pieno, modellato a lastra e cotto a 980 °C. La patina è stesa a freddo, uno strato dopo l'altro.",
+    "stato": "Disponibile",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "soglia",
+    "segnaposto": {
+      "stile": "scultura",
+      "forma": "arco",
+      "proporzione": [
+        4,
+        5
+      ],
+      "colori": [
+        "#DAD8D3",
+        "#C3C0B9",
+        "#EEECE7",
+        "#9A5A3D"
+      ]
+    }
+  },
+  {
+    "titolo": "Equilibrio minimo",
+    "immagine": "",
+    "categoria": "Sculture",
+    "anno": 2025,
+    "tecnica": "Bronzo a cera persa",
+    "misure": "h 28 cm",
+    "edizione": "",
+    "descrizione": "Quattro forme in bilico, fuse in fonderia artistica. Esemplare unico.",
+    "stato": "Venduta",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "equilibrio-minimo",
+    "segnaposto": {
+      "stile": "scultura",
+      "forma": "pietre",
+      "proporzione": [
+        4,
+        5
+      ],
+      "colori": [
+        "#D0D0CB",
+        "#B8B7B0",
+        "#E8E7E2",
+        "#6E5B3C"
+      ]
+    }
+  },
+  {
+    "titolo": "Vuoto pieno",
+    "immagine": "",
+    "categoria": "Sculture",
+    "anno": 2026,
+    "tecnica": "Gesso e legno di noce",
+    "misure": "h 65 cm",
+    "edizione": "",
+    "descrizione": "Un anello di gesso su una base in noce massello. Esposto nella mostra Superfici.",
+    "stato": "Disponibile",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "vuoto-pieno",
+    "segnaposto": {
+      "stile": "scultura",
+      "forma": "anello",
+      "proporzione": [
+        4,
+        5
+      ],
+      "colori": [
+        "#2B2C2F",
+        "#1D1E20",
+        "#3A3B3F",
+        "#E4E0D5",
+        "#6B4A2F"
+      ]
+    }
+  },
+  {
+    "titolo": "Foulard Marea",
+    "immagine": "",
+    "categoria": "Accessori artistici",
+    "anno": 2026,
+    "tecnica": "Seta stampata, orlo cucito a mano",
+    "misure": "90 × 90 cm",
+    "edizione": "Serie di 50 pezzi",
+    "descrizione": "Il dipinto Marea bassa riportato su seta. Ogni foulard arriva in una scatola con la riproduzione dell'opera.",
+    "stato": "Disponibile",
+    "prezzo": "160 €",
+    "inEvidenza": false,
+    "id": "foulard-marea",
+    "segnaposto": {
+      "stile": "foulard",
+      "proporzione": [
+        1,
+        1
+      ],
+      "colori": [
+        "#E2E0DA",
+        "#2F3E4C",
+        "#C7B287",
+        "#8EA5B2"
+      ]
+    }
+  },
+  {
+    "titolo": "Taccuino dipinto",
+    "immagine": "",
+    "categoria": "Accessori artistici",
+    "anno": 2026,
+    "tecnica": "Copertina in lino dipinta a mano, 160 pagine",
+    "misure": "21 × 15 cm",
+    "edizione": "",
+    "descrizione": "Taccuino a pagine bianche, carta da 120 g. Ogni copertina è dipinta singolarmente, quindi nessuna è uguale all'altra.",
+    "stato": "Disponibile",
+    "prezzo": "45 €",
+    "inEvidenza": false,
+    "id": "taccuino-dipinto",
+    "segnaposto": {
+      "stile": "taccuino",
+      "proporzione": [
+        1,
+        1
+      ],
+      "colori": [
+        "#D6D2C8",
+        "#2E3B33",
+        "#C9A24A",
+        "#E7E1D3"
+      ]
+    }
+  },
+  {
+    "titolo": "Notturno",
+    "immagine": "",
+    "categoria": "Altro",
+    "anno": 2025,
+    "tecnica": "Ceramica smaltata a gran fuoco",
+    "misure": "ø 32 cm",
+    "edizione": "",
+    "descrizione": "Piatto con smalti stesi a pennello. Pezzo unico, adatto anche all'uso.",
+    "stato": "Disponibile",
+    "prezzo": "220 €",
+    "inEvidenza": false,
+    "id": "notturno",
+    "segnaposto": {
+      "stile": "ceramica",
+      "proporzione": [
+        1,
+        1
+      ],
+      "colori": [
+        "#CAC7C0",
+        "#1C2333",
+        "#E7E2D5",
+        "#3F5C8F"
+      ]
+    }
+  },
+  {
+    "titolo": "Studio per Orizzonte",
+    "immagine": "",
+    "categoria": "Altro",
+    "anno": 2025,
+    "tecnica": "Matita e acquerello su carta",
+    "misure": "24 × 32 cm",
+    "edizione": "",
+    "descrizione": "Disegno preparatorio per Orizzonte n. 3, con le prime prove di colore e gli appunti a margine.",
+    "stato": "Disponibile",
+    "prezzo": "",
+    "inEvidenza": false,
+    "id": "studio-orizzonte",
+    "segnaposto": {
+      "stile": "disegno",
+      "proporzione": [
+        4,
+        3
+      ],
+      "colori": [
+        "#F1EEE7",
+        "#A63A2B",
+        "#3B463A",
+        "#4F4F4F"
+      ]
+    }
+  }
+]
