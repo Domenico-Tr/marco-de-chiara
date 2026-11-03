@@ -1,25 +1,27 @@
 /* =====================================================================
    Sito di Marco De Chiara — stile
-   Palette e caratteri presi dal suo quadro: il verde quasi nero dei bordi,
-   l'alone verde acido al centro, i gialli, i magenta e i turchesi dei
-   riccioli. Un solo tema scuro, su cui le opere risaltano.
+   Fondo quasi bianco, come una parete di galleria. I colori vengono dal
+   suo quadro: il verde scurissimo dei bordi per i testi, il verde bosco
+   per pulsanti e dettagli, il verde acido dell'alone come luce e come
+   "evidenziatore" a pennello, i gialli, i magenta e i turchesi dei riccioli.
    Tutti i colori e i caratteri sono variabili: si cambiano qui in :root.
    ===================================================================== */
 
-/* Layout: nome a caratteri pieni e stretti su un alone verde acido, opere in colonne libere, didascalie da museo */
+/* Layout: nome in corsivo calligrafico, opera in apertura su un alone verde acido, opere in colonne libere, didascalie da museo */
 :root {
   /* Colori */
-  --parete: #0F1E15;        /* sfondo: il verde quasi nero dei bordi del quadro */
-  --passepartout: #172A1E;  /* superfici rialzate: sottomenu, cornice, video */
-  --inchiostro: #F3EFDD;    /* testo principale: bianco caldo */
-  --grafite: #A7B5A0;       /* testo secondario: verde salvia */
-  --linea: #2C4535;         /* filetti e bordi */
-  --accento: #C8EF3C;       /* verde acido dell'alone: filtro attivo, "In corso", pulsanti */
-  --alone: rgba(200, 239, 60, 0.15); /* la luce verde dietro l'opera in apertura */
-  --pellicola: #050A07;     /* fondo dei video */
-  --bollino: #FF6B3D;       /* arancio cadmio: il "bollino" delle opere vendute */
-  --ombra: rgba(0, 0, 0, 0.35);
-  --ombra-forte: rgba(0, 0, 0, 0.6);
+  --parete: #FAFAF7;        /* sfondo: bianco appena caldo, come una parete di galleria */
+  --passepartout: #FFFFFF;  /* superfici rialzate: sottomenu, cornice */
+  --inchiostro: #12261A;    /* testo principale: il verde quasi nero dei bordi del quadro */
+  --grafite: #5B6A5F;       /* testo secondario: verde grigio */
+  --linea: #DDE2D9;         /* filetti e bordi */
+  --accento: #1F5A2E;       /* verde bosco: pulsanti, "In corso", dettagli */
+  --acido: #C3EA36;         /* verde acido dell'alone: evidenziatore a pennello */
+  --alone: rgba(195, 234, 54, 0.28); /* la luce verde dietro l'opera in apertura */
+  --pellicola: #0E1A12;     /* fondo dei video */
+  --bollino: #D9482A;       /* arancio cadmio: il "bollino" delle opere vendute */
+  --ombra: rgba(18, 38, 26, 0.08);
+  --ombra-forte: rgba(18, 38, 26, 0.26);
 
   /* Pigmenti dei riccioli: colorano le sottolineature a pennello del menu */
   --giallo: #F4C534;
@@ -36,12 +38,11 @@
   --pennellata-2: #1D5230;  /* verde bosco */
   --pennellata-3: #4C9A2B;  /* verde prato */
   --pennellata-4: #B9E43A;  /* verde acido */
-  --velatura: rgba(200, 239, 60, 0.14);  /* pennellata leggera dietro le voci del sottomenu */
+  --velatura: rgba(195, 234, 54, 0.32);  /* pennellata leggera dietro le voci del sottomenu */
 
   /* Caratteri */
-  --font-display: "Cormorant", "Cormorant Garamond", Garamond, Georgia, serif;  /* nome, titoli delle sezioni e delle opere: alto contrasto, corsivo calligrafico */
-  --font-titoli: "Bricolage Grotesque", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  --font-testo: "Bricolage Grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Cormorant", "Cormorant Garamond", Garamond, Georgia, serif;  /* nome, titoli delle sezioni e delle opere */
+  --font-testo: "Jost", Futura, "Century Gothic", "Helvetica Neue", Arial, sans-serif;  /* testi, menu, didascalie */
 
   /* Scala tipografica */
   --t-xs: 0.8125rem;
@@ -57,10 +58,10 @@
   --larghezza: 1320px;
   --sezione: clamp(4.5rem, 10vw, 8.5rem);
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-::selection { background: var(--accento); color: var(--parete); }
+::selection { background: var(--acido); color: var(--inchiostro); }
 
 /* Forme dei pennelli, generate come immagini SVG: servono da maschera
    per far comparire le cose "dipinte" e per le sottolineature a pennello. */
@@ -427,7 +428,7 @@ body::before {
   content: "";
   position: absolute; left: -0.25em; right: -0.25em; bottom: 0;
   height: 0.5rem;
-  background: var(--accento);
+  background: var(--acido);
   -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -582,8 +583,8 @@ body::before {
   position: absolute; inset: 0;
   display: grid; place-items: center;
   /* senza copertina: l'alone verde del quadro */
-  background: radial-gradient(circle at 50% 42%, var(--accento) 0%, var(--pennellata-3) 28%, var(--pennellata-2) 52%, var(--parete) 80%);
-  color: var(--parete);
+  background: radial-gradient(circle at 50% 42%, var(--acido) 0%, var(--pennellata-3) 28%, var(--pennellata-2) 52%, var(--pennellata-1) 85%);
+  color: var(--inchiostro);
 }
 .video-fondo .icona { font-size: 3.25rem; }
 .video-gioca {
@@ -591,10 +592,10 @@ body::before {
   display: inline-flex; align-items: center; gap: 0.5rem;
   padding: 0.55rem 1rem 0.55rem 0.7rem;
   border-radius: 999px;
-  background: var(--accento);
-  color: var(--parete);
+  background: var(--acido);
+  color: var(--inchiostro);
   font-size: var(--t-s);
-  font-weight: 600;
+  font-weight: 500;
   transition: transform 0.2s ease;
 }
 .video-gioca svg { width: 1rem; height: 1rem; }

@@ -102,13 +102,13 @@ Le icone di Instagram e TikTok arrivano da Font Awesome (gratuito), caricato da 
 
 In cima a `css/style.css`, dentro `:root`:
 
-La palette viene da un quadro di Marco: il verde quasi nero dei bordi, l'alone verde acido al centro, i gialli, i magenta e i turchesi dei riccioli. Il sito ha un solo tema, scuro.
+Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un quadro di Marco: il verde scurissimo dei bordi per i testi, il verde bosco per pulsanti e dettagli, il verde acido dell'alone come luce dietro l'opera in apertura e come "evidenziatore" a pennello, i gialli, i magenta e i turchesi dei riccioli per le sottolineature del menu.
 
-- `--parete` è lo sfondo, `--accento` il verde acido (filtro attivo, pulsanti, "In corso"), `--alone` la luce verde dietro l'opera in apertura.
+- `--parete` è lo sfondo, `--inchiostro` il colore del testo, `--accento` il verde bosco (pulsanti, "In corso", pallino "Disponibile"), `--acido` il verde acido (filtro attivo, pulsante "Guarda" dei video), `--alone` la luce dietro l'opera in apertura.
 - `--giallo`, `--magenta`, `--turchese`: colori delle sottolineature a pennello del menu. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
-- Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico), i titoli delle sezioni, delle opere, degli eventi e dei video (`--font-display`); Bricolage Grotesque per i testi (`--font-testo`).
+- Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03c` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03d` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
