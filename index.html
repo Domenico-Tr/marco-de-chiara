@@ -6,10 +6,10 @@
   <title>Marco De Chiara | Opere, mostre e contatti</title>
   <meta name="description" content="Le opere di Marco De Chiara: quadri, stampe, sculture e accessori artistici. Mostre in programma e contatti.">
 
-  <!-- Caratteri: Bodoni Moda per titoli e nome, Hanken Grotesk per i testi -->
+  <!-- Caratteri: Bricolage Grotesque per nome, titoli e testi; Fraunces corsivo per i titoli delle opere -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..600;1,6..96,400..500&family=Hanken+Grotesk:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,400..600,0..100,0..1&display=swap">
 
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -27,8 +27,9 @@
 
       <nav class="menu" id="menu" aria-label="Menu principale">
         <ul class="menu-lista">
-          <!-- --n è l'ordine in cui compare la sottolineatura a pennello nel menu del telefono -->
-          <li class="menu-voce menu-voce--opere" style="--n: 0">
+          <!-- --pigmento è il colore della sottolineatura a pennello (dai riccioli del quadro);
+               --n l'ordine in cui compare nel menu del telefono -->
+          <li class="menu-voce menu-voce--opere" style="--pigmento: var(--accento); --n: 0">
             <a class="menu-link" href="#opere">
               Opere
               <svg class="menu-freccia" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
@@ -36,8 +37,9 @@
             <!-- Le categorie vengono create da js/script.js leggendo js/categorie.js -->
             <ul class="sottomenu" id="sottomenu-opere" aria-label="Categorie di opere"></ul>
           </li>
-          <li class="menu-voce" style="--n: 1"><a class="menu-link" href="#eventi">Eventi</a></li>
-          <li class="menu-voce" style="--n: 2"><a class="menu-link" href="#contatti">Contatti</a></li>
+          <li class="menu-voce" style="--pigmento: var(--giallo); --n: 1"><a class="menu-link" href="#processo">Processo creativo</a></li>
+          <li class="menu-voce" style="--pigmento: var(--magenta); --n: 2"><a class="menu-link" href="#eventi">Eventi</a></li>
+          <li class="menu-voce" style="--pigmento: var(--turchese); --n: 3"><a class="menu-link" href="#contatti">Contatti</a></li>
         </ul>
       </nav>
     </div>
@@ -68,6 +70,28 @@
         <p class="visually-hidden" id="stato-filtro" aria-live="polite"></p>
         <div class="opere" id="opere-griglia"></div>
         <noscript><p>Per vedere le opere attiva JavaScript nel browser.</p></noscript>
+      </div>
+    </section>
+
+    <!-- ============ PROCESSO CREATIVO ============ -->
+    <!-- I video arrivano da contenuti/processo.json, gestito dal pannello -->
+    <section class="sezione" id="processo" aria-labelledby="titolo-processo">
+      <div class="wrap">
+        <div class="intestazione">
+          <h2 class="titolo-sezione" id="titolo-processo">Processo creativo</h2>
+          <div class="processo-lato">
+            <p class="nota-sezione">Video dallo studio: dalla tela bianca all'opera finita.</p>
+            <div class="processo-comandi" id="processo-comandi" hidden>
+              <button type="button" class="freccia" id="processo-prec" aria-label="Video precedenti">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+              </button>
+              <button type="button" class="freccia" id="processo-succ" aria-label="Video successivi">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="processo-striscia" id="processo-striscia" tabindex="0" aria-label="Video del processo creativo"></div>
       </div>
     </section>
 

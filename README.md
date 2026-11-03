@@ -11,8 +11,10 @@ vetrina-artista/
 ├── .nojekyll           serve a GitHub Pages: lascialo dov'è
 ├── contenuti/
 │   ├── opere.json      le opere
+│   ├── processo.json   i video del processo creativo
 │   ├── eventi.json     gli eventi
 │   └── sito.json       frase di presentazione e contatti
+├── video/              video caricati dal pannello
 ├── css/style.css       stile, colori, animazioni
 ├── js/categorie.js     categorie del menu
 ├── js/script.js        funzionamento del sito
@@ -69,6 +71,19 @@ Le 14 opere e i 6 eventi presenti all'inizio sono **esempi**: la prima cosa da f
 
 Consigli per le foto: JPG o WebP, circa 1600–2000 px sul lato lungo, sotto i 500 KB ciascuna, con luce diffusa e sfondo neutro. Verticali, orizzontali e quadrate convivono senza problemi. Se una foto non viene trovata, al suo posto il sito mostra un riquadro tratteggiato con il percorso cercato.
 
+## Processo creativo (video)
+
+Nel pannello, la voce **Processo creativo** è un elenco di video. Per ognuno:
+
+- **Titolo** e **Data**: i video più recenti compaiono per primi.
+- **Video caricato** oppure **Oppure link al video**, uno dei due:
+  - un file MP4 girato col telefono si guarda direttamente nel sito. Meglio sotto i 50 MB: GitHub rifiuta i file oltre i 100 MB e i video pesanti rallentano il sito. I file `.mov` dell'iPhone a volte non partono su Chrome: in quel caso convertili in MP4 (ad esempio con HandBrake, gratuito) oppure usa un link.
+  - un link di **YouTube** si guarda nel sito con il lettore di YouTube; un link di **Instagram** o **TikTok** apre il video sul social. Per i video lunghi conviene sempre YouTube.
+- **Copertina**: facoltativa, l'immagine mostrata prima di premere play. Per Instagram e TikTok è consigliata, altrimenti compare un fondo verde con l'icona del social.
+- **Opera collegata**: se scrivi il titolo esatto di un'opera, sotto il video compare "Guarda l'opera finita".
+
+Se l'elenco è vuoto, la sezione scrive "Presto qui i video dallo studio."
+
 ## Modificare i contenuti senza pannello
 
 Si possono anche modificare a mano i file in `contenuti/` con VS Code. Sono in formato JSON: testi tra virgolette doppie, una virgola tra un campo e l'altro, nessuna virgola dopo l'ultimo. Se il file ha un errore, il sito lo segnala al posto delle opere.
@@ -87,9 +102,11 @@ Le icone di Instagram e TikTok arrivano da Font Awesome (gratuito), caricato da 
 
 In cima a `css/style.css`, dentro `:root`:
 
-- `--parete` è lo sfondo, `--oltremare` l'unico colore d'accento (filtro attivo, pulsanti, "In corso").
-- Il blocco "Tema scuro" sotto contiene gli stessi colori per chi usa il telefono o il computer in modalità scura.
-- I caratteri arrivano da Google Fonts: il link è in `index.html`, i nomi in `--font-titoli` e `--font-testo`.
+La palette viene da un quadro di Marco: il verde quasi nero dei bordi, l'alone verde acido al centro, i gialli, i magenta e i turchesi dei riccioli. Il sito ha un solo tema, scuro.
+
+- `--parete` è lo sfondo, `--accento` il verde acido (filtro attivo, pulsanti, "In corso"), `--alone` la luce verde dietro l'opera in apertura.
+- `--giallo`, `--magenta`, `--turchese`: colori delle sottolineature a pennello del menu. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
+- Caratteri, da Google Fonts (link in `index.html`): Bricolage Grotesque per nome, titoli e testi (`--font-titoli`, `--font-testo`), Fraunces corsivo per i titoli delle opere (`--font-corsivo`).
 
 ## Transizioni a pennello
 
@@ -99,7 +116,7 @@ In cima a `css/style.css`, dentro `:root`:
 
 Cosa si può cambiare:
 
-- **Colori delle pennellate**: `--pennellata-1` … `--pennellata-4` in cima a `css/style.css`. Ora sono toni d'inchiostro; nel commento lì sopra ci sono tre tavolozze pronte da incollare (Oltremare, Terre, Sanguigna).
+- **Colori delle pennellate**: `--pennellata-1` … `--pennellata-4` in cima a `css/style.css`. Ora sono i verdi del fondo del quadro, dal buio alla luce; nel commento lì sopra ci sono altre tavolozze pronte da incollare (Pelle, Riccioli, Inchiostro).
 - **Velocità del passaggio**: in `js/script.js` cerca `await anima(` (due righe): i numeri `0.42` e `0.36` sono i secondi di ogni pennellata.
 - **Velocità delle comparse**: la variabile `--durata` (in `.rivela` e `.cornice .rivela` nel CSS).
 - Chi ha attivato "riduci movimento" nelle impostazioni del telefono o del computer non vede animazioni: il sito salta direttamente alla sezione.

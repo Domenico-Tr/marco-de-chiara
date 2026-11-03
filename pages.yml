@@ -1,0 +1,197 @@
+# =====================================================================
+# Configurazione del pannello di gestione (Pages CMS, app.pagescms.org)
+# Dice al pannello quali contenuti si possono modificare e con quali
+# campi. Il sito legge gli stessi file dalla cartella "contenuti".
+# =====================================================================
+
+# Le foto caricate dal pannello finiscono nella cartella img/,
+# i video nella cartella video/
+media:
+  - name: immagini
+    label: Immagini
+    input: img
+    output: /img
+    extensions: [jpg, jpeg, png, webp]
+    rename: safe
+  - name: video
+    label: Video
+    input: video
+    output: /video
+    extensions: [mp4, webm, mov]
+    rename: safe
+
+content:
+  # ---------------- Opere ----------------
+  - name: opere
+    label: Opere
+    type: file
+    path: contenuti/opere.json
+    format: json
+    list: true
+    fields:
+      - name: titolo
+        label: Titolo
+        type: string
+        required: true
+      - name: immagine
+        label: Foto
+        type: image
+        description: JPG, PNG o WebP, circa 1600–2000 px sul lato lungo.
+        options:
+          media: immagini
+      - name: categoria
+        label: Categoria
+        type: select
+        required: true
+        default: Quadri
+        options:
+          values: [Quadri, Stampe, Sculture, Accessori artistici, Altro]
+      - name: anno
+        label: Anno
+        type: number
+      - name: tecnica
+        label: Tecnica
+        type: string
+        description: Es. Olio su tela
+      - name: misure
+        label: Misure
+        type: string
+        description: Es. 100 × 80 cm (altezza × base)
+      - name: edizione
+        label: Edizione
+        type: string
+        description: Solo per stampe e serie, es. Edizione di 12 esemplari
+      - name: descrizione
+        label: Descrizione
+        type: text
+      - name: stato
+        label: Stato
+        type: select
+        default: Disponibile
+        options:
+          values: [Disponibile, Venduta, Riservata]
+      - name: prezzo
+        label: Prezzo
+        type: string
+        description: Es. 1.200 €. Lascia vuoto per mostrare "Prezzo su richiesta".
+      - name: inEvidenza
+        label: Opera grande in apertura
+        type: boolean
+        description: Attivalo su una sola opera. Se nessuna lo ha, si usa la prima dell'elenco.
+
+  # ---------------- Processo creativo ----------------
+  - name: processo
+    label: Processo creativo
+    type: file
+    path: contenuti/processo.json
+    format: json
+    list: true
+    fields:
+      - name: titolo
+        label: Titolo
+        type: string
+        required: true
+      - name: data
+        label: Data
+        type: date
+        description: I video più recenti compaiono per primi.
+        options:
+          format: yyyy-MM-dd
+      - name: video
+        label: Video caricato
+        type: file
+        description: MP4 girato col telefono, meglio sotto i 50 MB. Per video lunghi usa il campo qui sotto.
+        options:
+          media: video
+          categories: [video]
+      - name: link
+        label: Oppure link al video
+        type: string
+        description: Link di YouTube, Instagram o TikTok, da usare al posto del file.
+      - name: copertina
+        label: Copertina
+        type: image
+        description: Facoltativa. L'immagine mostrata prima di premere play.
+        options:
+          media: immagini
+      - name: descrizione
+        label: Descrizione
+        type: text
+      - name: opera
+        label: Opera collegata
+        type: string
+        description: Facoltativo. Scrivi il titolo esatto di un'opera per mostrare il pulsante "Guarda l'opera finita".
+
+  # ---------------- Eventi ----------------
+  - name: eventi
+    label: Eventi
+    type: file
+    path: contenuti/eventi.json
+    format: json
+    list: true
+    fields:
+      - name: titolo
+        label: Titolo
+        type: string
+        required: true
+      - name: tipo
+        label: Tipo di evento
+        type: string
+        description: Es. Mostra personale, Mostra collettiva, Laboratorio
+      - name: luogo
+        label: Luogo
+        type: string
+        description: Es. Galleria Lume
+      - name: citta
+        label: Città
+        type: string
+      - name: inizio
+        label: Data di inizio
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: fine
+        label: Data di fine
+        type: date
+        default: ""
+        description: Lascia vuoto se l'evento dura un solo giorno.
+        options:
+          format: yyyy-MM-dd
+      - name: note
+        label: Note
+        type: text
+        description: Orari, inaugurazione, iscrizioni
+      - name: indirizzo
+        label: Indirizzo
+        type: string
+        description: Facoltativo. Se lo scrivi compare il link a Google Maps.
+      - name: link
+        label: Pagina dell'evento
+        type: string
+        description: Facoltativo. Indirizzo web che inizia con https://
+
+  # ---------------- Presentazione e contatti ----------------
+  - name: sito
+    label: Presentazione e contatti
+    type: file
+    path: contenuti/sito.json
+    format: json
+    fields:
+      - name: presentazione
+        label: Frase di presentazione
+        type: text
+        description: Compare sotto il nome, in apertura.
+      - name: email
+        label: Email
+        type: string
+      - name: instagram
+        label: Profili Instagram
+        type: string
+        list: true
+        description: Solo il nome utente, senza @
+      - name: tiktok
+        label: Profili TikTok
+        type: string
+        list: true
+        description: Solo il nome utente, senza @
