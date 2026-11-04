@@ -1411,40 +1411,130 @@ html.js-sipario::after {
   pointer-events: none;
 }
 
-/* ---------- Nastro delle categorie ---------- */
+/* ---------- Nastro delle categorie ----------
+   Due pennellate larghe che si incrociano: dietro, verde acido, le miniature
+   delle opere che scorrono verso destra; davanti, verde notte, le categorie
+   che scorrono verso sinistra. Entrando nello schermo vengono stese col
+   pennello; scorrendo la pagina accelerano, cambiano verso e si piegano
+   (il movimento lo calcola js/script.js, funzione animaNastro). */
 .nastro {
-  overflow: hidden;
-  padding-block: clamp(1.25rem, 3vw, 2.25rem);
+  position: relative;
+  height: clamp(16rem, 31vw, 26rem);
   margin-bottom: var(--sezione);
-  border-block: 1px solid var(--linea);
+  overflow: hidden;
 }
+.nastro-fascia {
+  position: absolute;
+  left: -8%; width: 116%;
+  top: 50%;
+  pointer-events: none;
+}
+.nastro-fascia--opere {
+  height: clamp(8.5rem, 13.5vw, 11.5rem);
+  transform: translateY(-66%) rotate(4.5deg);
+  filter: drop-shadow(0 12px 16px rgba(18, 38, 26, 0.12));
+}
+.nastro-fascia--categorie {
+  height: clamp(5.75rem, 10vw, 8.75rem);
+  transform: translateY(-30%) rotate(-3deg);
+  filter: drop-shadow(0 16px 20px var(--ombra-forte));
+  color: var(--parete);
+}
+.nastro-fascia--categorie .nastro-traccia { pointer-events: auto; }
+
+/* Il colpo di pennello che stende la fascia quando il nastro entra nello schermo */
+.nastro-colpo {
+  height: 100%;
+  -webkit-mask-image: var(--maschera-destra); mask-image: var(--maschera-destra);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 0 0; mask-position: 0 0;
+}
+.js-anim .nastro[data-rivela]:not(.visibile) .nastro-colpo { -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+.js-anim .nastro[data-rivela].visibile .nastro-colpo { animation: dipingi-dentro 1.2s cubic-bezier(0.55, 0.05, 0.3, 1) both; }
+.js-anim .nastro[data-rivela].visibile .nastro-fascia--categorie .nastro-colpo { animation-delay: 0.3s; }
+
+/* La forma della pennellata, con le striature asciutte sui bordi */
+.nastro-pennellata {
+  height: 100%;
+  display: flex; align-items: center;
+  overflow: hidden;
+  -webkit-mask-image: var(--banda); mask-image: var(--banda);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.nastro-fascia--opere .nastro-pennellata {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 45%, rgba(0, 0, 0, 0.08)),
+    var(--acido);
+}
+.nastro-fascia--categorie .nastro-pennellata {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%, rgba(0, 0, 0, 0.2)),
+    var(--fascia);
+}
+
 .nastro-traccia {
   display: flex;
   width: max-content;
-  animation: nastro 48s linear infinite;
+  will-change: transform;
 }
-.nastro:hover .nastro-traccia,
-.nastro:focus-within .nastro-traccia { animation-play-state: paused; }
 .nastro-gruppo {
   display: flex; align-items: center;
-  gap: clamp(1.5rem, 4vw, 3.5rem);
-  padding-right: clamp(1.5rem, 4vw, 3.5rem);
+  gap: clamp(1.4rem, 3.5vw, 3rem);
+  padding-right: clamp(1.4rem, 3.5vw, 3rem);
 }
+
+/* Davanti: le categorie, piene e a contorno alternate, col numero di opere */
 .nastro-voce {
+  position: relative;
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(2.5rem, 7vw, 6rem);
-  line-height: 1.15;
-  color: var(--inchiostro);
+  font-size: clamp(2.2rem, 5.6vw, 4.75rem);
+  line-height: 1.1;
+  color: var(--parete);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.3s ease, -webkit-text-stroke-color 0.3s ease;
 }
-.nastro-voce--contorno { color: transparent; -webkit-text-stroke: 1px var(--inchiostro); }
+.nastro-voce--contorno { color: transparent; -webkit-text-stroke: 1px var(--parete); }
 .nastro-voce:hover,
-.nastro-voce:focus-visible { color: var(--accento); -webkit-text-stroke-color: var(--accento); }
-/* Macchie di colore tra una voce e l'altra */
+.nastro-voce:focus-visible { color: var(--pigmento, var(--acido)); -webkit-text-stroke-color: var(--pigmento, var(--acido)); }
+.nastro-voce:focus-visible { outline-color: var(--acido); outline-offset: 4px; }
+.nastro-conta {
+  margin-left: 0.2em;
+  font-family: var(--font-testo);
+  font-style: normal;
+  font-size: 0.26em;
+  letter-spacing: 0.06em;
+  vertical-align: super;
+  color: var(--pigmento, var(--acido));
+  -webkit-text-stroke: 0;
+}
+
+/* Dietro: le miniature delle opere, come piccole tele appese di sbieco */
+.nastro-fascia--opere .nastro-gruppo { gap: clamp(1rem, 2.4vw, 2rem); padding-right: clamp(1rem, 2.4vw, 2rem); }
+.nastro-mini {
+  flex: none;
+  height: calc(100% - clamp(2rem, 4vw, 3.25rem));
+  padding: clamp(3px, 0.4vw, 5px);
+  background: var(--passepartout);
+  box-shadow: 0 8px 16px -8px rgba(18, 38, 26, 0.45);
+  transform: rotate(var(--inclina, 0deg));
+}
+.nastro-fascia--opere .nastro-traccia,
+.nastro-fascia--opere .nastro-gruppo { height: 100%; }
+.nastro-mini .media {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: none;
+}
+
+/* Macchie di colore tra una categoria e l'altra */
 .macchia {
   flex: none;
   width: clamp(1.1rem, 2.4vw, 1.9rem);
@@ -1457,7 +1547,36 @@ html.js-sipario::after {
 .macchia--1 { background: var(--giallo); transform: rotate(80deg); }
 .macchia--2 { background: var(--magenta); transform: rotate(160deg); }
 .macchia--3 { background: var(--turchese); transform: rotate(250deg); }
-@keyframes nastro { to { transform: translateX(-50%); } }
+
+/* L'anteprima che segue il mouse: le opere della categoria, una dopo l'altra */
+.nastro-anteprima {
+  position: fixed; left: 0; top: 0;
+  z-index: 25;
+  width: clamp(11rem, 16vw, 15rem);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(var(--ax, -999px), var(--ay, -999px), 0) rotate(var(--ar, 0deg));
+  scale: 0.85;
+  transition: opacity 0.3s ease, scale 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.nastro-anteprima.visibile { opacity: 1; scale: 1; }
+.nastro-anteprima-quadro {
+  display: block;
+  padding: 6px;
+  background: var(--passepartout);
+  box-shadow: 0 2px 2px var(--ombra), 0 28px 44px -20px var(--ombra-forte);
+}
+.nastro-anteprima-quadro .media { width: 100%; height: auto; }
+.nastro-anteprima-titolo {
+  display: block;
+  padding: 0.5rem 0.2rem 0.15rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  line-height: 1.2;
+  color: var(--grafite);
+}
+.nastro-anteprima-titolo em { color: var(--inchiostro); }
+
 
 /* ---------- Cursore da galleria (solo con il mouse) ---------- */
 .cursore {
@@ -1534,6 +1653,7 @@ html.js-sipario::after {
   transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .lente.is-attiva { opacity: 1; transform: scale(1); }
+.lente.in-pausa { opacity: 0; transform: scale(0.6); }
 .con-lente { cursor: none; }
 .scheda-nota-lente { margin: 0; font-size: var(--t-xs); color: var(--grafite); }
 
@@ -1896,6 +2016,106 @@ html.js-sipario::after {
 }
 .evidenza { transform: translateY(calc(var(--salita, 0) * 0.07px)); }
 
+/* =====================================================================
+   MI PIACE
+   Il cuore si riempie di magenta dal basso, come colore versato, e
+   schizza gocce dei pigmenti del quadro. Nella scheda un doppio clic
+   sull'opera fa comparire un grande cuore.
+   ===================================================================== */
+.didascalia { position: relative; padding-right: 3rem; }
+.didascalia > .piace { position: absolute; top: -0.35rem; right: -0.4rem; }
+
+.piace {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--inchiostro);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.piace-cuore {
+  position: relative;
+  display: grid;
+  width: 1.4rem; height: 1.4rem;
+  transition: transform 0.25s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.piace:hover .piace-cuore { transform: scale(1.12) rotate(-6deg); }
+.piace-cuore > span { grid-area: 1 / 1; display: block; }
+.piace-cuore svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.piace-vuoto path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  transition: stroke 0.3s ease;
+}
+.piace-pieno { clip-path: inset(100% 0 0 0); transition: clip-path 0.55s cubic-bezier(0.6, 0.05, 0.3, 1); }
+.piace-pieno path { fill: var(--magenta); }
+.piace[aria-pressed="true"] .piace-pieno { clip-path: inset(0 0 0 0); }
+.piace[aria-pressed="true"] .piace-vuoto path { stroke: var(--magenta); }
+.piace-conta:empty { display: none; }
+.piace.sboccia .piace-cuore { animation: battito 0.6s cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes battito {
+  30% { transform: scale(1.45) rotate(-8deg); }
+  100% { transform: none; }
+}
+
+/* Nella scheda: un pulsante come gli altri, con la scritta */
+.piace--grande {
+  gap: 0.55rem;
+  min-height: 2.9rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--linea);
+  font-size: var(--t-s);
+  transition: border-color 0.2s ease;
+}
+.piace--grande:hover { border-color: var(--inchiostro); }
+.piace--grande[aria-pressed="true"] { border-color: var(--magenta); }
+.piace--grande .piace-conta { color: var(--grafite); }
+.piace--grande .piace-conta::before { content: "· "; }
+.scheda-piace { display: contents; }
+
+/* Gli schizzi di colore */
+.goccia {
+  position: absolute; left: 50%; top: 50%;
+  width: var(--s, 5px); height: var(--s, 5px);
+  margin: calc(var(--s, 5px) / -2) 0 0 calc(var(--s, 5px) / -2);
+  border-radius: 55% 45% 60% 40% / 50% 60% 40% 50%;
+  background: var(--c, var(--magenta));
+  pointer-events: none;
+  animation: goccia 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+@keyframes goccia {
+  from { transform: rotate(var(--a, 0deg)) translateX(0) scale(0.3); opacity: 1; }
+  65% { opacity: 1; }
+  to { transform: rotate(var(--a, 0deg)) translateX(var(--d, 20px)) scale(1); opacity: 0; }
+}
+
+/* Il grande cuore del doppio clic sull'opera */
+.scheda-media { position: relative; }
+.cuore-grande {
+  position: absolute;
+  z-index: 3;
+  width: 6.5rem; height: 6.5rem;
+  margin: -3.25rem 0 0 -3.25rem;
+  pointer-events: none;
+  animation: cuore-pop 1s cubic-bezier(0.3, 1.4, 0.5, 1) forwards;
+}
+.cuore-grande svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 8px 16px rgba(18, 38, 26, 0.3)); }
+.cuore-grande path { fill: var(--magenta); }
+.cuore-grande .goccia { animation-duration: 0.9s; }
+@keyframes cuore-pop {
+  0% { transform: scale(0) rotate(-14deg); opacity: 0; }
+  22% { transform: scale(1.18) rotate(5deg); opacity: 1; }
+  40% { transform: scale(0.94) rotate(-2deg); }
+  70% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.08) translateY(-24px); opacity: 0; }
+}
+
 /* Chi ha chiesto meno animazioni al sistema non ne vede */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -1905,5 +2125,4 @@ html.js-sipario::after {
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
   }
-  .nastro-traccia { animation: none !important; }
 }

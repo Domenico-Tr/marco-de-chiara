@@ -14,7 +14,7 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-04b">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-04c">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi.
@@ -104,9 +104,22 @@
     </section>
 
     <!-- ============ NASTRO DELLE CATEGORIE ============ -->
-    <!-- Fascia che scorre con le categorie: cliccandone una si va alle opere filtrate -->
-    <nav class="nastro" id="nastro" aria-label="Categorie di opere" hidden>
-      <div class="nastro-traccia" id="nastro-traccia"></div>
+    <!-- Due pennellate che si incrociano e scorrono in versi opposti:
+         dietro le miniature delle opere, davanti le categorie (cliccandone una
+         si va alle opere filtrate). Scorrendo la pagina accelerano e si piegano. -->
+    <nav class="nastro" id="nastro" aria-label="Categorie di opere" data-rivela hidden>
+      <div class="nastro-fascia nastro-fascia--opere" aria-hidden="true">
+        <div class="nastro-colpo">
+          <div class="nastro-pennellata"><div class="nastro-traccia" id="nastro-miniature"></div></div>
+        </div>
+      </div>
+      <div class="nastro-fascia nastro-fascia--categorie">
+        <div class="nastro-colpo">
+          <div class="nastro-pennellata"><div class="nastro-traccia" id="nastro-traccia"></div></div>
+        </div>
+      </div>
+      <!-- Passando col mouse su una categoria, qui compaiono le sue opere -->
+      <div class="nastro-anteprima" id="nastro-anteprima" aria-hidden="true"></div>
     </nav>
 
     <!-- ============ OPERE ============ -->
@@ -202,6 +215,8 @@
             <a class="bottone" id="scheda-richiesta" href="#contatti">Chiedi informazioni</a>
             <!-- Solo per quadri e stampe: apre "Provalo nella tua stanza" -->
             <button type="button" class="bottone bottone--leggero" id="scheda-stanza" hidden>Provalo nella tua stanza</button>
+            <!-- Il cuore "mi piace" (anche con un doppio clic sull'opera) -->
+            <span class="scheda-piace" id="scheda-piace"></span>
           </div>
           <p class="scheda-email" id="scheda-email-riga">oppure scrivi a <span id="scheda-email"></span></p>
         </div>
@@ -298,7 +313,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-04b"></script>
-  <script src="js/script.js?v=2026-11-04b"></script>
+  <script src="js/categorie.js?v=2026-11-04c"></script>
+  <script src="js/script.js?v=2026-11-04c"></script>
 </body>
 </html>

@@ -110,7 +110,7 @@ Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un qu
 - `--fascia`: il colore della pennellata dietro la barra del menu e del fondo del menu sul telefono (ora il verde notte `--pennellata-1`).
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04b` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04c` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -134,7 +134,7 @@ Sono tutti in `js/script.js` (sezione "9. Effetti a tema pittura") e in fondo a 
 - **Cursore da galleria**: un cerchio segue il mouse; sulle opere e sui video diventa un disco con "Guarda", sui link un pallino verde acido.
 - **Opere sotto le luci**: con il mouse sopra, le opere si inclinano appena e un riflesso segue il puntatore.
 - **Lente**: nella scheda dell'opera, passando sopra l'immagine si vede la pennellata ingrandita due volte e mezzo.
-- **Nastro delle categorie**: fascia che scorre sotto l'apertura con tutte le categorie del menu; cliccandone una si va alle opere filtrate.
+- **Nastro delle categorie**: sotto l'apertura due grandi pennellate si incrociano e vengono stese col pennello quando entrano nello schermo. Davanti, verde notte, le categorie col numero di opere (cliccandone una si va alle opere filtrate); dietro, verde acido, le miniature delle opere, che scorrono nel verso opposto. Scorrendo la pagina le fasce accelerano, cambiano verso e si piegano. Passando col mouse su una categoria compare una piccola tela con le sue opere, che segue il puntatore. Velocità e inclinazioni sono in `js/script.js`, funzione `animaNastro`.
 - **Comparse allo scorrimento**: le linee sopra i titoli si tracciano, le opere si dipingono entrando nello schermo, eventi, contatti e video salgono in sequenza.
 - **Dettagli**: filo verde acido nella barra che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
 
@@ -158,6 +158,50 @@ Sono in `js/script.js` (sezione "9b. Effetti della tela") e in `css/style.css` (
 - **Tavolozza**: il sottomenu "Opere" ha la forma di una tavolozza, con un campione di colore per ogni categoria e il foro per il pollice.
 - **Social**: su schermi larghi, in fondo alla barra, le icone di Instagram e TikTok (il primo profilo di ciascuno, preso da `contenuti/sito.json`).
 - **Telefono**: il pulsante è fatto di tre pennellate che diventano una X. Il menu copre tutto lo schermo su un fondo verde notte con la luce acida del quadro: voci grandi numerate, ognuna sottolineata col suo pigmento, le categorie come etichette colorate e, in fondo, l'email e tutti i social.
+
+## Mi piace
+
+Sotto ogni opera (e nella scheda a tutto schermo) c'è un cuore. Toccandolo si riempie di magenta e schizza gocce di colore; nella scheda basta anche un doppio clic sull'opera.
+
+**Senza fare niente** ogni visitatore ritrova i suoi cuori quando torna sul sito (li ricorda il suo browser), ma non vede quanti ne hanno messi gli altri.
+
+**Per contare i mi piace di tutti** serve un piccolo database gratuito di Google, Firebase. Si fa una volta sola, in circa dieci minuti:
+
+1. Vai su [console.firebase.google.com](https://console.firebase.google.com), entra con un account Google e crea un nuovo progetto (per esempio `marco-de-chiara`). Google Analytics non serve: puoi disattivarlo.
+2. Nel menu a sinistra apri **Firestore Database** (sotto "Build" o "Crea") e premi **Crea database**. Se chiede l'edizione scegli **Standard**, poi una località in Europa (per esempio `eur3`) e la **modalità di produzione**.
+3. Apri la scheda **Regole**, cancella quello che c'è, incolla queste righe e premi **Pubblica**:
+
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /like/{opera} {
+         allow read: if true;
+         allow create: if opera.matches('^[a-z0-9-]{1,80}$')
+                       && request.resource.data.keys().hasOnly(['n'])
+                       && request.resource.data.n == 1;
+         allow update: if request.resource.data.keys().hasOnly(['n'])
+                       && request.resource.data.n is int
+                       && request.resource.data.n >= 0
+                       && (request.resource.data.n == resource.data.n + 1
+                           || request.resource.data.n == resource.data.n - 1);
+         allow delete: if false;
+       }
+     }
+   }
+   ```
+
+   Queste regole permettono solo di aggiungere o togliere un "mi piace" alla volta: nessuno può cancellare i conteggi o scriverci altro.
+4. Premi l'ingranaggio in alto a sinistra → **Impostazioni progetto**. In fondo, sotto "Le tue app", premi l'icona **</>** (Web), dai un nome qualsiasi e registra l'app. Firebase mostra un blocco di codice: ti servono solo due valori, `projectId` e `apiKey`.
+5. Su [app.pagescms.org](https://app.pagescms.org) apri **Presentazione e contatti**, incolla `projectId` in "Mi piace: ID del progetto Firebase" e `apiKey` in "Mi piace: chiave web Firebase", poi salva.
+
+Dopo un paio di minuti accanto ai cuori compaiono i numeri. I conteggi si vedono anche dalla console di Firebase, in Firestore Database → `like`: un documento per opera, con il totale nel campo `n`.
+
+Da sapere:
+- Il piano gratuito di Firebase basta per migliaia di visite al giorno e non chiede la carta di credito.
+- La `apiKey` è fatta per stare in un sito pubblico: a proteggere i dati sono le regole del passo 3.
+- Ogni opera è riconosciuta dal suo titolo: se Marco cambia il titolo di un'opera, il suo conteggio riparte da zero.
+- Il cuore non è un sistema anti-imbroglio: chi svuota i dati del browser può rimetterlo. Per un sito d'artista va benissimo.
 
 ## Provalo nella tua stanza
 

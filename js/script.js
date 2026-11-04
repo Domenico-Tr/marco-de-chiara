@@ -15,6 +15,7 @@
      9. Effetti a tema pittura
      10. Provalo nella tua stanza
      9b. Effetti della tela (titoli dipinti, alone delle opere, pennellate di fondo)
+     11. Mi piace
      8. Avvio
 ===================================================================== */
 (function () {
@@ -27,6 +28,8 @@
   const esc = (v) =>
     String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const menoMovimento = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // I pigmenti dei riccioli del quadro, a turno per categorie e voci di menu
+  const PIGMENTI = ["var(--acido)", "var(--giallo)", "var(--magenta)", "var(--turchese)"];
 
   const NOMI_CATEGORIE = Object.fromEntries(CATEGORIE.map((c) => [c.id, c.nome]));
   const STATI = { disponibile: "Disponibile", venduta: "Venduta", riservata: "Riservata" };
@@ -957,7 +960,7 @@
   }
 
   function didascaliaHTML(o) {
-    return `
+    return `${bottonePiace(o)}
       <p class="didascalia-titolo"><em>${esc(o.titolo)}</em>${o.anno ? `, ${esc(o.anno)}` : ""}</p>
       ${o.tecnica ? `<p>${esc(o.tecnica)}</p>` : ""}
       ${o.misure ? `<p>${esc(o.misure)}</p>` : ""}
@@ -968,7 +971,7 @@
   // Il sottomenu delle opere: ogni categoria ha il suo campione di colore,
   // a turno i pigmenti del quadro; "Tutte le opere" li ha tutti
   function costruisciSottomenu() {
-    const pigmenti = ["var(--acido)", "var(--giallo)", "var(--magenta)", "var(--turchese)"];
+    const pigmenti = PIGMENTI;
     const voci = [{ id: "tutte", nome: "Tutte le opere" }, ...CATEGORIE];
     $("#sottomenu-opere").innerHTML = voci
       .map((v, n) => {
@@ -1143,6 +1146,7 @@
     // "Provalo nella tua stanza" solo per le opere da appendere
     $("#scheda-stanza").hidden = !daParete(o);
 
+    $("#scheda-piace").innerHTML = bottonePiace(o, true);
     $("#scheda-pos").textContent = `${indice + 1} di ${elenco.length}`;
     $("#scheda-nav").hidden = elenco.length < 2;
   }
@@ -2103,8 +2107,10 @@
 
   // Nastro delle categorie: tutte quelle del menu, ripetute quanto basta a riempire lo schermo
   function costruisciNastro() {
-    const voci = CATEGORIE.slice();
+    const voci = CATEGORIE.map((c, n) => ({ ...c, quante: conta(c.id), pigmento: PIGMENTI[n % PIGMENTI.length] }));
     if (!voci.length) return;
+
+    // Davanti: le categorie, ripetute finché la fascia è piena
     const giro = [];
     while (giro.length < 10) giro.push(...voci);
     const gruppo = (copia) =>
@@ -2113,15 +2119,216 @@
         .map((c, i) => {
           const fuoriTab = copia || i >= voci.length;
           return (
-            `<a class="nastro-voce${i % 2 ? " nastro-voce--contorno" : ""}" href="#opere" data-categoria="${esc(c.id)}"${fuoriTab ? ' tabindex="-1"' : ""}>${esc(c.nome)}</a>` +
+            `<a class="nastro-voce${i % 2 ? " nastro-voce--contorno" : ""}" href="#opere" data-categoria="${esc(c.id)}" style="--pigmento: ${c.pigmento}"${fuoriTab ? ' tabindex="-1"' : ""}>` +
+            `${esc(c.nome)}${c.quante ? `<sup class="nastro-conta">${c.quante}</sup>` : ""}</a>` +
             `<span class="macchia macchia--${i % 4}" aria-hidden="true"></span>`
           );
         })
         .join("") +
       "</div>";
-    // due metà identiche: scorrendo di metà larghezza il giro si chiude senza salti
+    // due metà identiche: spostandosi di metà larghezza il giro si chiude senza salti
     $("#nastro-traccia").innerHTML = gruppo(false) + gruppo(true);
+
+    // Dietro: le miniature delle opere, appese un po' storte
+    const miniature = $("#nastro-miniature");
+    const opere = OPERE.slice(0, 16);
+    if (opere.length) {
+      const fila = [];
+      while (fila.length < 10) fila.push(...opere);
+      const inclinazioni = [-2.5, 1.5, -1, 2.5, -1.8, 1];
+      [0, 1].forEach(() => {
+        const g = document.createElement("div");
+        g.className = "nastro-gruppo";
+        fila.forEach((o, i) => {
+          const mini = document.createElement("span");
+          mini.className = "nastro-mini";
+          mini.style.setProperty("--inclina", `${inclinazioni[i % inclinazioni.length]}deg`);
+          mini.append(creaMedia(o, 240));
+          g.append(mini);
+        });
+        miniature.append(g);
+      });
+    } else {
+      $(".nastro-fascia--opere").hidden = true;
+    }
+
     $("#nastro").hidden = false;
+    animaNastro();
+    preparaAnteprimaNastro();
+  }
+
+  // Le due fasce scorrono in versi opposti. Lo scorrimento della pagina le spinge
+  // (più veloce scorri, più corrono), ne cambia il verso e le piega un po'.
+  function animaNastro() {
+    const nastro = $("#nastro");
+    const fasce = [
+      { traccia: $("#nastro-traccia"), verso: -1, base: 52 },
+      { traccia: $("#nastro-miniature"), verso: 1, base: 34 },
+    ].filter((f) => f.traccia && f.traccia.children.length);
+    if (!fasce.length || menoMovimento()) return;
+
+    const misura = () => fasce.forEach((f) => {
+      f.meta = f.traccia.scrollWidth / 2;
+    });
+    misura();
+    fasce.forEach((f, n) => {
+      f.x = n ? -f.meta * 0.4 : 0;
+    });
+    if ("ResizeObserver" in window) {
+      const ro = new ResizeObserver(misura);
+      fasce.forEach((f) => ro.observe(f.traccia));
+    } else {
+      window.addEventListener("resize", misura);
+    }
+
+    let visibile = false;
+    let ultimo = 0;
+    let ultimoScroll = window.scrollY;
+    let spinta = 0; // px al secondo che si aggiungono, dallo scorrimento
+    let direzione = 1; // 1 scorrendo in giù, -1 in su
+    let freno = 1;
+    let frenoVoluto = 1;
+
+    const fotogramma = (ora) => {
+      if (!visibile) {
+        ultimo = 0;
+        return;
+      }
+      const dt = ultimo ? Math.min(0.05, (ora - ultimo) / 1000) : 0;
+      ultimo = ora;
+      const dy = window.scrollY - ultimoScroll;
+      ultimoScroll = window.scrollY;
+      if (dy) direzione = dy > 0 ? 1 : -1;
+      spinta += (Math.max(-80, Math.min(80, dy)) * 14 - spinta) * 0.1;
+      freno += (frenoVoluto - freno) * 0.08;
+      const piega = Math.max(-8, Math.min(8, spinta / 110));
+      fasce.forEach((f) => {
+        const v = f.verso * (f.base * freno * direzione + spinta);
+        f.x += v * dt;
+        if (f.meta > 0) {
+          while (f.x <= -f.meta) f.x += f.meta;
+          while (f.x > 0) f.x -= f.meta;
+        }
+        f.traccia.style.transform = `translate3d(${f.x.toFixed(2)}px, 0, 0) skewX(${(piega * -f.verso).toFixed(2)}deg)`;
+      });
+      requestAnimationFrame(fotogramma);
+    };
+
+    // Gira solo quando il nastro è sullo schermo
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((voci) => {
+        const ora = voci[voci.length - 1].isIntersecting;
+        if (ora && !visibile) {
+          visibile = true;
+          ultimoScroll = window.scrollY;
+          requestAnimationFrame(fotogramma);
+        }
+        visibile = ora;
+      }).observe(nastro);
+    } else {
+      visibile = true;
+      requestAnimationFrame(fotogramma);
+    }
+
+    // Col mouse sopra le categorie la fascia rallenta; col tasto Tab si ferma
+    // e porta in vista la categoria scelta
+    const davanti = fasce.find((f) => f.verso === -1);
+    if (!davanti) return;
+    davanti.traccia.addEventListener("mouseenter", () => { frenoVoluto = 0.12; });
+    davanti.traccia.addEventListener("mouseleave", () => { frenoVoluto = 1; });
+    davanti.traccia.addEventListener("focusin", (e) => {
+      frenoVoluto = 0;
+      freno = 0;
+      const a = e.target.closest(".nastro-voce");
+      if (a) davanti.x = -Math.max(0, a.offsetLeft - nastro.clientWidth * 0.2);
+    });
+    davanti.traccia.addEventListener("focusout", () => { frenoVoluto = 1; });
+  }
+
+  // Passando col mouse su una categoria compare una piccola tela con le sue opere,
+  // che segue il puntatore e si inclina mentre si sposta
+  function preparaAnteprimaNastro() {
+    if (!conMouse()) return;
+    const anteprima = $("#nastro-anteprima");
+    const traccia = $("#nastro-traccia");
+    if (!anteprima || !traccia) return;
+    let attiva = null;
+    let timer = null;
+    let giro = false;
+    let mx = -999, my = -999, x = -999, y = -999;
+
+    const mostra = (o, quante, n) => {
+      const media = creaMedia(o, 420, true);
+      if (!menoMovimento()) {
+        media.classList.add("rivela");
+        media.style.setProperty("--durata", "0.6s");
+      }
+      const quadro = document.createElement("span");
+      quadro.className = "nastro-anteprima-quadro";
+      const titolo = document.createElement("span");
+      titolo.className = "nastro-anteprima-titolo";
+      titolo.innerHTML = `<em>${esc(o.titolo)}</em>${quante > 1 ? ` · ${n + 1}/${quante}` : ""}`;
+      quadro.append(media, titolo);
+      anteprima.replaceChildren(quadro);
+    };
+    const nascondi = () => {
+      attiva = null;
+      clearInterval(timer);
+      anteprima.classList.remove("visibile");
+    };
+    const segui = () => {
+      if (!anteprima.classList.contains("visibile")) {
+        giro = false;
+        return;
+      }
+      const px = x;
+      x += (mx - x) * 0.16;
+      y += (my - y) * 0.16;
+      const inclina = Math.max(-12, Math.min(12, (x - px) * 0.6));
+      anteprima.style.setProperty("--ax", `${(x + 28).toFixed(1)}px`);
+      anteprima.style.setProperty("--ay", `${(y - anteprima.offsetHeight * 0.55).toFixed(1)}px`);
+      anteprima.style.setProperty("--ar", `${inclina.toFixed(2)}deg`);
+      requestAnimationFrame(segui);
+    };
+
+    traccia.addEventListener("pointermove", (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      if (x === -999) {
+        x = mx;
+        y = my;
+      }
+    }, { passive: true });
+    traccia.addEventListener("mouseover", (e) => {
+      const a = e.target.closest(".nastro-voce");
+      if (!a || a === attiva) return;
+      attiva = a;
+      const lista = OPERE.filter((o) => o.categoria === a.dataset.categoria).slice(0, 6);
+      clearInterval(timer);
+      if (!lista.length) {
+        anteprima.classList.remove("visibile");
+        return;
+      }
+      let k = 0;
+      mostra(lista[0], lista.length, 0);
+      if (lista.length > 1) {
+        timer = setInterval(() => {
+          k = (k + 1) % lista.length;
+          mostra(lista[k], lista.length, k);
+        }, 1300);
+      }
+      anteprima.classList.add("visibile");
+      if (!giro) {
+        giro = true;
+        requestAnimationFrame(segui);
+      }
+    });
+    traccia.addEventListener("mouseleave", () => {
+      nascondi();
+      x = y = -999;
+    });
+    // cliccando si va alle opere: l'anteprima sparisce subito
+    traccia.addEventListener("click", nascondi);
   }
 
   /* ------------------------------------------------------------------
@@ -2794,6 +3001,234 @@
   }
 
   /* ------------------------------------------------------------------
+     11. Mi piace
+     Ogni visitatore può mettere "mi piace" alle opere: il suo cuore resta
+     pieno anche quando torna (lo ricorda il suo browser). Se nel pannello
+     sono compilati i due campi Firebase (Presentazione e contatti), i "mi
+     piace" di tutti vengono contati e il numero compare accanto al cuore.
+     ------------------------------------------------------------------ */
+  const CUORE =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3C6.9 16.5 3.2 13.3 3.2 9.1c0-2.7 2.1-4.8 4.7-4.8 1.7 0 3.2.9 4.1 2.3.9-1.4 2.4-2.3 4.1-2.3 2.6 0 4.7 2.1 4.7 4.8 0 4.2-3.7 7.4-8.8 11.2z"/></svg>';
+
+  const Piace = (() => {
+    const CHIAVE = "mi-piace";
+    const CHIAVE_SOSPESI = "mi-piace-da-inviare";
+    const leggi = (k, riserva) => {
+      try {
+        const v = JSON.parse(localStorage.getItem(k));
+        return v == null ? riserva : v;
+      } catch (e) {
+        return riserva;
+      }
+    };
+    const scrivi = (k, v) => {
+      try {
+        localStorage.setItem(k, JSON.stringify(v));
+      } catch (e) {
+        /* browser in incognito o con i dati bloccati: vale solo per questa visita */
+      }
+    };
+    // il nome dell'opera come lo salva Firebase: lettere minuscole, numeri e trattini
+    const pulisci = (id) => String(id || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 80) || "opera";
+
+    const salvate = leggi(CHIAVE, []);
+    const mie = new Set(Array.isArray(salvate) ? salvate.map(pulisci) : []);
+    let sospesi = leggi(CHIAVE_SOSPESI, {});
+    if (!sospesi || typeof sospesi !== "object" || Array.isArray(sospesi)) sospesi = {};
+    const conteggi = {};
+    let db = null; // { progetto, chiave } quando il conteggio condiviso è attivo
+    let timer = null;
+
+    const radice = () =>
+      `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(db.progetto)}/databases/(default)/documents`;
+    const numero = (campo) => Math.max(0, Number(campo && (campo.integerValue ?? campo.doubleValue)) || 0);
+
+    async function leggiConteggi() {
+      let pagina = "";
+      do {
+        const url = `${radice()}/like?pageSize=300&key=${encodeURIComponent(db.chiave)}${pagina ? `&pageToken=${encodeURIComponent(pagina)}` : ""}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(`lettura dei mi piace: errore ${r.status}`);
+        const dati = await r.json();
+        (dati.documents || []).forEach((d) => {
+          conteggi[decodeURIComponent(d.name.split("/").pop())] = numero(d.fields && d.fields.n);
+        });
+        pagina = dati.nextPageToken || "";
+      } while (pagina);
+    }
+
+    // Aggiunge (passo 1) o toglie (passo -1) un mi piace e riceve il totale aggiornato
+    async function invia(id, passo) {
+      const r = await fetch(`${radice()}:commit?key=${encodeURIComponent(db.chiave)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          writes: [
+            {
+              update: { name: `projects/${db.progetto}/databases/(default)/documents/like/${id}`, fields: {} },
+              updateMask: { fieldPaths: [] },
+              updateTransforms: [{ fieldPath: "n", increment: { integerValue: String(passo) } }],
+            },
+          ],
+        }),
+      });
+      if (!r.ok) throw new Error(`invio del mi piace: errore ${r.status}`);
+      const dati = await r.json();
+      const ris = dati.writeResults && dati.writeResults[0] && dati.writeResults[0].transformResults;
+      if (ris && ris[0]) conteggi[id] = numero(ris[0]);
+    }
+
+    // Manda i mi piace in attesa (anche quelli rimasti da una visita senza rete)
+    async function svuota() {
+      if (!db) return;
+      for (const id of Object.keys(sospesi)) {
+        const passo = sospesi[id];
+        if (!passo) {
+          delete sospesi[id];
+          continue;
+        }
+        try {
+          await invia(id, passo > 0 ? 1 : -1);
+          delete sospesi[id];
+        } catch (e) {
+          break; // niente rete: si riprova alla prossima occasione
+        }
+      }
+      scrivi(CHIAVE_SOSPESI, sospesi);
+      aggiornaTutti();
+    }
+
+    function aggiornaBottone(b) {
+      const k = pulisci(b.dataset.piace);
+      const piace = mie.has(k);
+      const n = db ? conteggi[k] || 0 : 0;
+      b.setAttribute("aria-pressed", String(piace));
+      const c = b.querySelector(".piace-conta");
+      if (c) c.textContent = n ? String(n) : "";
+      b.setAttribute("aria-label", etichettaPiace(b.dataset.titolo, n));
+    }
+    function aggiornaTutti() {
+      document.querySelectorAll(".piace[data-piace]").forEach(aggiornaBottone);
+    }
+
+    function cambia(id) {
+      const k = pulisci(id);
+      const piace = !mie.has(k);
+      if (piace) mie.add(k);
+      else mie.delete(k);
+      scrivi(CHIAVE, Array.from(mie));
+      if (db) {
+        conteggi[k] = Math.max(0, (conteggi[k] || 0) + (piace ? 1 : -1));
+        sospesi[k] = (sospesi[k] || 0) + (piace ? 1 : -1);
+        scrivi(CHIAVE_SOSPESI, sospesi);
+        clearTimeout(timer);
+        timer = setTimeout(svuota, 700); // chi cambia idea in fretta non manda niente
+      }
+      aggiornaTutti();
+      return piace;
+    }
+
+    async function avvia(config) {
+      const progetto = String((config && config.progetto) || "").trim();
+      const chiave = String((config && config.chiave) || "").trim();
+      if (progetto && chiave) db = { progetto, chiave };
+      aggiornaTutti();
+      if (!db) return;
+      try {
+        await leggiConteggi();
+        Object.keys(sospesi).forEach((k) => {
+          conteggi[k] = Math.max(0, (conteggi[k] || 0) + sospesi[k]);
+        });
+        aggiornaTutti();
+        svuota();
+      } catch (e) {
+        console.warn("Mi piace: conteggio non disponibile, controlla i campi Firebase nel pannello.", e);
+        db = null;
+        aggiornaTutti();
+      }
+    }
+
+    return { avvia, cambia, mia: (id) => mie.has(pulisci(id)), quanti: (id) => (db ? conteggi[pulisci(id)] || 0 : 0), aggiornaTutti };
+  })();
+
+  function etichettaPiace(titolo, n) {
+    return `Mi piace: ${titolo || "opera"}${n ? `, ${n} ${n === 1 ? "persona" : "persone"}` : ""}`;
+  }
+
+  function bottonePiace(o, grande) {
+    const n = Piace.quanti(o.id);
+    return (
+      `<button type="button" class="piace${grande ? " piace--grande" : ""}" data-piace="${esc(o.id)}" data-titolo="${esc(o.titolo)}" aria-pressed="${Piace.mia(o.id)}" aria-label="${esc(etichettaPiace(o.titolo, n))}">` +
+      `<span class="piace-cuore"><span class="piace-vuoto">${CUORE}</span><span class="piace-pieno">${CUORE}</span></span>` +
+      (grande ? '<span class="piace-testo">Mi piace</span>' : "") +
+      `<span class="piace-conta">${n || ""}</span></button>`
+    );
+  }
+
+  // Schizzi di colore che saltano via dal cuore, nei pigmenti del quadro
+  function schizzi(contenitore, quanti, distanza) {
+    if (menoMovimento()) return;
+    const colori = ["var(--magenta)", "var(--acido)", "var(--giallo)", "var(--turchese)"];
+    for (let i = 0; i < quanti; i++) {
+      const g = document.createElement("i");
+      g.className = "goccia";
+      g.style.setProperty("--a", `${(360 / quanti) * i + Math.random() * 24 - 12}deg`);
+      g.style.setProperty("--d", `${distanza * (0.75 + Math.random() * 0.6)}px`);
+      g.style.setProperty("--s", `${(distanza / 6) * (0.6 + Math.random() * 0.8)}px`);
+      g.style.setProperty("--c", colori[i % colori.length]);
+      g.addEventListener("animationend", () => g.remove());
+      contenitore.append(g);
+    }
+  }
+
+  function sboccia(b) {
+    if (menoMovimento()) return;
+    b.classList.remove("sboccia");
+    void b.offsetWidth;
+    b.classList.add("sboccia");
+    schizzi(b.querySelector(".piace-cuore"), 9, b.classList.contains("piace--grande") ? 26 : 22);
+  }
+
+  function preparaPiace() {
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest(".piace[data-piace]");
+      if (!b) return;
+      if (Piace.cambia(b.dataset.piace)) sboccia(b);
+    });
+
+    // Nella scheda: doppio clic (o doppio tocco) sull'opera per mettere mi piace
+    const area = $("#scheda-media");
+    if (!area) return;
+    area.addEventListener("dblclick", (e) => {
+      const b = $("#scheda-piace .piace");
+      if (!b || !e.target.closest(".media")) return;
+      e.preventDefault();
+      if (!Piace.mia(b.dataset.piace)) {
+        Piace.cambia(b.dataset.piace);
+        sboccia(b);
+      }
+      if (menoMovimento()) return;
+      // la lente si fa da parte mentre compare il cuore
+      if (lente) {
+        lente.classList.add("in-pausa");
+        clearTimeout(lente._pausa);
+        lente._pausa = setTimeout(() => lente.classList.remove("in-pausa"), 1100);
+      }
+      const r = area.getBoundingClientRect();
+      const cuore = document.createElement("span");
+      cuore.className = "cuore-grande";
+      cuore.innerHTML = CUORE;
+      cuore.style.left = `${e.clientX - r.left}px`;
+      cuore.style.top = `${e.clientY - r.top}px`;
+      cuore.addEventListener("animationend", (ev) => {
+        if (ev.target === cuore) cuore.remove();
+      });
+      area.append(cuore);
+      schizzi(cuore, 12, 70);
+    });
+  }
+
+  /* ------------------------------------------------------------------
      8. Avvio
      ------------------------------------------------------------------ */
   async function avvia() {
@@ -2830,6 +3265,7 @@
     preparaProgresso();
     preparaCursore();
     preparaInclinazione();
+    preparaPiace();
     preparaTitoliDipinti();
     creaColpiSfondo();
     preparaAloni();
@@ -2857,6 +3293,8 @@
     costruisciProcesso();
     preparaAcquerello();
     requestAnimationFrame(() => aggiornaScorrimento());
+    // i mi piace di tutti, se nel pannello è collegato Firebase
+    Piace.avvia({ progetto: CONTATTI.firebaseProgetto, chiave: CONTATTI.firebaseChiave });
 
     // Il bottone "Mostra tutte le opere" nella griglia vuota
     $("#opere-griglia").addEventListener("click", (e) => {
