@@ -90,5 +90,17 @@
     "descrizione": "Xilografia Antica tecnica di stampa a rilievo in cui il disegno viene inciso su una tavoletta di legno. Le parti scavate trattengono il vuoto, mentre quelle in rilievo vengono inchiostrate e impresse sulla carta o sulla tela. \nInchiostro nero su carta riso",
     "stato": "Disponibile",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Abisso ",
+    "immagine": "/img/img8717-1.jpeg",
+    "categoria": "Stampe",
+    "anno": 2020,
+    "tecnica": "Linoleografia",
+    "misure": "49x29",
+    "edizione": "N 1",
+    "descrizione": "Si incide una matrice di linoleum sottraendo materiale: le parti scavate restano bianche, mentre quelle in rilievo vengono inchiostrate e impresse sulla carta o su un tessuto.\nInchiostro -nero -arancione-giallo-rosso \nCarta ROSASPINA ",
+    "stato": "Disponibile",
+    "inEvidenza": false
   }
 ]
