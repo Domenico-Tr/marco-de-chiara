@@ -85,8 +85,15 @@ html {
 html.no-scroll { overflow: hidden; }
 
 body {
+  position: relative;
   margin: 0;
-  background: var(--parete);
+  /* La trama della tela (css/tela.webp) sopra il colore della parete.
+     Per tornare a un fondo liscio cancella le tre righe "background-image",
+     "background-size" e "background-blend-mode" qui sotto. */
+  background-color: var(--parete);
+  background-image: url("tela.webp");
+  background-size: 192px 192px;
+  background-blend-mode: multiply;
   color: var(--inchiostro);
   font-family: var(--font-testo);
   font-size: var(--t-m);
@@ -1003,7 +1010,10 @@ body::before {
   width: 100%; height: 100%;
   max-width: none; max-height: none;
   margin: 0; padding: 0; border: 0;
-  background: var(--parete);
+  background-color: var(--parete);
+  background-image: url("tela.webp");
+  background-size: 192px 192px;
+  background-blend-mode: multiply;
   color: var(--inchiostro);
   overflow: hidden;
 }
@@ -1342,16 +1352,6 @@ body::before {
    cursore, acquerello e inclinazione ci sono solo con il mouse.
    ===================================================================== */
 
-/* Grana di carta da acquerello su tutto il fondo, sotto i contenuti */
-body::after {
-  content: "";
-  position: fixed; inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.15 0 0 0 0 0.1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-  opacity: 0.18;
-}
-
 /* Sipario della prima visita: copre la pagina finché le pennellate non la scoprono */
 html.js-sipario::after {
   content: "";
@@ -1589,7 +1589,10 @@ html.js-sipario::after {
   width: 100%; height: 100%;
   max-width: none; max-height: none;
   margin: 0; padding: 0; border: 0;
-  background: var(--parete);
+  background-color: var(--parete);
+  background-image: url("tela.webp");
+  background-size: 192px 192px;
+  background-blend-mode: multiply;
   color: var(--inchiostro);
   overflow: hidden;
 }
@@ -1778,6 +1781,120 @@ html.js-sipario::after {
     padding: 1.25rem max(16px, env(safe-area-inset-right, 0px)) 2rem max(16px, env(safe-area-inset-left, 0px));
   }
 }
+
+/* =====================================================================
+   EFFETTI DELLA TELA
+   Titoli dipinti, alone dei colori dell'opera, pennellate di fondo
+   tra le sezioni e profondità nell'apertura. I movimenti legati allo
+   scorrimento li calcola js/script.js (sezione "9b").
+   ===================================================================== */
+
+/* Ogni sezione ha il suo pigmento, lo stesso della sua voce nel menu */
+#opere    { --pigmento-sezione: var(--acido); }
+#processo { --pigmento-sezione: var(--giallo); }
+#eventi   { --pigmento-sezione: var(--magenta); }
+#contatti { --pigmento-sezione: var(--turchese); }
+
+/* Le pennellate e gli aloni possono sporgere: si tagliano ai bordi dello schermo */
+.sezione { position: relative; overflow-x: clip; }
+@supports not (overflow: clip) {
+  .sezione { overflow-x: hidden; }
+}
+
+/* ---------- Titoli dipinti ----------
+   Il titolo entra come un disegno a matita (solo il contorno), poi il colore
+   lo riempie con una pennellata. Dietro, una pennellata del pigmento della
+   sezione si allunga mentre scorri verso il titolo (--pennello, da 0 a 1). */
+.titolo-sezione { position: relative; isolation: isolate; }
+.titolo-sezione::before {
+  content: "";
+  position: absolute; left: -0.2em; top: 0.42em;
+  width: calc(100% + 0.65em); height: 0.5em;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--pigmento-sezione, var(--acido));
+  opacity: 0.62;
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  clip-path: inset(0 calc((1 - var(--pennello, 1)) * 100%) 0 0);
+}
+.js-anim .titolo-sezione[data-testo] {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--inchiostro);
+}
+.js-anim .titolo-sezione[data-testo]::after {
+  content: attr(data-testo);
+  content: attr(data-testo) / "";
+  position: absolute; inset: 0;
+  color: var(--inchiostro);
+  -webkit-text-stroke: 0;
+  pointer-events: none;
+  -webkit-mask-image: var(--maschera-destra); mask-image: var(--maschera-destra);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.js-anim .intestazione.visibile .titolo-sezione[data-testo]::after {
+  animation: dipingi-dentro 1.5s cubic-bezier(0.55, 0.05, 0.3, 1) 0.65s both;
+}
+
+/* ---------- L'alone dell'opera ----------
+   Passando sopra un'opera (sul telefono: quando arriva al centro dello
+   schermo) dietro di lei si accende una luce nei suoi stessi colori, come
+   l'alone verde dell'apertura. Il colore lo ricava js/script.js dalla foto. */
+.opera-apri::before {
+  content: "";
+  position: absolute; inset: -16% -22%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, var(--alone-opera, var(--alone)) 55%, transparent);
+  opacity: 0;
+  transform: scale(0.72);
+  transition: opacity 0.9s ease, transform 1.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.opera-apri.is-illuminata { z-index: 1; }
+.opera-apri.is-illuminata::before { opacity: 1; transform: none; }
+
+/* ---------- Pennellate di fondo tra le sezioni ----------
+   Nello spazio tra una sezione e l'altra una grande pennellata leggera,
+   del colore della sezione che arriva: si dipinge quando entra nello
+   schermo e scorre un po' più piano della pagina (--deriva, in pixel). */
+.colpo-sfondo {
+  position: absolute;
+  bottom: calc(var(--sezione) * 0.3);
+  width: clamp(15rem, 54vw, 48rem);
+  height: clamp(2.4rem, 6vw, 5.25rem);
+  z-index: -1;
+  pointer-events: none;
+  transform: translateY(calc(var(--deriva, 0) * 1px)) rotate(var(--rot, -4deg));
+}
+/* il colore sta in ::before, così il "dipingersi" (clip-path) non nasconde
+   l'elemento a chi controlla se è entrato nello schermo */
+.colpo-sfondo::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--colpo, var(--acido));
+  opacity: 0.2;
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.6s cubic-bezier(0.6, 0.05, 0.3, 1);
+}
+.colpo-sfondo--sinistra { left: -3%; }
+.colpo-sfondo--destra { right: -3%; }
+.js-anim .colpo-sfondo--sinistra[data-rivela]:not(.visibile)::before { clip-path: inset(0 100% 0 0); }
+.js-anim .colpo-sfondo--destra[data-rivela]:not(.visibile)::before { clip-path: inset(0 0 0 100%); }
+
+/* ---------- Profondità nell'apertura ----------
+   Scorrendo, il nome sale un po' più in fretta della pagina e svanisce,
+   l'opera resta indietro: sembrano su due piani diversi (--salita, in pixel). */
+.apertura-testo {
+  transform: translateY(calc(var(--salita, 0) * -0.22px));
+  opacity: calc(1 - var(--salita, 0) / 1600);
+}
+.evidenza { transform: translateY(calc(var(--salita, 0) * 0.07px)); }
 
 /* Chi ha chiesto meno animazioni al sistema non ne vede */
 @media (prefers-reduced-motion: reduce) {

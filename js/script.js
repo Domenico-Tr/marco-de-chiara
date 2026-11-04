@@ -12,8 +12,11 @@
      6. Contatti
      7. Testata e menu (pennellata della barra, macchia di colore, menu del telefono)
      7b. Passaggio tra le sezioni con le pennellate
+     9. Effetti a tema pittura
+     10. Provalo nella tua stanza
+     9b. Effetti della tela (titoli dipinti, alone delle opere, pennellate di fondo)
      8. Avvio
-   ===================================================================== */
+===================================================================== */
 (function () {
   "use strict";
 
@@ -2617,6 +2620,180 @@
   }
 
   /* ------------------------------------------------------------------
+     9b. Effetti della tela
+     Titoli dipinti, alone dei colori dell'opera, pennellate di fondo
+     tra le sezioni e profondità nell'apertura (gli stili sono nel blocco
+     "EFFETTI DELLA TELA" di css/style.css).
+     ------------------------------------------------------------------ */
+
+  // Il titolo si dipinge sopra il suo contorno: il testo da dipingere lo copia il CSS da data-testo
+  function preparaTitoliDipinti() {
+    document.querySelectorAll(".titolo-sezione").forEach((t) => {
+      t.dataset.testo = t.textContent.trim();
+    });
+  }
+
+  // Il colore dell'alone: la media dei colori più vivi della foto, appena ravvivata
+  function coloreOpera(media) {
+    try {
+      const lato = 20;
+      const c = document.createElement("canvas");
+      c.width = c.height = lato;
+      const ctx = c.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(media, 0, 0, lato, lato);
+      const d = ctx.getImageData(0, 0, lato, lato).data;
+      let r = 0, g = 0, b = 0, somma = 0;
+      for (let k = 0; k < d.length; k += 4) {
+        const max = Math.max(d[k], d[k + 1], d[k + 2]);
+        const min = Math.min(d[k], d[k + 1], d[k + 2]);
+        const vivezza = max ? (max - min) / max : 0;
+        const luce = (max + min) / 510;
+        const peso = vivezza * vivezza * (1 - Math.abs(luce - 0.55)) + 0.01;
+        r += d[k] * peso; g += d[k + 1] * peso; b += d[k + 2] * peso; somma += peso;
+      }
+      // in tinta-saturazione-luce: il colore resta quello dell'opera, ma acceso come una luce
+      const [R, G, B] = [r / somma / 255, g / somma / 255, b / somma / 255];
+      const max = Math.max(R, G, B), min = Math.min(R, G, B);
+      const s0 = max ? (max - min) / max : 0;
+      if (s0 < 0.12) return ""; // opera quasi senza colore (bianco e nero, bronzo, marmo): alone verde acido
+      let tintaGradi = 0;
+      if (max === R) tintaGradi = ((G - B) / (max - min)) % 6;
+      else if (max === G) tintaGradi = (B - R) / (max - min) + 2;
+      else tintaGradi = (R - G) / (max - min) + 4;
+      tintaGradi = Math.round(((tintaGradi * 60) + 360) % 360);
+      const sat = Math.round(Math.min(90, Math.max(62, s0 * 100 + 20)));
+      return `hsla(${tintaGradi}, ${sat}%, 58%, 0.42)`;
+    } catch (err) {
+      return ""; // foto da un altro sito: resta l'alone verde acido
+    }
+  }
+
+  function preparaAloni() {
+    const griglia = $("#opere-griglia");
+    if (!griglia) return;
+    const accendi = (btn, acceso) => {
+      if (acceso && !btn.dataset.alone) {
+        const media = btn.querySelector(".media");
+        const pronta = media && (media.tagName === "CANVAS" || (media.complete && media.naturalWidth));
+        if (pronta) {
+          btn.dataset.alone = coloreOpera(media) || "nessuno";
+          if (btn.dataset.alone !== "nessuno") btn.style.setProperty("--alone-opera", btn.dataset.alone);
+        }
+      }
+      btn.classList.toggle("is-illuminata", acceso);
+    };
+
+    if (conMouse()) {
+      griglia.addEventListener("pointerover", (e) => {
+        const btn = e.target.closest(".opera-apri");
+        if (btn) accendi(btn, true);
+      });
+      griglia.addEventListener("pointerout", (e) => {
+        const btn = e.target.closest(".opera-apri");
+        if (btn && !btn.contains(e.relatedTarget)) accendi(btn, false);
+      });
+      griglia.addEventListener("focusin", (e) => {
+        const btn = e.target.closest(".opera-apri");
+        if (btn) accendi(btn, true);
+      });
+      griglia.addEventListener("focusout", (e) => {
+        const btn = e.target.closest(".opera-apri");
+        if (btn) accendi(btn, false);
+      });
+      return;
+    }
+
+    // Sul telefono si accende l'opera che passa al centro dello schermo
+    if (!("IntersectionObserver" in window)) return;
+    const osservatore = new IntersectionObserver(
+      (voci) => voci.forEach((v) => accendi(v.target, v.isIntersecting)),
+      { rootMargin: "-38% 0px -38% 0px" }
+    );
+    const osservaTutte = () => {
+      osservatore.disconnect();
+      griglia.querySelectorAll(".opera-apri").forEach((b) => osservatore.observe(b));
+    };
+    new MutationObserver(osservaTutte).observe(griglia, { childList: true });
+    osservaTutte();
+  }
+
+  // Le pennellate tra una sezione e l'altra: ognuna ha il colore della sezione che arriva
+  const COLPI_SFONDO = [
+    { sezione: "opere", colore: "var(--giallo)", lato: "destra", rotazione: -5, velocita: 0.16 },
+    { sezione: "processo", colore: "var(--magenta)", lato: "sinistra", rotazione: 4, velocita: 0.2 },
+    { sezione: "eventi", colore: "var(--turchese)", lato: "destra", rotazione: -3, velocita: 0.14 },
+    { sezione: "contatti", colore: "var(--acido)", lato: "sinistra", rotazione: 5, velocita: 0.18 },
+  ];
+
+  function creaColpiSfondo() {
+    COLPI_SFONDO.forEach((c) => {
+      const sezione = document.getElementById(c.sezione);
+      if (!sezione) return;
+      const el = document.createElement("span");
+      el.className = `colpo-sfondo colpo-sfondo--${c.lato}`;
+      el.setAttribute("aria-hidden", "true");
+      el.setAttribute("data-rivela", "");
+      el.style.setProperty("--colpo", c.colore);
+      el.style.setProperty("--rot", `${c.rotazione}deg`);
+      el.dataset.velocita = String(c.velocita);
+      sezione.append(el);
+    });
+  }
+
+  // Tutto quello che si muove con lo scorrimento, calcolato una volta per fotogramma
+  let aggiornaScorrimento = () => {};
+
+  function preparaScorrimento() {
+    const titoli = Array.from(document.querySelectorAll(".titolo-sezione"));
+    const colpi = Array.from(document.querySelectorAll(".colpo-sfondo"));
+    const apertura = $(".apertura");
+    if (menoMovimento()) {
+      titoli.forEach((t) => t.style.setProperty("--pennello", "1"));
+      return;
+    }
+    const vicino = (r, h) => r.bottom > -h * 0.5 && r.top < h * 1.5;
+    let inAttesa = false;
+
+    aggiornaScorrimento = () => {
+      inAttesa = false;
+      const h = window.innerHeight;
+
+      // La pennellata dietro il titolo si allunga mentre il titolo sale verso il centro
+      titoli.forEach((t) => {
+        const r = t.getBoundingClientRect();
+        if (!vicino(r, h)) return;
+        const p = Math.min(1, Math.max(0, (h * 0.95 - r.top) / (h * 0.5)));
+        t.style.setProperty("--pennello", p.toFixed(3));
+      });
+
+      // Le pennellate di fondo scorrono più piano della pagina
+      colpi.forEach((el) => {
+        const s = el.parentElement.getBoundingClientRect();
+        const centro = s.top + el.offsetTop + el.offsetHeight / 2;
+        if (centro < -h || centro > 2 * h) return;
+        const deriva = Math.max(-140, Math.min(140, (centro - h / 2) * Number(el.dataset.velocita)));
+        el.style.setProperty("--deriva", deriva.toFixed(1));
+      });
+
+      // Apertura: il nome e l'opera si separano su due piani
+      if (apertura) {
+        const salita = Math.min(window.scrollY, apertura.offsetHeight);
+        apertura.style.setProperty("--salita", salita.toFixed(1));
+      }
+    };
+
+    const chiedi = () => {
+      if (!inAttesa) {
+        inAttesa = true;
+        requestAnimationFrame(aggiornaScorrimento);
+      }
+    };
+    window.addEventListener("scroll", chiedi, { passive: true });
+    window.addEventListener("resize", chiedi);
+    aggiornaScorrimento();
+  }
+
+  /* ------------------------------------------------------------------
      8. Avvio
      ------------------------------------------------------------------ */
   async function avvia() {
@@ -2653,6 +2830,10 @@
     preparaProgresso();
     preparaCursore();
     preparaInclinazione();
+    preparaTitoliDipinti();
+    creaColpiSfondo();
+    preparaAloni();
+    preparaScorrimento();
     $("#anno").textContent = String(new Date().getFullYear());
 
     try {
@@ -2675,6 +2856,7 @@
     costruisciContatti();
     costruisciProcesso();
     preparaAcquerello();
+    requestAnimationFrame(() => aggiornaScorrimento());
 
     // Il bottone "Mostra tutte le opere" nella griglia vuota
     $("#opere-griglia").addEventListener("click", (e) => {

@@ -16,6 +16,7 @@ vetrina-artista/
 │   └── sito.json       frase di presentazione e contatti
 ├── video/              video caricati dal pannello
 ├── css/style.css       stile, colori, animazioni
+├── css/tela.webp       la trama della tela sul fondo
 ├── js/categorie.js     categorie del menu
 ├── js/script.js        funzionamento del sito
 └── img/                foto delle opere
@@ -109,7 +110,7 @@ Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un qu
 - `--fascia`: il colore della pennellata dietro la barra del menu e del fondo del menu sul telefono (ora il verde notte `--pennellata-1`).
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04a` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04b` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -135,9 +136,19 @@ Sono tutti in `js/script.js` (sezione "9. Effetti a tema pittura") e in fondo a 
 - **Lente**: nella scheda dell'opera, passando sopra l'immagine si vede la pennellata ingrandita due volte e mezzo.
 - **Nastro delle categorie**: fascia che scorre sotto l'apertura con tutte le categorie del menu; cliccandone una si va alle opere filtrate.
 - **Comparse allo scorrimento**: le linee sopra i titoli si tracciano, le opere si dipingono entrando nello schermo, eventi, contatti e video salgono in sequenza.
-- **Dettagli**: grana di carta da acquerello sul fondo, filo verde acido nella barra che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
+- **Dettagli**: filo verde acido nella barra che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
 
 Cursore, acquerello, inclinazione e lente ci sono solo con il mouse: su telefono e tablet non compaiono.
+
+## Effetti della tela
+
+Sono in `js/script.js` (sezione "9b. Effetti della tela") e in `css/style.css` (blocco "EFFETTI DELLA TELA").
+
+- **Tela sul fondo**: tutto il sito, la scheda dell'opera e "Provalo nella tua stanza" stanno su una tela di lino preparata, appena visibile. È il file `css/tela.webp`, ripetuto come una piastrella. Per un fondo liscio, in `css/style.css` cerca `tela.webp` dentro `body` e cancella le tre righe `background-image`, `background-size` e `background-blend-mode`.
+- **Titoli dipinti**: il titolo di ogni sezione entra come un disegno a matita (solo il contorno) e poi il colore lo riempie con una pennellata. Dietro, una pennellata del colore della sezione si allunga mentre scorri verso il titolo. I colori delle sezioni sono in cima al blocco: `#opere`, `#processo`, `#eventi`, `#contatti` con `--pigmento-sezione`.
+- **Alone dell'opera**: passando col mouse su un'opera, dietro di lei si accende una luce nei suoi stessi colori, come l'alone verde dell'apertura. Sul telefono si accende l'opera che passa al centro dello schermo. Il colore viene calcolato dalla foto; per le opere quasi senza colore (bianco e nero, bronzo, marmo) l'alone è verde acido.
+- **Pennellate tra le sezioni**: nello spazio tra una sezione e l'altra compare una grande pennellata leggera del colore della sezione che arriva, che scorre più piano della pagina. Colori, lato e inclinazione sono nell'elenco `COLPI_SFONDO` in `js/script.js`.
+- **Profondità nell'apertura**: scorrendo, il nome sale un po' più in fretta e svanisce piano, mentre l'opera in evidenza resta indietro, come su due piani diversi.
 
 ## Barra del menu
 
