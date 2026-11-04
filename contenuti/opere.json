@@ -11,5 +11,22 @@
     "stato": "Disponibile",
     "prezzo": "200",
     "inEvidenza": false
+  },
+  {
+    "titolo": "giallo",
+    "immagine": "/img/img05.jpg",
+    "categoria": "Quadri",
+    "anno": 2026,
+    "tecnica": "olio",
+    "edizione": "prima ",
+    "stato": "Disponibile",
+    "prezzo": "500 $",
+    "inEvidenza": false
+  },
+  {
+    "titolo": "giallo",
+    "categoria": "Quadri",
+    "stato": "Disponibile",
+    "inEvidenza": false
   }
 ]
