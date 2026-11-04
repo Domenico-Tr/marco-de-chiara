@@ -22,11 +22,5 @@
     "stato": "Disponibile",
     "prezzo": "500 $",
     "inEvidenza": false
-  },
-  {
-    "titolo": "giallo",
-    "categoria": "Quadri",
-    "stato": "Disponibile",
-    "inEvidenza": false
   }
 ]
