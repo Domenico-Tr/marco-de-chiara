@@ -3011,8 +3011,8 @@
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3C6.9 16.5 3.2 13.3 3.2 9.1c0-2.7 2.1-4.8 4.7-4.8 1.7 0 3.2.9 4.1 2.3.9-1.4 2.4-2.3 4.1-2.3 2.6 0 4.7 2.1 4.7 4.8 0 4.2-3.7 7.4-8.8 11.2z"/></svg>';
 
   const Piace = (() => {
-    const CHIAVE = "mi-piace";
-    const CHIAVE_SOSPESI = "mi-piace-da-inviare";
+    const CHIAVE = "mi-piace"; // le opere a cui questo visitatore ha messo il cuore
+    const CHIAVE_CONTATE = "mi-piace-contati"; // quelle già contate su Firebase da questo browser
     const leggi = (k, riserva) => {
       try {
         const v = JSON.parse(localStorage.getItem(k));
@@ -3030,25 +3030,49 @@
     };
     // il nome dell'opera come lo salva Firebase: lettere minuscole, numeri e trattini
     const pulisci = (id) => String(id || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 80) || "opera";
+    const elenco = (v) => (Array.isArray(v) ? v.map(pulisci) : []);
 
-    const salvate = leggi(CHIAVE, []);
-    const mie = new Set(Array.isArray(salvate) ? salvate.map(pulisci) : []);
-    let sospesi = leggi(CHIAVE_SOSPESI, {});
-    if (!sospesi || typeof sospesi !== "object" || Array.isArray(sospesi)) sospesi = {};
+    const mie = new Set(elenco(leggi(CHIAVE, [])));
+    const contate = new Set(elenco(leggi(CHIAVE_CONTATE, [])));
+    try {
+      localStorage.removeItem("mi-piace-da-inviare"); // usato dalla prima versione
+    } catch (e) {
+      /* niente */
+    }
     const conteggi = {};
     let db = null; // { progetto, chiave } quando il conteggio condiviso è attivo
     let timer = null;
+    let inCorso = false;
+    let ancora = false;
+
+    // +1 se il cuore c'è ma Firebase non lo sa ancora, -1 se è stato tolto, 0 se è tutto in pari
+    const differenza = (k) => (mie.has(k) ? 1 : 0) - (contate.has(k) ? 1 : 0);
+    const daInviare = () => Array.from(new Set([...mie, ...contate])).filter((k) => differenza(k) !== 0);
 
     const radice = () =>
       `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(db.progetto)}/databases/(default)/documents`;
     const numero = (campo) => Math.max(0, Number(campo && (campo.integerValue ?? campo.doubleValue)) || 0);
+
+    // Un errore con il codice e il messaggio di Firebase, per capire cosa non va dalla console
+    async function errore(r, cosa) {
+      let messaggio = "";
+      try {
+        const j = await r.json();
+        messaggio = (j && j.error && (j.error.message || j.error.status)) || "";
+      } catch (e) {
+        /* risposta senza testo */
+      }
+      const err = new Error(`${cosa}: errore ${r.status}${messaggio ? ` – ${messaggio}` : ""}`);
+      err.stato = r.status;
+      return err;
+    }
 
     async function leggiConteggi() {
       let pagina = "";
       do {
         const url = `${radice()}/like?pageSize=300&key=${encodeURIComponent(db.chiave)}${pagina ? `&pageToken=${encodeURIComponent(pagina)}` : ""}`;
         const r = await fetch(url);
-        if (!r.ok) throw new Error(`lettura dei mi piace: errore ${r.status}`);
+        if (!r.ok) throw await errore(r, "lettura dei mi piace");
         const dati = await r.json();
         (dati.documents || []).forEach((d) => {
           conteggi[decodeURIComponent(d.name.split("/").pop())] = numero(d.fields && d.fields.n);
@@ -3072,37 +3096,60 @@
           ],
         }),
       });
-      if (!r.ok) throw new Error(`invio del mi piace: errore ${r.status}`);
+      if (!r.ok) throw await errore(r, "invio del mi piace");
       const dati = await r.json();
       const ris = dati.writeResults && dati.writeResults[0] && dati.writeResults[0].transformResults;
       if (ris && ris[0]) conteggi[id] = numero(ris[0]);
     }
 
-    // Manda i mi piace in attesa (anche quelli rimasti da una visita senza rete)
+    // Mette in pari Firebase con i cuori di questo browser
+    // (anche quelli messi senza rete o prima che il conteggio fosse attivo)
     async function svuota() {
       if (!db) return;
-      for (const id of Object.keys(sospesi)) {
-        const passo = sospesi[id];
-        if (!passo) {
-          delete sospesi[id];
-          continue;
+      if (inCorso) {
+        ancora = true;
+        return;
+      }
+      inCorso = true;
+      try {
+        for (const k of daInviare()) {
+          const passo = differenza(k);
+          if (!passo) continue;
+          try {
+            await invia(k, passo);
+            if (passo > 0) contate.add(k);
+            else contate.delete(k);
+          } catch (e) {
+            const definitivo = e.stato >= 400 && e.stato < 500 && e.stato !== 408 && e.stato !== 429;
+            console.warn(`Mi piace: "${k}" non inviato.`, e.message);
+            if (!definitivo) break; // niente rete: si riprova alla prossima occasione
+            // Firebase ha detto di no (per esempio togliere un cuore mai contato): non insistere
+            if (passo > 0) contate.add(k);
+            else contate.delete(k);
+          }
         }
-        try {
-          await invia(id, passo > 0 ? 1 : -1);
-          delete sospesi[id];
-        } catch (e) {
-          break; // niente rete: si riprova alla prossima occasione
+      } finally {
+        inCorso = false;
+        scrivi(CHIAVE_CONTATE, Array.from(contate));
+        aggiornaTutti();
+        if (ancora) {
+          ancora = false;
+          clearTimeout(timer);
+          timer = setTimeout(svuota, 300);
         }
       }
-      scrivi(CHIAVE_SOSPESI, sospesi);
-      aggiornaTutti();
     }
+
+    const quanti = (id) => {
+      if (!db) return 0;
+      const k = pulisci(id);
+      return Math.max(0, (conteggi[k] || 0) + differenza(k));
+    };
 
     function aggiornaBottone(b) {
       const k = pulisci(b.dataset.piace);
-      const piace = mie.has(k);
-      const n = db ? conteggi[k] || 0 : 0;
-      b.setAttribute("aria-pressed", String(piace));
+      const n = quanti(k);
+      b.setAttribute("aria-pressed", String(mie.has(k)));
       const c = b.querySelector(".piace-conta");
       if (c) c.textContent = n ? String(n) : "";
       b.setAttribute("aria-label", etichettaPiace(b.dataset.titolo, n));
@@ -3118,9 +3165,6 @@
       else mie.delete(k);
       scrivi(CHIAVE, Array.from(mie));
       if (db) {
-        conteggi[k] = Math.max(0, (conteggi[k] || 0) + (piace ? 1 : -1));
-        sospesi[k] = (sospesi[k] || 0) + (piace ? 1 : -1);
-        scrivi(CHIAVE_SOSPESI, sospesi);
         clearTimeout(timer);
         timer = setTimeout(svuota, 700); // chi cambia idea in fretta non manda niente
       }
@@ -3129,26 +3173,25 @@
     }
 
     async function avvia(config) {
-      const progetto = String((config && config.progetto) || "").trim();
-      const chiave = String((config && config.chiave) || "").trim();
+      // toglie spazi e virgolette incollati per sbaglio nel pannello
+      const pulito = (v) => String(v || "").trim().replace(/^["'\s]+|["'\s,;]+$/g, "");
+      const progetto = pulito(config && config.progetto);
+      const chiave = pulito(config && config.chiave);
       if (progetto && chiave) db = { progetto, chiave };
       aggiornaTutti();
       if (!db) return;
       try {
         await leggiConteggi();
-        Object.keys(sospesi).forEach((k) => {
-          conteggi[k] = Math.max(0, (conteggi[k] || 0) + sospesi[k]);
-        });
         aggiornaTutti();
         svuota();
       } catch (e) {
-        console.warn("Mi piace: conteggio non disponibile, controlla i campi Firebase nel pannello.", e);
+        console.warn("Mi piace: conteggio non disponibile, controlla i campi Firebase nel pannello.", e.message);
         db = null;
         aggiornaTutti();
       }
     }
 
-    return { avvia, cambia, mia: (id) => mie.has(pulisci(id)), quanti: (id) => (db ? conteggi[pulisci(id)] || 0 : 0), aggiornaTutti };
+    return { avvia, cambia, mia: (id) => mie.has(pulisci(id)), quanti, aggiornaTutti };
   })();
 
   function etichettaPiace(titolo, n) {
