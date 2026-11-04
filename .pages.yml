@@ -36,7 +36,7 @@ content:
       - name: immagine
         label: Foto
         type: image
-        description: JPG, PNG o WebP, circa 1600–2000 px sul lato lungo.
+        description: JPG, PNG o WebP, circa 2000 px sul lato lungo e sotto i 2 MB. Le foto più pesanti il pannello le rifiuta (errore 413).
         options:
           media: immagini
       - name: categoria
@@ -100,7 +100,7 @@ content:
       - name: video
         label: Video caricato
         type: file
-        description: MP4 girato col telefono, meglio sotto i 50 MB. Per video lunghi usa il campo qui sotto.
+        description: Solo video brevi, sotto i 3 MB (il pannello rifiuta quelli più pesanti con l'errore 413). Per video più lunghi caricali su GitHub nella cartella video (fino a 25 MB) e poi sceglili qui, oppure usa il campo qui sotto.
         options:
           media: video
           categories: [video]
@@ -198,9 +198,10 @@ content:
       - name: firebaseProgetto
         label: "Mi piace: ID del progetto Firebase"
         type: string
-        description: Facoltativo. Con questo campo e il successivo il sito conta i "mi piace" di tutti i visitatori (istruzioni nel README, alla voce "Mi piace"). Se restano vuoti, ogni visitatore vede solo i suoi.
+        description: Facoltativo. Con questo campo e il successivo il sito conta i "mi piace" e le visualizzazioni di tutti i visitatori (istruzioni nel README, alla voce "Mi piace e visualizzazioni"). Se restano vuoti, ogni visitatore vede solo i suoi cuori.
       - name: firebaseChiave
         label: "Mi piace: chiave web Firebase"
         type: string
         description: La "apiKey" della configurazione web di Firebase. È fatta per stare nel sito, non è una password.
+
 
