@@ -102,5 +102,29 @@
     "descrizione": "Si incide una matrice di linoleum sottraendo materiale: le parti scavate restano bianche, mentre quelle in rilievo vengono inchiostrate e impresse sulla carta o su un tessuto.\nInchiostro -nero -arancione-giallo-rosso \nCarta ROSASPINA ",
     "stato": "Disponibile",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Abisso ",
+    "immagine": "/img/img8718-1.jpeg",
+    "categoria": "Quadri",
+    "anno": 2020,
+    "tecnica": "Linoleografia",
+    "misure": "49x29",
+    "edizione": "N 2",
+    "descrizione": "Si incide una matrice di linoleum sottraendo materiale: le parti scavate restano bianche, mentre quelle in rilievo vengono inchiostrate e impresse sulla carta o su un tessuto.\nInchiostro -nero -\nCarta ROSASPINA ",
+    "stato": "Disponibile",
+    "inEvidenza": false
+  },
+  {
+    "titolo": "Al lupo!",
+    "immagine": "/img/img2600.jpeg",
+    "categoria": "Stampe",
+    "anno": 2020,
+    "tecnica": "Linoleografia",
+    "misure": "15x20",
+    "edizione": "N 1",
+    "descrizione": "Si incide una matrice di linoleum sottraendo materiale: le parti scavate restano bianche, mentre quelle in rilievo vengono inchiostrate e impresse sulla carta o su un tessuto.\nInchiostro -nero -rosso-\nCarta ROSASPINA ",
+    "stato": "Disponibile",
+    "inEvidenza": false
   }
 ]
