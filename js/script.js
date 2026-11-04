@@ -15,7 +15,7 @@
      9. Effetti a tema pittura
      10. Provalo nella tua stanza
      9b. Effetti della tela (titoli dipinti, alone delle opere, pennellate di fondo)
-     11. Mi piace
+     11. Mi piace e visualizzazioni
      8. Avvio
 ===================================================================== */
 (function () {
@@ -960,7 +960,7 @@
   }
 
   function didascaliaHTML(o) {
-    return `${bottonePiace(o)}
+    return `<div class="reazioni">${visteHTML(o)}${bottonePiace(o)}</div>
       <p class="didascalia-titolo"><em>${esc(o.titolo)}</em>${o.anno ? `, ${esc(o.anno)}` : ""}</p>
       ${o.tecnica ? `<p>${esc(o.tecnica)}</p>` : ""}
       ${o.misure ? `<p>${esc(o.misure)}</p>` : ""}
@@ -1132,7 +1132,7 @@
 
     let prezzo = "";
     if (o.stato !== "venduta") prezzo = `<span>${o.prezzo ? esc(o.prezzo) : "Prezzo su richiesta"}</span>`;
-    $("#scheda-stato").innerHTML = statoHTML(o) + prezzo;
+    $("#scheda-stato").innerHTML = statoHTML(o) + prezzo + visteHTML(o, true);
 
     const richiesta = $("#scheda-richiesta");
     if (CONTATTI.email) {
@@ -1147,6 +1147,7 @@
     $("#scheda-stanza").hidden = !daParete(o);
 
     $("#scheda-piace").innerHTML = bottonePiace(o, true);
+    Visite.conta(o.id);
     $("#scheda-pos").textContent = `${indice + 1} di ${elenco.length}`;
     $("#scheda-nav").hidden = elenco.length < 2;
   }
@@ -3001,54 +3002,27 @@
   }
 
   /* ------------------------------------------------------------------
-     11. Mi piace
+     11. Mi piace e visualizzazioni
      Ogni visitatore può mettere "mi piace" alle opere: il suo cuore resta
      pieno anche quando torna (lo ricorda il suo browser). Se nel pannello
      sono compilati i due campi Firebase (Presentazione e contatti), i "mi
-     piace" di tutti vengono contati e il numero compare accanto al cuore.
+     piace" di tutti vengono contati e il numero compare accanto al cuore;
+     in più si contano le visualizzazioni: ogni volta che qualcuno apre la
+     scheda di un'opera (una sola volta per visita), con un occhio accanto.
      ------------------------------------------------------------------ */
   const CUORE =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3C6.9 16.5 3.2 13.3 3.2 9.1c0-2.7 2.1-4.8 4.7-4.8 1.7 0 3.2.9 4.1 2.3.9-1.4 2.4-2.3 4.1-2.3 2.6 0 4.7 2.1 4.7 4.8 0 4.2-3.7 7.4-8.8 11.2z"/></svg>';
+  const OCCHIO =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3.2"/></svg>';
 
-  const Piace = (() => {
-    const CHIAVE = "mi-piace"; // le opere a cui questo visitatore ha messo il cuore
-    const CHIAVE_CONTATE = "mi-piace-contati"; // quelle già contate su Firebase da questo browser
-    const leggi = (k, riserva) => {
-      try {
-        const v = JSON.parse(localStorage.getItem(k));
-        return v == null ? riserva : v;
-      } catch (e) {
-        return riserva;
-      }
-    };
-    const scrivi = (k, v) => {
-      try {
-        localStorage.setItem(k, JSON.stringify(v));
-      } catch (e) {
-        /* browser in incognito o con i dati bloccati: vale solo per questa visita */
-      }
-    };
-    // il nome dell'opera come lo salva Firebase: lettere minuscole, numeri e trattini
-    const pulisci = (id) => String(id || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 80) || "opera";
-    const elenco = (v) => (Array.isArray(v) ? v.map(pulisci) : []);
+  // Il nome dell'opera come lo salva Firebase: lettere minuscole, numeri e trattini
+  const chiaveOpera = (id) => String(id || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 80) || "opera";
 
-    const mie = new Set(elenco(leggi(CHIAVE, [])));
-    const contate = new Set(elenco(leggi(CHIAVE_CONTATE, [])));
-    try {
-      localStorage.removeItem("mi-piace-da-inviare"); // usato dalla prima versione
-    } catch (e) {
-      /* niente */
-    }
-    const conteggi = {};
-    let db = null; // { progetto, chiave } quando il conteggio condiviso è attivo
-    let timer = null;
-    let inCorso = false;
-    let ancora = false;
-
-    // +1 se il cuore c'è ma Firebase non lo sa ancora, -1 se è stato tolto, 0 se è tutto in pari
-    const differenza = (k) => (mie.has(k) ? 1 : 0) - (contate.has(k) ? 1 : 0);
-    const daInviare = () => Array.from(new Set([...mie, ...contate])).filter((k) => differenza(k) !== 0);
-
+  // Il collegamento con il database Firestore di Firebase, comune a mi piace e visualizzazioni
+  const Firebase = (() => {
+    let db = null; // { progetto, chiave }
+    // toglie spazi e virgolette incollati per sbaglio nel pannello
+    const pulito = (v) => String(v || "").trim().replace(/^["'\s]+|["'\s,;]+$/g, "");
     const radice = () =>
       `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(db.progetto)}/databases/(default)/documents`;
     const numero = (campo) => Math.max(0, Number(campo && (campo.integerValue ?? campo.doubleValue)) || 0);
@@ -3067,45 +3041,95 @@
       return err;
     }
 
-    async function leggiConteggi() {
+    function configura(config) {
+      const progetto = pulito(config && config.progetto);
+      const chiave = pulito(config && config.chiave);
+      db = progetto && chiave ? { progetto, chiave } : null;
+      return !!db;
+    }
+
+    // Tutti i contatori di una raccolta ("like" o "visite"): { opera: numero }
+    async function leggi(raccolta) {
+      const conti = {};
       let pagina = "";
       do {
-        const url = `${radice()}/like?pageSize=300&key=${encodeURIComponent(db.chiave)}${pagina ? `&pageToken=${encodeURIComponent(pagina)}` : ""}`;
+        const url = `${radice()}/${raccolta}?pageSize=300&key=${encodeURIComponent(db.chiave)}${pagina ? `&pageToken=${encodeURIComponent(pagina)}` : ""}`;
         const r = await fetch(url);
-        if (!r.ok) throw await errore(r, "lettura dei mi piace");
+        if (!r.ok) throw await errore(r, `lettura di "${raccolta}"`);
         const dati = await r.json();
         (dati.documents || []).forEach((d) => {
-          conteggi[decodeURIComponent(d.name.split("/").pop())] = numero(d.fields && d.fields.n);
+          conti[decodeURIComponent(d.name.split("/").pop())] = numero(d.fields && d.fields.n);
         });
         pagina = dati.nextPageToken || "";
       } while (pagina);
+      return conti;
     }
 
-    // Aggiunge (passo 1) o toglie (passo -1) un mi piace e riceve il totale aggiornato
-    async function invia(id, passo) {
+    // Aggiunge (passo 1) o toglie (passo -1) uno al contatore e restituisce il totale aggiornato
+    async function incrementa(raccolta, id, passo) {
       const r = await fetch(`${radice()}:commit?key=${encodeURIComponent(db.chiave)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           writes: [
             {
-              update: { name: `projects/${db.progetto}/databases/(default)/documents/like/${id}`, fields: {} },
+              update: { name: `projects/${db.progetto}/databases/(default)/documents/${raccolta}/${id}`, fields: {} },
               updateMask: { fieldPaths: [] },
               updateTransforms: [{ fieldPath: "n", increment: { integerValue: String(passo) } }],
             },
           ],
         }),
       });
-      if (!r.ok) throw await errore(r, "invio del mi piace");
+      if (!r.ok) throw await errore(r, `invio a "${raccolta}"`);
       const dati = await r.json();
       const ris = dati.writeResults && dati.writeResults[0] && dati.writeResults[0].transformResults;
-      if (ris && ris[0]) conteggi[id] = numero(ris[0]);
+      return ris && ris[0] ? numero(ris[0]) : null;
     }
+
+    return { configura, attivo: () => !!db, leggi, incrementa };
+  })();
+
+  const leggiLocale = (k, riserva, archivio) => {
+    try {
+      const v = JSON.parse((archivio || window.localStorage).getItem(k));
+      return v == null ? riserva : v;
+    } catch (e) {
+      return riserva;
+    }
+  };
+  const scriviLocale = (k, v, archivio) => {
+    try {
+      (archivio || window.localStorage).setItem(k, JSON.stringify(v));
+    } catch (e) {
+      /* browser in incognito o con i dati bloccati: vale solo per questa visita */
+    }
+  };
+  const elencoChiavi = (v) => (Array.isArray(v) ? v.map(chiaveOpera) : []);
+
+  const Piace = (() => {
+    const CHIAVE = "mi-piace"; // le opere a cui questo visitatore ha messo il cuore
+    const CHIAVE_CONTATE = "mi-piace-contati"; // quelle già contate su Firebase da questo browser
+    const mie = new Set(elencoChiavi(leggiLocale(CHIAVE, [])));
+    const contate = new Set(elencoChiavi(leggiLocale(CHIAVE_CONTATE, [])));
+    try {
+      localStorage.removeItem("mi-piace-da-inviare"); // usato dalla prima versione
+    } catch (e) {
+      /* niente */
+    }
+    let conteggi = {};
+    let acceso = false; // il conteggio condiviso funziona
+    let timer = null;
+    let inCorso = false;
+    let ancora = false;
+
+    // +1 se il cuore c'è ma Firebase non lo sa ancora, -1 se è stato tolto, 0 se è tutto in pari
+    const differenza = (k) => (mie.has(k) ? 1 : 0) - (contate.has(k) ? 1 : 0);
+    const daInviare = () => Array.from(new Set([...mie, ...contate])).filter((k) => differenza(k) !== 0);
 
     // Mette in pari Firebase con i cuori di questo browser
     // (anche quelli messi senza rete o prima che il conteggio fosse attivo)
     async function svuota() {
-      if (!db) return;
+      if (!acceso) return;
       if (inCorso) {
         ancora = true;
         return;
@@ -3116,7 +3140,8 @@
           const passo = differenza(k);
           if (!passo) continue;
           try {
-            await invia(k, passo);
+            const n = await Firebase.incrementa("like", k, passo);
+            if (n !== null) conteggi[k] = n;
             if (passo > 0) contate.add(k);
             else contate.delete(k);
           } catch (e) {
@@ -3130,7 +3155,7 @@
         }
       } finally {
         inCorso = false;
-        scrivi(CHIAVE_CONTATE, Array.from(contate));
+        scriviLocale(CHIAVE_CONTATE, Array.from(contate));
         aggiornaTutti();
         if (ancora) {
           ancora = false;
@@ -3141,13 +3166,13 @@
     }
 
     const quanti = (id) => {
-      if (!db) return 0;
-      const k = pulisci(id);
+      if (!acceso) return 0;
+      const k = chiaveOpera(id);
       return Math.max(0, (conteggi[k] || 0) + differenza(k));
     };
 
     function aggiornaBottone(b) {
-      const k = pulisci(b.dataset.piace);
+      const k = chiaveOpera(b.dataset.piace);
       const n = quanti(k);
       b.setAttribute("aria-pressed", String(mie.has(k)));
       const c = b.querySelector(".piace-conta");
@@ -3159,12 +3184,12 @@
     }
 
     function cambia(id) {
-      const k = pulisci(id);
+      const k = chiaveOpera(id);
       const piace = !mie.has(k);
       if (piace) mie.add(k);
       else mie.delete(k);
-      scrivi(CHIAVE, Array.from(mie));
-      if (db) {
+      scriviLocale(CHIAVE, Array.from(mie));
+      if (acceso) {
         clearTimeout(timer);
         timer = setTimeout(svuota, 700); // chi cambia idea in fretta non manda niente
       }
@@ -3172,27 +3197,92 @@
       return piace;
     }
 
-    async function avvia(config) {
-      // toglie spazi e virgolette incollati per sbaglio nel pannello
-      const pulito = (v) => String(v || "").trim().replace(/^["'\s]+|["'\s,;]+$/g, "");
-      const progetto = pulito(config && config.progetto);
-      const chiave = pulito(config && config.chiave);
-      if (progetto && chiave) db = { progetto, chiave };
+    async function avvia() {
       aggiornaTutti();
-      if (!db) return;
+      if (!Firebase.attivo()) return;
       try {
-        await leggiConteggi();
+        conteggi = await Firebase.leggi("like");
+        acceso = true;
         aggiornaTutti();
         svuota();
       } catch (e) {
         console.warn("Mi piace: conteggio non disponibile, controlla i campi Firebase nel pannello.", e.message);
-        db = null;
-        aggiornaTutti();
       }
     }
 
-    return { avvia, cambia, mia: (id) => mie.has(pulisci(id)), quanti, aggiornaTutti };
+    return { avvia, cambia, mia: (id) => mie.has(chiaveOpera(id)), quanti, aggiornaTutti };
   })();
+
+  // Le visualizzazioni: si conta l'apertura della scheda di un'opera, una volta per visita
+  const Visite = (() => {
+    const CHIAVE_SESSIONE = "opere-viste"; // le opere già contate in questa visita
+    const sessione = (() => {
+      try {
+        return window.sessionStorage;
+      } catch (e) {
+        return null;
+      }
+    })();
+    const viste = new Set(sessione ? elencoChiavi(leggiLocale(CHIAVE_SESSIONE, [], sessione)) : []);
+    let conteggi = {};
+    let acceso = false;
+    const inAttesa = []; // opere aperte prima che i conteggi fossero letti
+
+    const quante = (id) => (acceso ? conteggi[chiaveOpera(id)] || 0 : 0);
+
+    function aggiornaTutti() {
+      document.querySelectorAll(".viste[data-viste]").forEach((el) => {
+        const n = quante(el.dataset.viste);
+        el.hidden = !n;
+        const c = el.querySelector(".viste-n");
+        if (c) c.textContent = String(n);
+        const t = el.querySelector(".viste-testo");
+        if (t) t.textContent = n === 1 ? " visualizzazione" : " visualizzazioni";
+      });
+    }
+
+    async function conta(id) {
+      const k = chiaveOpera(id);
+      if (viste.has(k)) return;
+      if (!acceso) {
+        if (Firebase.attivo() && !inAttesa.includes(k)) inAttesa.push(k);
+        return;
+      }
+      viste.add(k);
+      if (sessione) scriviLocale(CHIAVE_SESSIONE, Array.from(viste), sessione);
+      conteggi[k] = (conteggi[k] || 0) + 1; // si vede subito, poi arriva il numero vero
+      aggiornaTutti();
+      try {
+        const n = await Firebase.incrementa("visite", k, 1);
+        if (n !== null) conteggi[k] = n;
+      } catch (e) {
+        console.warn(`Visualizzazioni: "${k}" non inviata.`, e.message);
+      }
+      aggiornaTutti();
+    }
+
+    async function avvia() {
+      if (!Firebase.attivo()) return;
+      try {
+        conteggi = await Firebase.leggi("visite");
+        acceso = true;
+        aggiornaTutti();
+        inAttesa.splice(0).forEach(conta);
+      } catch (e) {
+        console.warn("Visualizzazioni: conteggio non disponibile, controlla le regole di Firebase.", e.message);
+      }
+    }
+
+    return { avvia, conta, quante, aggiornaTutti };
+  })();
+
+  function visteHTML(o, grande) {
+    const n = Visite.quante(o.id);
+    return (
+      `<span class="viste${grande ? " viste--grande" : ""}" data-viste="${esc(o.id)}"${n ? "" : " hidden"}>` +
+      `${OCCHIO}<span class="viste-n">${n}</span><span class="viste-testo${grande ? "" : " visually-hidden"}"> ${n === 1 ? "visualizzazione" : "visualizzazioni"}</span></span>`
+    );
+  }
 
   function etichettaPiace(titolo, n) {
     return `Mi piace: ${titolo || "opera"}${n ? `, ${n} ${n === 1 ? "persona" : "persone"}` : ""}`;
@@ -3336,8 +3426,10 @@
     costruisciProcesso();
     preparaAcquerello();
     requestAnimationFrame(() => aggiornaScorrimento());
-    // i mi piace di tutti, se nel pannello è collegato Firebase
-    Piace.avvia({ progetto: CONTATTI.firebaseProgetto, chiave: CONTATTI.firebaseChiave });
+    // i mi piace e le visualizzazioni di tutti, se nel pannello è collegato Firebase
+    Firebase.configura({ progetto: CONTATTI.firebaseProgetto, chiave: CONTATTI.firebaseChiave });
+    Piace.avvia();
+    Visite.avvia();
 
     // Il bottone "Mostra tutte le opere" nella griglia vuota
     $("#opere-griglia").addEventListener("click", (e) => {

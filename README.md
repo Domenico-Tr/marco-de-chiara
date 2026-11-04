@@ -70,7 +70,7 @@ Dal pannello puoi invitare Marco come collaboratore con la sua email: non gli se
 
 Le 14 opere e i 6 eventi presenti all'inizio sono **esempi**: la prima cosa da fare è cancellarli dal pannello e inserire quelli veri.
 
-Consigli per le foto: JPG o WebP, circa 1600–2000 px sul lato lungo, sotto i 500 KB ciascuna, con luce diffusa e sfondo neutro. Verticali, orizzontali e quadrate convivono senza problemi. Se una foto non viene trovata, al suo posto il sito mostra un riquadro tratteggiato con il percorso cercato.
+Consigli per le foto: JPG o WebP, circa 1600–2000 px sul lato lungo, sotto i 2 MB (il pannello rifiuta i file più pesanti con l'errore 413; l'ideale per la velocità del sito è sotto i 500 KB), con luce diffusa e sfondo neutro. Verticali, orizzontali e quadrate convivono senza problemi. Se una foto non viene trovata, al suo posto il sito mostra un riquadro tratteggiato con il percorso cercato.
 
 ## Processo creativo (video)
 
@@ -78,7 +78,7 @@ Nel pannello, la voce **Processo creativo** è un elenco di video. Per ognuno:
 
 - **Titolo** e **Data**: i video più recenti compaiono per primi.
 - **Video caricato** oppure **Oppure link al video**, uno dei due:
-  - un file MP4 girato col telefono si guarda direttamente nel sito. Meglio sotto i 50 MB: GitHub rifiuta i file oltre i 100 MB e i video pesanti rallentano il sito. I file `.mov` dell'iPhone a volte non partono su Chrome: in quel caso convertili in MP4 (ad esempio con HandBrake, gratuito) oppure usa un link.
+  - un file MP4 girato col telefono si guarda direttamente nel sito. Dal pannello passano solo video brevi, sotto i 3 MB: per quelli più pesanti (fino a 25 MB) apri la cartella `video` su GitHub, **Add file → Upload files**, e poi nel pannello sceglili dalla libreria dei video. I file `.mov` dell'iPhone a volte non partono su Chrome: in quel caso convertili in MP4 (ad esempio con HandBrake, gratuito) oppure usa un link.
   - un link di **YouTube** si guarda nel sito con il lettore di YouTube; un link di **Instagram** o **TikTok** apre il video sul social. Per i video lunghi conviene sempre YouTube.
 - **Copertina**: facoltativa, l'immagine mostrata prima di premere play. Per Instagram e TikTok è consigliata, altrimenti compare un fondo verde con l'icona del social.
 - **Opera collegata**: se scrivi il titolo esatto di un'opera, sotto il video compare "Guarda l'opera finita".
@@ -110,7 +110,7 @@ Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un qu
 - `--fascia`: il colore della pennellata dietro la barra del menu e del fondo del menu sul telefono (ora il verde notte `--pennellata-1`).
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04d` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04e` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -159,16 +159,20 @@ Sono in `js/script.js` (sezione "9b. Effetti della tela") e in `css/style.css` (
 - **Social**: su schermi larghi, in fondo alla barra, le icone di Instagram e TikTok (il primo profilo di ciascuno, preso da `contenuti/sito.json`).
 - **Telefono**: il pulsante è fatto di tre pennellate che diventano una X. Il menu copre tutto lo schermo su un fondo verde notte con la luce acida del quadro: voci grandi numerate, ognuna sottolineata col suo pigmento, le categorie come etichette colorate e, in fondo, l'email e tutti i social.
 
-## Mi piace
+## Mi piace e visualizzazioni
 
 Sotto ogni opera (e nella scheda a tutto schermo) c'è un cuore. Toccandolo si riempie di magenta e schizza gocce di colore; nella scheda basta anche un doppio clic sull'opera.
 
 **Senza fare niente** ogni visitatore ritrova i suoi cuori quando torna sul sito (li ricorda il suo browser), ma non vede quanti ne hanno messi gli altri.
 
-**Per contare i mi piace di tutti** serve un piccolo database gratuito di Google, Firebase. Si fa una volta sola, in circa dieci minuti:
+**Con Firebase collegato** (un piccolo database gratuito di Google) il sito conta:
+- i **mi piace** di tutti, con il numero accanto al cuore;
+- le **visualizzazioni** di ogni opera, con un occhio accanto al cuore e nella scheda. Una visualizzazione è l'apertura della scheda dell'opera; chi la riapre nella stessa visita non viene contato due volte.
+
+Si attiva una volta sola, in circa dieci minuti:
 
 1. Vai su [console.firebase.google.com](https://console.firebase.google.com), entra con un account Google e crea un nuovo progetto (per esempio `marco-de-chiara`). Google Analytics non serve: puoi disattivarlo.
-2. Nel menu a sinistra apri **Firestore Database** (sotto "Build" o "Crea") e premi **Crea database**. Se chiede l'edizione scegli **Standard**, poi una località in Europa (per esempio `eur3`) e la **modalità di produzione**.
+2. Nel menu a sinistra apri **Databases & Storage → Firestore** e premi **Crea database**. Se chiede l'edizione scegli **Standard**, poi una località in Europa (per esempio `eur3`) e la **modalità di produzione**.
 3. Apri la scheda **Regole**, cancella quello che c'è, incolla queste righe e premi **Pubblica**:
 
    ```
@@ -187,21 +191,30 @@ Sotto ogni opera (e nella scheda a tutto schermo) c'è un cuore. Toccandolo si r
                            || request.resource.data.n == resource.data.n - 1);
          allow delete: if false;
        }
+       match /visite/{opera} {
+         allow read: if true;
+         allow create: if opera.matches('^[a-z0-9-]{1,80}$')
+                       && request.resource.data.keys().hasOnly(['n'])
+                       && request.resource.data.n == 1;
+         allow update: if request.resource.data.keys().hasOnly(['n'])
+                       && request.resource.data.n == resource.data.n + 1;
+         allow delete: if false;
+       }
      }
    }
    ```
 
-   Queste regole permettono solo di aggiungere o togliere un "mi piace" alla volta: nessuno può cancellare i conteggi o scriverci altro.
+   Queste regole permettono solo di aggiungere o togliere un "mi piace" alla volta e di aggiungere una visualizzazione alla volta: nessuno può cancellare i conteggi o scriverci altro.
 4. Premi l'ingranaggio in alto a sinistra → **Impostazioni progetto**. In fondo, sotto "Le tue app", premi l'icona **</>** (Web), dai un nome qualsiasi e registra l'app. Firebase mostra un blocco di codice: ti servono solo due valori, `projectId` e `apiKey`.
-5. Su [app.pagescms.org](https://app.pagescms.org) apri **Presentazione e contatti**, incolla `projectId` in "Mi piace: ID del progetto Firebase" e `apiKey` in "Mi piace: chiave web Firebase", poi salva.
+5. Su [app.pagescms.org](https://app.pagescms.org) apri **Presentazione e contatti**, incolla `projectId` in "Mi piace: ID del progetto Firebase" e `apiKey` in "Mi piace: chiave web Firebase" (senza virgolette), poi salva.
 
-Dopo un paio di minuti accanto ai cuori compaiono i numeri. I conteggi si vedono anche dalla console di Firebase, in Firestore Database → `like`: un documento per opera, con il totale nel campo `n`.
+Dopo un paio di minuti accanto ai cuori compaiono i numeri. I conteggi si vedono anche dalla console di Firebase, in Firestore Database → scheda Dati: la raccolta `like` per i mi piace e `visite` per le visualizzazioni, con un documento per opera e il totale nel campo `n`. Le visualizzazioni compaiono sul sito solo dalla prima apertura in poi: un'opera mai aperta non mostra l'occhio.
 
 Da sapere:
 - Il piano gratuito di Firebase basta per migliaia di visite al giorno e non chiede la carta di credito.
 - La `apiKey` è fatta per stare in un sito pubblico: a proteggere i dati sono le regole del passo 3.
-- Ogni opera è riconosciuta dal suo titolo: se Marco cambia il titolo di un'opera, il suo conteggio riparte da zero.
-- Il cuore non è un sistema anti-imbroglio: chi svuota i dati del browser può rimetterlo. Per un sito d'artista va benissimo.
+- Ogni opera è riconosciuta dal suo titolo: se Marco cambia il titolo di un'opera, i suoi conteggi ripartono da zero.
+- Sono conteggi semplici, non un sistema anti-imbroglio: chi svuota i dati del browser può rimettere il cuore, e anche le visite di Marco contano. Per un sito d'artista va benissimo.
 
 ## Provalo nella tua stanza
 

@@ -2023,7 +2023,30 @@ html.js-sipario::after {
    sull'opera fa comparire un grande cuore.
    ===================================================================== */
 .didascalia { position: relative; padding-right: 3rem; }
-.didascalia > .piace { position: absolute; top: -0.35rem; right: -0.4rem; }
+.didascalia:has(.viste:not([hidden])) { padding-right: 6.25rem; }
+/* In alto a destra della didascalia: visualizzazioni e cuore */
+.reazioni {
+  position: absolute; top: -0.35rem; right: -0.4rem;
+  display: flex; align-items: center; gap: 0.15rem;
+}
+
+/* Le visualizzazioni: un occhio e il numero, discreti */
+.viste {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  color: var(--grafite);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.viste[hidden] { display: none; }
+.viste svg {
+  width: 1.15rem; height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.viste--grande { font-size: var(--t-s); }
 
 .piace {
   position: relative;
