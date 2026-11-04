@@ -14,7 +14,7 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-03f">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-04a">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi.
@@ -39,17 +39,34 @@
 
   <!-- ============ TESTATA E MENU ============ -->
   <header class="testata">
-    <div class="wrap testata-inner">
-      <a class="marchio" href="#inizio">Marco De Chiara</a>
+    <!-- La pennellata scura che si stende dietro la barra quando scorri la pagina.
+         Dentro c'è anche il filo verde acido che si allunga mentre leggi. -->
+    <div class="testata-fondo" aria-hidden="true">
+      <div class="testata-colpo"><div class="testata-pennellata"></div></div>
+    </div>
 
+    <div class="wrap testata-inner">
+      <a class="marchio" href="#inizio">
+        <span class="marchio-nome">Marco De Chiara</span>
+        <!-- Il ghirigoro sotto il nome, come una firma: si ridisegna al passaggio del mouse -->
+        <svg class="marchio-firma" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M3 9.6C26 6.2 51 11.4 79 8.4S139 4.4 166 6.6C179 7.7 189 9.6 197 4.6" pathLength="1" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </a>
+
+      <!-- Sul telefono: tre pennellate che diventano una X -->
       <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">
-        <span>Menu</span>
+        <span class="menu-btn-testo">Menu</span>
+        <span class="menu-btn-icona" aria-hidden="true"><i></i><i></i><i></i></span>
       </button>
 
       <nav class="menu" id="menu" aria-label="Menu principale">
+        <!-- La macchia di colore che scivola sotto la voce indicata dal mouse
+             e si ferma sulla sezione che stai guardando -->
+        <span class="menu-segno" aria-hidden="true"></span>
         <ul class="menu-lista">
-          <!-- --pigmento è il colore della sottolineatura a pennello (dai riccioli del quadro);
-               --n l'ordine in cui compare nel menu del telefono -->
+          <!-- --pigmento è il colore della macchia e della sottolineatura a pennello
+               (dai riccioli del quadro); --n l'ordine in cui compare nel menu del telefono -->
           <li class="menu-voce menu-voce--opere" style="--pigmento: var(--acido); --n: 0">
             <a class="menu-link" href="#opere">
               Opere
@@ -62,7 +79,12 @@
           <li class="menu-voce" style="--pigmento: var(--magenta); --n: 2"><a class="menu-link" href="#eventi">Eventi</a></li>
           <li class="menu-voce" style="--pigmento: var(--turchese); --n: 3"><a class="menu-link" href="#contatti">Contatti</a></li>
         </ul>
+        <!-- Solo nel menu del telefono: email e social, creati da js/script.js leggendo contenuti/sito.json -->
+        <div class="menu-piede" id="menu-piede"></div>
       </nav>
+
+      <!-- Su schermi larghi: le icone dei social in fondo alla barra -->
+      <ul class="testata-social" id="testata-social" aria-label="Social"></ul>
     </div>
   </header>
 
@@ -276,7 +298,7 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-03f"></script>
-  <script src="js/script.js?v=2026-11-03f"></script>
+  <script src="js/categorie.js?v=2026-11-04a"></script>
+  <script src="js/script.js?v=2026-11-04a"></script>
 </body>
 </html>

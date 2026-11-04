@@ -102,18 +102,19 @@ Le icone di Instagram e TikTok arrivano da Font Awesome (gratuito), caricato da 
 
 In cima a `css/style.css`, dentro `:root`:
 
-Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un quadro di Marco: il verde scurissimo dei bordi per i testi, il verde bosco per pulsanti e dettagli, il verde acido dell'alone come luce dietro l'opera in apertura e come "evidenziatore" a pennello, i gialli, i magenta e i turchesi dei riccioli per le sottolineature del menu.
+Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un quadro di Marco: il verde scurissimo dei bordi per i testi, il verde bosco per pulsanti e dettagli, il verde acido dell'alone come luce dietro l'opera in apertura e come "evidenziatore" a pennello, i gialli, i magenta e i turchesi dei riccioli per la macchia di colore e le sottolineature del menu.
 
 - `--parete` è lo sfondo, `--inchiostro` il colore del testo, `--accento` il verde bosco (pulsanti, "In corso", pallino "Disponibile"), `--acido` il verde acido (filtro attivo, pulsante "Guarda" dei video), `--alone` la luce dietro l'opera in apertura.
-- `--giallo`, `--magenta`, `--turchese`: colori delle sottolineature a pennello del menu. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
+- `--giallo`, `--magenta`, `--turchese`: colori della macchia sotto le voci del menu, delle sottolineature e dei campioni delle categorie. Quale colore va a quale voce si sceglie con `--pigmento` sui `<li>` in `index.html`.
+- `--fascia`: il colore della pennellata dietro la barra del menu e del fondo del menu sul telefono (ora il verde notte `--pennellata-1`).
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-03f` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04a` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
 - **Passaggio tra sezioni**: cliccando una voce del menu (o una categoria, o il nome in alto) lo schermo si copre di pennellate, la pagina si sposta sotto il colore e altre pennellate la ripuliscono. È disegnato in `js/script.js`, sezione "2b. Pennellate a tutto schermo".
-- **Menu**: su computer il sottomenu "Opere" compare con un colpo di pennello e le voci si sottolineano a pennello; su telefono il pannello si dipinge dall'alto e le voci vengono sottolineate una dopo l'altra.
+- **Menu**: su computer il sottomenu "Opere" compare con un colpo di pennello; su telefono il menu scende dall'alto come una pennellata (vedi "Barra del menu" qui sotto).
 - **Opere**: cambiando categoria le opere compaiono dipinte una dopo l'altra; nella scheda a tutto schermo ogni opera si dipinge da sinistra (avanti) o da destra (indietro).
 
 Cosa si può cambiare:
@@ -134,9 +135,18 @@ Sono tutti in `js/script.js` (sezione "9. Effetti a tema pittura") e in fondo a 
 - **Lente**: nella scheda dell'opera, passando sopra l'immagine si vede la pennellata ingrandita due volte e mezzo.
 - **Nastro delle categorie**: fascia che scorre sotto l'apertura con tutte le categorie del menu; cliccandone una si va alle opere filtrate.
 - **Comparse allo scorrimento**: le linee sopra i titoli si tracciano, le opere si dipingono entrando nello schermo, eventi, contatti e video salgono in sequenza.
-- **Dettagli**: grana di carta da acquerello sul fondo, pennellata sotto la testata che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
+- **Dettagli**: grana di carta da acquerello sul fondo, filo verde acido nella barra che si allunga mentre si scorre, firma grande nel piè di pagina con "Torna su".
 
 Cursore, acquerello, inclinazione e lente ci sono solo con il mouse: su telefono e tablet non compaiono.
+
+## Barra del menu
+
+- **Pennellata**: in cima alla pagina la barra è trasparente. Appena scorri, una pennellata verde notte si stende da sinistra dietro il nome e le voci, con le setole agli estremi, e il testo diventa chiaro una voce dopo l'altra; tornando in cima si ritira. Dentro la pennellata un filo verde acido si allunga mentre scorri la pagina. Il colore è `--fascia` in cima a `css/style.css`; la forma è la variabile `--banda`.
+- **Macchia di colore**: su computer, passando col mouse sulle voci, una macchia di pigmento scivola sotto la voce (si schiaccia un po' mentre si sposta, come colore trascinato) e poi resta sulla sezione che stai guardando. Ogni voce ha il suo pigmento (`--pigmento` in `index.html`).
+- **Firma**: sotto il nome c'è un ghirigoro che si disegna all'apertura e si ridisegna al passaggio del mouse.
+- **Tavolozza**: il sottomenu "Opere" ha la forma di una tavolozza, con un campione di colore per ogni categoria e il foro per il pollice.
+- **Social**: su schermi larghi, in fondo alla barra, le icone di Instagram e TikTok (il primo profilo di ciascuno, preso da `contenuti/sito.json`).
+- **Telefono**: il pulsante è fatto di tre pennellate che diventano una X. Il menu copre tutto lo schermo su un fondo verde notte con la luce acida del quadro: voci grandi numerate, ognuna sottolineata col suo pigmento, le categorie come etichette colorate e, in fondo, l'email e tutti i social.
 
 ## Provalo nella tua stanza
 

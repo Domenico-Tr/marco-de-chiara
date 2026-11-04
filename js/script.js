@@ -10,7 +10,7 @@
      4. Scheda dell'opera a tutto schermo
      5. Eventi
      6. Contatti
-     7. Testata e menu su telefono
+     7. Testata e menu (pennellata della barra, macchia di colore, menu del telefono)
      7b. Passaggio tra le sezioni con le pennellate
      8. Avvio
    ===================================================================== */
@@ -962,10 +962,17 @@
       ${statoHTML(o)}`;
   }
 
+  // Il sottomenu delle opere: ogni categoria ha il suo campione di colore,
+  // a turno i pigmenti del quadro; "Tutte le opere" li ha tutti
   function costruisciSottomenu() {
+    const pigmenti = ["var(--acido)", "var(--giallo)", "var(--magenta)", "var(--turchese)"];
     const voci = [{ id: "tutte", nome: "Tutte le opere" }, ...CATEGORIE];
     $("#sottomenu-opere").innerHTML = voci
-      .map((v) => `<li><a href="#opere" data-categoria="${esc(v.id)}"><span>${esc(v.nome)}</span><span class="conta">${conta(v.id)}</span></a></li>`)
+      .map((v, n) => {
+        const tutte = v.id === "tutte";
+        const colore = tutte ? "" : ` style="--pigmento: ${pigmenti[(n - 1) % pigmenti.length]}"`;
+        return `<li><a href="#opere" data-categoria="${esc(v.id)}"${colore}><span class="campione${tutte ? " campione--tutti" : ""}" aria-hidden="true"></span><span class="sottomenu-nome">${esc(v.nome)}</span><span class="conta">${conta(v.id)}</span></a></li>`;
+      })
       .join("");
   }
 
@@ -1558,6 +1565,29 @@
       )
       .join("");
 
+    // Nel menu del telefono: l'email e tutti i social, in fondo
+    const social = voci.filter((v) => v.tipo !== "email");
+    const piedeMenu = $("#menu-piede");
+    if (piedeMenu) {
+      piedeMenu.innerHTML =
+        (CONTATTI.email ? `<a class="menu-email" href="mailto:${esc(CONTATTI.email)}">${esc(CONTATTI.email)}</a>` : "") +
+        (social.length
+          ? `<ul class="menu-social" aria-label="Social">${social
+              .map((v) => `<li><a ${attributiLink(v)}><span class="icona">${ICONE[v.tipo]}</span><span>${esc(v.testo)}</span></a></li>`)
+              .join("")}</ul>`
+          : "");
+    }
+
+    // Nella barra su schermi larghi: un'icona per ogni social (il primo profilo di ciascuno)
+    const barra = $("#testata-social");
+    if (barra) {
+      const visti = new Set();
+      barra.innerHTML = social
+        .filter((v) => !visti.has(v.tipo) && visti.add(v.tipo))
+        .map((v) => `<li><a ${attributiLink(v)} aria-label="${v.etichetta} ${esc(v.testo)}" title="${esc(v.testo)}">${ICONE[v.tipo]}</a></li>`)
+        .join("");
+    }
+
     lista.addEventListener("click", (e) => {
       const b = e.target.closest(".copia");
       if (!b) return;
@@ -1588,28 +1618,58 @@
   }
 
   /* ------------------------------------------------------------------
-     7. Testata e menu su telefono
+     7. Testata e menu
      ------------------------------------------------------------------ */
+  // Riporta la macchia di colore del menu sulla sezione che stai guardando
+  // (la imposta preparaMenu, la chiama anche preparaSezioneCorrente)
+  let segnoTorna = () => {};
+
+  // Il ghirigoro sotto il nome si disegna come una firma
+  function disegnaFirma(ritardo = 0) {
+    const firma = $(".marchio-firma path");
+    if (!firma || !firma.animate || menoMovimento()) return;
+    firma.animate([{ strokeDashoffset: "1" }, { strokeDashoffset: "0" }], {
+      duration: 1100,
+      delay: ritardo,
+      easing: "cubic-bezier(0.6, 0.05, 0.3, 1)",
+      fill: "backwards",
+    });
+  }
+
   function preparaMenu() {
+    const radice = document.documentElement;
     const btn = $("#menu-btn");
+    const testoBtn = btn.querySelector(".menu-btn-testo");
     const menu = $("#menu");
     const telefono = window.matchMedia("(max-width: 760px)");
-    // Il pannello si apre con una pennellata; in chiusura resta visibile
-    // finché il colore non si è ritirato (classe is-closing)
+    const sotto = [$("main"), $(".piede")].filter(Boolean);
+
+    // Sul telefono il menu copre lo schermo: scende con una pennellata dall'alto
+    // e in chiusura resta visibile finché il colore non si è ritirato (is-closing)
+    const chiudiDelTutto = () => {
+      menu.classList.remove("is-open", "is-closing");
+      radice.classList.remove("menu-aperto");
+    };
     const imposta = (aperto) => {
       btn.setAttribute("aria-expanded", String(aperto));
-      btn.querySelector("span").textContent = aperto ? "Chiudi" : "Menu";
+      testoBtn.textContent = aperto ? "Chiudi" : "Menu";
+      // la pagina sotto non si raggiunge col tasto Tab mentre il menu la copre
+      sotto.forEach((el) => {
+        el.inert = aperto && telefono.matches;
+      });
       clearTimeout(menu._chiusura);
       if (aperto) {
         menu.classList.remove("is-closing");
         menu.classList.add("is-open");
+        radice.classList.add("menu-aperto");
+        menu.scrollTop = 0;
       } else if (menu.classList.contains("is-open")) {
         if (!telefono.matches || menoMovimento()) {
-          menu.classList.remove("is-open", "is-closing");
+          chiudiDelTutto();
           return;
         }
         menu.classList.add("is-closing");
-        menu._chiusura = setTimeout(() => menu.classList.remove("is-open", "is-closing"), 400);
+        menu._chiusura = setTimeout(chiudiDelTutto, 420);
       }
     };
     btn.addEventListener("click", () => imposta(btn.getAttribute("aria-expanded") !== "true"));
@@ -1629,11 +1689,89 @@
       }
     });
 
-    // Il filetto sotto la testata compare quando si scorre
+    // La pennellata dietro la barra si stende quando scorri e si ritira in cima
     const testata = $(".testata");
-    const aggiorna = () => testata.classList.toggle("is-scrolled", window.scrollY > 8);
+    const aggiorna = () => testata.classList.toggle("is-scrolled", window.scrollY > 24);
     window.addEventListener("scroll", aggiorna, { passive: true });
     aggiorna();
+
+    // Il nome si ridisegna come una firma al passaggio del mouse
+    $(".marchio").addEventListener("mouseenter", () => disegnaFirma());
+
+    // La macchia di colore sotto le voci (solo su schermi larghi)
+    const segno = $(".menu-segno");
+    const voci = Array.from(document.querySelectorAll(".menu-lista > .menu-voce > .menu-link"));
+    let suSegno = null; // la voce su cui sta la macchia
+    let indicata = null; // la voce sotto il mouse o con il focus
+
+    const sposta = (a, forza) => {
+      if (!segno || telefono.matches) return;
+      if (a === suSegno && !forza) return;
+      const prima = suSegno;
+      if (prima) prima.classList.remove("sotto-segno");
+      suSegno = a;
+      if (!a) {
+        segno.classList.remove("visibile");
+        return;
+      }
+      // se la macchia era nascosta (o la finestra è cambiata) compare lì, senza scivolare
+      const salta = forza || !prima || !segno.classList.contains("visibile");
+      if (salta) segno.classList.add("senza-scivolo");
+      const r = a.getBoundingClientRect();
+      const n = menu.getBoundingClientRect();
+      const h = Math.round(r.height * 0.7);
+      segno.style.setProperty("--x", `${(r.left - n.left - 14).toFixed(1)}px`);
+      segno.style.setProperty("--y", `${(r.top - n.top + (r.height - h) / 2 + 1).toFixed(1)}px`);
+      segno.style.setProperty("--w", `${(r.width + 28).toFixed(1)}px`);
+      segno.style.setProperty("--h", `${h}px`);
+      segno.style.setProperty("--segno-colore", a.parentElement.style.getPropertyValue("--pigmento") || "var(--acido)");
+      if (salta) {
+        void segno.offsetWidth;
+        segno.classList.remove("senza-scivolo");
+      }
+      segno.classList.add("visibile");
+      a.classList.add("sotto-segno");
+      // mentre scivola la macchia si schiaccia, come colore trascinato col pennello
+      if (!salta && segno.animate && !menoMovimento()) {
+        const verso = voci.indexOf(a) > voci.indexOf(prima) ? -1 : 1;
+        segno.animate(
+          [{ transform: "none" }, { transform: `scaleY(0.5) skewX(${verso * 14}deg)`, offset: 0.4 }, { transform: "none" }],
+          { duration: 560, easing: "ease-out" }
+        );
+      }
+    };
+    const corrente = () => voci.find((a) => a.hasAttribute("aria-current")) || null;
+    segnoTorna = (forza) => sposta(indicata || corrente(), forza === true);
+
+    voci.forEach((a) => {
+      a.addEventListener("mouseenter", () => {
+        indicata = a;
+        sposta(a);
+      });
+      a.addEventListener("focus", () => {
+        indicata = a;
+        sposta(a);
+      });
+    });
+    $(".menu-lista").addEventListener("mouseleave", () => {
+      indicata = null;
+      segnoTorna();
+    });
+    menu.addEventListener("focusout", (e) => {
+      if (menu.contains(e.relatedTarget)) return;
+      indicata = null;
+      segnoTorna();
+    });
+    window.addEventListener("resize", () => segnoTorna(true));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => segnoTorna(true));
+
+    // Passando da telefono a schermo largo (o viceversa) il menu si chiude
+    const cambiaSchermo = () => {
+      imposta(false);
+      segnoTorna(true);
+    };
+    if (telefono.addEventListener) telefono.addEventListener("change", cambiaSchermo);
+    else if (telefono.addListener) telefono.addListener(cambiaSchermo);
   }
 
   /* ------------------------------------------------------------------
@@ -1679,7 +1817,7 @@
     });
   }
 
-  // La voce del menu della sezione che stai guardando resta sottolineata
+  // La voce del menu della sezione che stai guardando resta segnata dalla macchia di colore
   function preparaSezioneCorrente() {
     if (!("IntersectionObserver" in window)) return;
     const link = {};
@@ -1698,6 +1836,7 @@
             a.removeAttribute("aria-current");
           }
         });
+        segnoTorna();
       },
       { rootMargin: "-40% 0px -55% 0px" }
     );
@@ -2486,7 +2625,10 @@
 
     // Apertura: alla prima visita il sipario di pittura, poi il nome lettera per lettera
     preparaNome();
-    const avviaApertura = () => radice.classList.add("apertura-pronta");
+    const avviaApertura = () => {
+      radice.classList.add("apertura-pronta");
+      disegnaFirma(650);
+    };
     let segnalaPronto = () => {};
     const pronto = new Promise((risolvi) => {
       segnalaPronto = risolvi;

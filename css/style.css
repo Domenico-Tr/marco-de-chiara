@@ -39,6 +39,7 @@
   --pennellata-3: #4C9A2B;  /* verde prato */
   --pennellata-4: #B9E43A;  /* verde acido */
   --velatura: rgba(195, 234, 54, 0.32);  /* pennellata leggera dietro le voci del sottomenu */
+  --fascia: var(--pennellata-1);  /* la pennellata scura dietro la barra del menu e il fondo del menu sul telefono */
 
   /* Caratteri */
   --font-display: "Cormorant", "Cormorant Garamond", Garamond, Georgia, serif;  /* nome, titoli delle sezioni e delle opere */
@@ -69,6 +70,7 @@
   --maschera-destra: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20100'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0.0%200.00h153.4v1.20h-153.4zM0.0%201.00h156.3v1.20h-156.3zM0.0%202.00h152.2v1.20h-152.2zM0.0%203.00h160.6v1.20h-160.6zM0.0%204.00h147.6v1.20h-147.6zM0.0%205.00h145.8v1.20h-145.8zM0.0%206.00h156.3v1.20h-156.3zM0.0%207.00h123.0v1.20h-123.0zM125.9%207.00h22.5v1.20h-22.5zM0.0%208.00h151.8v1.20h-151.8zM0.0%209.00h167.4v1.20h-167.4zM0.0%2010.00h162.7v1.20h-162.7zM0.0%2011.00h157.5v1.20h-157.5zM0.0%2012.00h162.6v1.20h-162.6zM0.0%2013.00h136.3v1.20h-136.3zM139.9%2013.00h8.0v1.20h-8.0zM0.0%2014.00h153.3v1.20h-153.3zM0.0%2015.00h157.4v1.20h-157.4zM0.0%2016.00h143.8v1.20h-143.8zM0.0%2017.00h138.6v1.20h-138.6zM0.0%2018.00h143.3v1.20h-143.3zM0.0%2019.00h131.2v1.20h-131.2zM133.6%2019.00h21.7v1.20h-21.7zM0.0%2020.00h139.9v1.20h-139.9zM0.0%2021.00h145.3v1.20h-145.3zM0.0%2022.00h144.6v1.20h-144.6zM0.0%2023.00h131.7v1.20h-131.7zM0.0%2024.00h132.9v1.20h-132.9zM0.0%2025.00h134.7v1.20h-134.7zM0.0%2026.00h139.6v1.20h-139.6zM0.0%2027.00h139.6v1.20h-139.6zM0.0%2028.00h146.6v1.20h-146.6zM0.0%2029.00h155.8v1.20h-155.8zM0.0%2030.00h149.9v1.20h-149.9zM0.0%2031.00h152.4v1.20h-152.4zM0.0%2032.00h152.8v1.20h-152.8zM0.0%2033.00h145.4v1.20h-145.4zM0.0%2034.00h147.9v1.20h-147.9zM0.0%2035.00h161.8v1.20h-161.8zM0.0%2036.00h164.7v1.20h-164.7zM0.0%2037.00h169.3v1.20h-169.3zM0.0%2038.00h167.1v1.20h-167.1zM0.0%2039.00h164.6v1.20h-164.6zM0.0%2040.00h170.6v1.20h-170.6zM0.0%2041.00h161.2v1.20h-161.2zM0.0%2042.00h134.4v1.20h-134.4zM138.2%2042.00h19.8v1.20h-19.8zM0.0%2043.00h141.4v1.20h-141.4zM0.0%2044.00h148.8v1.20h-148.8zM0.0%2045.00h154.7v1.20h-154.7zM0.0%2046.00h152.9v1.20h-152.9zM0.0%2047.00h156.3v1.20h-156.3zM0.0%2048.00h167.6v1.20h-167.6zM0.0%2049.00h150.2v1.20h-150.2zM0.0%2050.00h135.6v1.20h-135.6zM0.0%2051.00h144.9v1.20h-144.9zM0.0%2052.00h140.9v1.20h-140.9zM0.0%2053.00h139.4v1.20h-139.4zM0.0%2054.00h137.7v1.20h-137.7zM0.0%2055.00h144.3v1.20h-144.3zM0.0%2056.00h133.8v1.20h-133.8zM139.8%2056.00h8.7v1.20h-8.7zM0.0%2057.00h156.0v1.20h-156.0zM0.0%2058.00h154.5v1.20h-154.5zM0.0%2059.00h155.4v1.20h-155.4zM0.0%2060.00h141.0v1.20h-141.0zM0.0%2061.00h143.6v1.20h-143.6zM0.0%2062.00h150.8v1.20h-150.8zM0.0%2063.00h144.2v1.20h-144.2zM0.0%2064.00h151.6v1.20h-151.6zM0.0%2065.00h163.2v1.20h-163.2zM0.0%2066.00h160.6v1.20h-160.6zM0.0%2067.00h162.6v1.20h-162.6zM0.0%2068.00h167.7v1.20h-167.7zM0.0%2069.00h155.0v1.20h-155.0zM0.0%2070.00h159.5v1.20h-159.5zM0.0%2071.00h158.7v1.20h-158.7zM0.0%2072.00h149.9v1.20h-149.9zM0.0%2073.00h150.2v1.20h-150.2zM0.0%2074.00h150.1v1.20h-150.1zM0.0%2075.00h158.3v1.20h-158.3zM0.0%2076.00h145.4v1.20h-145.4zM0.0%2077.00h119.8v1.20h-119.8zM123.7%2077.00h22.9v1.20h-22.9zM0.0%2078.00h137.5v1.20h-137.5zM0.0%2079.00h145.5v1.20h-145.5zM0.0%2080.00h139.4v1.20h-139.4zM0.0%2081.00h143.9v1.20h-143.9zM0.0%2082.00h119.1v1.20h-119.1zM123.9%2082.00h13.8v1.20h-13.8zM0.0%2083.00h136.3v1.20h-136.3zM0.0%2084.00h148.1v1.20h-148.1zM0.0%2085.00h151.5v1.20h-151.5zM0.0%2086.00h154.5v1.20h-154.5zM0.0%2087.00h150.6v1.20h-150.6zM0.0%2088.00h147.4v1.20h-147.4zM0.0%2089.00h145.6v1.20h-145.6zM0.0%2090.00h152.6v1.20h-152.6zM0.0%2091.00h143.8v1.20h-143.8zM0.0%2092.00h155.4v1.20h-155.4zM0.0%2093.00h164.4v1.20h-164.4zM0.0%2094.00h162.1v1.20h-162.1zM0.0%2095.00h169.4v1.20h-169.4zM0.0%2096.00h155.1v1.20h-155.1zM0.0%2097.00h152.6v1.20h-152.6zM154.9%2097.00h8.3v1.20h-8.3zM0.0%2098.00h160.5v1.20h-160.5zM0.0%2099.00h158.1v1.20h-158.1z'/%3E%3C/svg%3E");
   --maschera-sinistra: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20300%20100'%20preserveAspectRatio='none'%3E%3Cg%20transform='matrix%28-1%200%200%201%20300%200%29'%3E%3Cpath%20d='M0.0%200.00h153.4v1.20h-153.4zM0.0%201.00h156.3v1.20h-156.3zM0.0%202.00h152.2v1.20h-152.2zM0.0%203.00h160.6v1.20h-160.6zM0.0%204.00h147.6v1.20h-147.6zM0.0%205.00h145.8v1.20h-145.8zM0.0%206.00h156.3v1.20h-156.3zM0.0%207.00h123.0v1.20h-123.0zM125.9%207.00h22.5v1.20h-22.5zM0.0%208.00h151.8v1.20h-151.8zM0.0%209.00h167.4v1.20h-167.4zM0.0%2010.00h162.7v1.20h-162.7zM0.0%2011.00h157.5v1.20h-157.5zM0.0%2012.00h162.6v1.20h-162.6zM0.0%2013.00h136.3v1.20h-136.3zM139.9%2013.00h8.0v1.20h-8.0zM0.0%2014.00h153.3v1.20h-153.3zM0.0%2015.00h157.4v1.20h-157.4zM0.0%2016.00h143.8v1.20h-143.8zM0.0%2017.00h138.6v1.20h-138.6zM0.0%2018.00h143.3v1.20h-143.3zM0.0%2019.00h131.2v1.20h-131.2zM133.6%2019.00h21.7v1.20h-21.7zM0.0%2020.00h139.9v1.20h-139.9zM0.0%2021.00h145.3v1.20h-145.3zM0.0%2022.00h144.6v1.20h-144.6zM0.0%2023.00h131.7v1.20h-131.7zM0.0%2024.00h132.9v1.20h-132.9zM0.0%2025.00h134.7v1.20h-134.7zM0.0%2026.00h139.6v1.20h-139.6zM0.0%2027.00h139.6v1.20h-139.6zM0.0%2028.00h146.6v1.20h-146.6zM0.0%2029.00h155.8v1.20h-155.8zM0.0%2030.00h149.9v1.20h-149.9zM0.0%2031.00h152.4v1.20h-152.4zM0.0%2032.00h152.8v1.20h-152.8zM0.0%2033.00h145.4v1.20h-145.4zM0.0%2034.00h147.9v1.20h-147.9zM0.0%2035.00h161.8v1.20h-161.8zM0.0%2036.00h164.7v1.20h-164.7zM0.0%2037.00h169.3v1.20h-169.3zM0.0%2038.00h167.1v1.20h-167.1zM0.0%2039.00h164.6v1.20h-164.6zM0.0%2040.00h170.6v1.20h-170.6zM0.0%2041.00h161.2v1.20h-161.2zM0.0%2042.00h134.4v1.20h-134.4zM138.2%2042.00h19.8v1.20h-19.8zM0.0%2043.00h141.4v1.20h-141.4zM0.0%2044.00h148.8v1.20h-148.8zM0.0%2045.00h154.7v1.20h-154.7zM0.0%2046.00h152.9v1.20h-152.9zM0.0%2047.00h156.3v1.20h-156.3zM0.0%2048.00h167.6v1.20h-167.6zM0.0%2049.00h150.2v1.20h-150.2zM0.0%2050.00h135.6v1.20h-135.6zM0.0%2051.00h144.9v1.20h-144.9zM0.0%2052.00h140.9v1.20h-140.9zM0.0%2053.00h139.4v1.20h-139.4zM0.0%2054.00h137.7v1.20h-137.7zM0.0%2055.00h144.3v1.20h-144.3zM0.0%2056.00h133.8v1.20h-133.8zM139.8%2056.00h8.7v1.20h-8.7zM0.0%2057.00h156.0v1.20h-156.0zM0.0%2058.00h154.5v1.20h-154.5zM0.0%2059.00h155.4v1.20h-155.4zM0.0%2060.00h141.0v1.20h-141.0zM0.0%2061.00h143.6v1.20h-143.6zM0.0%2062.00h150.8v1.20h-150.8zM0.0%2063.00h144.2v1.20h-144.2zM0.0%2064.00h151.6v1.20h-151.6zM0.0%2065.00h163.2v1.20h-163.2zM0.0%2066.00h160.6v1.20h-160.6zM0.0%2067.00h162.6v1.20h-162.6zM0.0%2068.00h167.7v1.20h-167.7zM0.0%2069.00h155.0v1.20h-155.0zM0.0%2070.00h159.5v1.20h-159.5zM0.0%2071.00h158.7v1.20h-158.7zM0.0%2072.00h149.9v1.20h-149.9zM0.0%2073.00h150.2v1.20h-150.2zM0.0%2074.00h150.1v1.20h-150.1zM0.0%2075.00h158.3v1.20h-158.3zM0.0%2076.00h145.4v1.20h-145.4zM0.0%2077.00h119.8v1.20h-119.8zM123.7%2077.00h22.9v1.20h-22.9zM0.0%2078.00h137.5v1.20h-137.5zM0.0%2079.00h145.5v1.20h-145.5zM0.0%2080.00h139.4v1.20h-139.4zM0.0%2081.00h143.9v1.20h-143.9zM0.0%2082.00h119.1v1.20h-119.1zM123.9%2082.00h13.8v1.20h-13.8zM0.0%2083.00h136.3v1.20h-136.3zM0.0%2084.00h148.1v1.20h-148.1zM0.0%2085.00h151.5v1.20h-151.5zM0.0%2086.00h154.5v1.20h-154.5zM0.0%2087.00h150.6v1.20h-150.6zM0.0%2088.00h147.4v1.20h-147.4zM0.0%2089.00h145.6v1.20h-145.6zM0.0%2090.00h152.6v1.20h-152.6zM0.0%2091.00h143.8v1.20h-143.8zM0.0%2092.00h155.4v1.20h-155.4zM0.0%2093.00h164.4v1.20h-164.4zM0.0%2094.00h162.1v1.20h-162.1zM0.0%2095.00h169.4v1.20h-169.4zM0.0%2096.00h155.1v1.20h-155.1zM0.0%2097.00h152.6v1.20h-152.6zM154.9%2097.00h8.3v1.20h-8.3zM0.0%2098.00h160.5v1.20h-160.5zM0.0%2099.00h158.1v1.20h-158.1z'/%3E%3C/g%3E%3C/svg%3E");
   --maschera-giu: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20300'%20preserveAspectRatio='none'%3E%3Cpath%20d='M0.00%200.0h1.20v154.5h-1.20zM1.00%200.0h1.20v159.9h-1.20zM2.00%200.0h1.20v164.4h-1.20zM3.00%200.0h1.20v156.4h-1.20zM4.00%200.0h1.20v156.4h-1.20zM5.00%200.0h1.20v154.1h-1.20zM6.00%200.0h1.20v159.3h-1.20zM7.00%200.0h1.20v161.8h-1.20zM8.00%200.0h1.20v160.5h-1.20zM9.00%200.0h1.20v155.3h-1.20zM9.00%20159.3h1.20v2.7h-1.20zM10.00%200.0h1.20v161.1h-1.20zM11.00%200.0h1.20v143.8h-1.20zM11.00%20147.4h1.20v13.4h-1.20zM12.00%200.0h1.20v164.4h-1.20zM13.00%200.0h1.20v151.8h-1.20zM14.00%200.0h1.20v152.8h-1.20zM15.00%200.0h1.20v142.0h-1.20zM16.00%200.0h1.20v151.1h-1.20zM17.00%200.0h1.20v137.7h-1.20zM18.00%200.0h1.20v150.0h-1.20zM19.00%200.0h1.20v149.8h-1.20zM20.00%200.0h1.20v140.9h-1.20zM21.00%200.0h1.20v139.5h-1.20zM22.00%200.0h1.20v138.9h-1.20zM23.00%200.0h1.20v132.4h-1.20zM24.00%200.0h1.20v138.8h-1.20zM25.00%200.0h1.20v139.6h-1.20zM26.00%200.0h1.20v145.2h-1.20zM27.00%200.0h1.20v143.1h-1.20zM28.00%200.0h1.20v145.9h-1.20zM29.00%200.0h1.20v147.4h-1.20zM30.00%200.0h1.20v150.2h-1.20zM31.00%200.0h1.20v131.5h-1.20zM31.00%20136.3h1.20v15.6h-1.20zM32.00%200.0h1.20v143.9h-1.20zM33.00%200.0h1.20v139.6h-1.20zM33.00%20144.7h1.20v12.8h-1.20zM34.00%200.0h1.20v152.0h-1.20zM35.00%200.0h1.20v131.1h-1.20zM35.00%20135.2h1.20v12.7h-1.20zM36.00%200.0h1.20v159.7h-1.20zM37.00%200.0h1.20v157.3h-1.20zM38.00%200.0h1.20v163.4h-1.20zM38.00%20167.3h1.20v3.3h-1.20zM39.00%200.0h1.20v167.3h-1.20zM40.00%200.0h1.20v160.2h-1.20zM41.00%200.0h1.20v147.8h-1.20zM42.00%200.0h1.20v146.2h-1.20zM43.00%200.0h1.20v146.9h-1.20zM44.00%200.0h1.20v160.9h-1.20zM45.00%200.0h1.20v151.7h-1.20zM46.00%200.0h1.20v148.3h-1.20zM47.00%200.0h1.20v158.2h-1.20zM48.00%200.0h1.20v156.0h-1.20zM49.00%200.0h1.20v151.5h-1.20zM50.00%200.0h1.20v148.4h-1.20zM51.00%200.0h1.20v142.7h-1.20zM52.00%200.0h1.20v129.4h-1.20zM53.00%200.0h1.20v128.6h-1.20zM54.00%200.0h1.20v141.0h-1.20zM55.00%200.0h1.20v145.8h-1.20zM56.00%200.0h1.20v148.3h-1.20zM57.00%200.0h1.20v157.9h-1.20zM58.00%200.0h1.20v139.7h-1.20zM58.00%20144.7h1.20v10.3h-1.20zM59.00%200.0h1.20v120.7h-1.20zM59.00%20124.2h1.20v21.8h-1.20zM60.00%200.0h1.20v142.1h-1.20zM61.00%200.0h1.20v148.7h-1.20zM62.00%200.0h1.20v150.1h-1.20zM63.00%200.0h1.20v167.4h-1.20zM64.00%200.0h1.20v149.1h-1.20zM65.00%200.0h1.20v160.2h-1.20zM66.00%200.0h1.20v178.7h-1.20zM67.00%200.0h1.20v164.1h-1.20zM68.00%200.0h1.20v158.2h-1.20zM69.00%200.0h1.20v154.5h-1.20zM70.00%200.0h1.20v120.1h-1.20zM70.00%20125.1h1.20v21.2h-1.20zM71.00%200.0h1.20v149.7h-1.20zM72.00%200.0h1.20v143.5h-1.20zM73.00%200.0h1.20v144.8h-1.20zM74.00%200.0h1.20v152.7h-1.20zM75.00%200.0h1.20v154.2h-1.20zM76.00%200.0h1.20v152.2h-1.20zM77.00%200.0h1.20v151.3h-1.20zM78.00%200.0h1.20v127.1h-1.20zM78.00%20129.6h1.20v14.8h-1.20zM79.00%200.0h1.20v139.6h-1.20zM80.00%200.0h1.20v133.6h-1.20zM81.00%200.0h1.20v141.0h-1.20zM82.00%200.0h1.20v145.4h-1.20zM83.00%200.0h1.20v135.2h-1.20zM84.00%200.0h1.20v146.9h-1.20zM85.00%200.0h1.20v150.3h-1.20zM86.00%200.0h1.20v150.1h-1.20zM87.00%200.0h1.20v143.0h-1.20zM88.00%200.0h1.20v157.0h-1.20zM89.00%200.0h1.20v126.3h-1.20zM89.00%20128.6h1.20v14.7h-1.20zM90.00%200.0h1.20v138.8h-1.20zM91.00%200.0h1.20v150.6h-1.20zM92.00%200.0h1.20v148.5h-1.20zM93.00%200.0h1.20v169.5h-1.20zM94.00%200.0h1.20v163.5h-1.20zM95.00%200.0h1.20v161.7h-1.20zM96.00%200.0h1.20v159.6h-1.20zM97.00%200.0h1.20v156.1h-1.20zM98.00%200.0h1.20v162.4h-1.20zM99.00%200.0h1.20v119.1h-1.20zM99.00%20123.3h1.20v23.8h-1.20z'/%3E%3C/svg%3E");
+  --banda: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201000%20100'%20preserveAspectRatio='none'%3E%3Cpath%20d='M23.2%204.00h212.6v2.30h-212.6zM241.3%204.00h123.1v2.30h-123.1zM376.6%204.00h186.0v2.30h-186.0zM574.9%204.00h159.4v2.30h-159.4zM741.0%204.00h231.4v2.30h-231.4zM24.4%206.00h354.9v2.30h-354.9zM385.4%206.00h330.4v2.30h-330.4zM724.5%206.00h250.8v2.30h-250.8zM25.1%208.00h307.0v2.30h-307.0zM339.0%208.00h402.8v2.30h-402.8zM746.5%208.00h228.0v2.30h-228.0zM22.5%2010.00h953.0v2.30h-953.0zM16.4%2012.00h965.4v2.30h-965.4zM5.7%2014.00h978.6v2.30h-978.6zM13.1%2016.00h974.8v2.30h-974.8zM12.4%2018.00h977.2v2.30h-977.2zM10.8%2020.00h974.6v2.30h-974.6zM9.1%2022.00h981.0v2.30h-981.0zM9.0%2024.00h980.0v2.30h-980.0zM7.6%2026.00h979.8v2.30h-979.8zM9.0%2028.00h978.7v2.30h-978.7zM4.2%2030.00h984.4v2.30h-984.4zM7.3%2032.00h985.5v2.30h-985.5zM0.9%2034.00h994.8v2.30h-994.8zM8.3%2036.00h984.1v2.30h-984.1zM2.7%2038.00h993.2v2.30h-993.2zM5.3%2040.00h988.5v2.30h-988.5zM5.1%2042.00h994.9v2.30h-994.9zM1.8%2044.00h990.9v2.30h-990.9zM1.3%2046.00h994.3v2.30h-994.3zM5.2%2048.00h987.4v2.30h-987.4zM0.0%2050.00h992.2v2.30h-992.2zM4.9%2052.00h990.3v2.30h-990.3zM0.0%2054.00h996.8v2.30h-996.8zM6.6%2056.00h993.4v2.30h-993.4zM4.8%2058.00h986.3v2.30h-986.3zM1.6%2060.00h993.9v2.30h-993.9zM0.0%2062.00h994.4v2.30h-994.4zM4.1%2064.00h988.5v2.30h-988.5zM7.4%2066.00h987.1v2.30h-987.1zM9.1%2068.00h985.0v2.30h-985.0zM7.2%2070.00h980.6v2.30h-980.6zM3.3%2072.00h992.6v2.30h-992.6zM12.2%2074.00h979.8v2.30h-979.8zM12.4%2076.00h979.2v2.30h-979.2zM0.3%2078.00h987.5v2.30h-987.5zM14.3%2080.00h970.3v2.30h-970.3zM14.7%2082.00h977.4v2.30h-977.4zM18.8%2084.00h960.2v2.30h-960.2zM19.7%2086.00h965.4v2.30h-965.4zM21.8%2088.00h960.8v2.30h-960.8zM24.7%2090.00h390.5v2.30h-390.5zM423.7%2090.00h315.4v2.30h-315.4zM743.2%2090.00h231.8v2.30h-231.8zM26.1%2092.00h333.0v2.30h-333.0zM362.9%2092.00h363.2v2.30h-363.2zM734.5%2092.00h156.6v2.30h-156.6zM893.7%2092.00h78.0v2.30h-78.0zM28.1%2094.00h173.8v2.30h-173.8zM205.7%2094.00h280.5v2.30h-280.5zM490.2%2094.00h265.9v2.30h-265.9zM765.5%2094.00h194.2v2.30h-194.2zM969.3%2094.00h5.6v2.30h-5.6z'/%3E%3C/svg%3E");
   --tratto: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20240%2024'%20preserveAspectRatio='none'%3E%3Cg%20transform='rotate%28-1.5%20120%2012%29'%3E%3Cpath%20d='M20.9%203.00h146.0v1.45h-146.0zM170.6%203.00h23.7v1.45h-23.7zM16.0%204.20h131.7v1.45h-131.7zM157.2%204.20h43.8v1.45h-43.8zM15.8%205.40h148.1v1.45h-148.1zM173.4%205.40h40.8v1.45h-40.8zM11.1%206.60h211.6v1.45h-211.6zM9.9%207.80h201.3v1.45h-201.3zM9.9%209.00h214.7v1.45h-214.7zM4.7%2010.20h206.7v1.45h-206.7zM222.5%2010.20h7.5v1.45h-7.5zM3.5%2011.40h177.3v1.45h-177.3zM187.3%2011.40h43.5v1.45h-43.5zM5.2%2012.60h227.3v1.45h-227.3zM9.2%2013.80h213.4v1.45h-213.4zM9.9%2015.00h216.2v1.45h-216.2zM14.2%2016.20h163.6v1.45h-163.6zM185.7%2016.20h33.7v1.45h-33.7zM15.1%2017.40h185.5v1.45h-185.5zM19.5%2018.60h193.4v1.45h-193.4zM22.7%2019.80h154.1v1.45h-154.1zM187.9%2019.80h18.4v1.45h-18.4z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
@@ -128,25 +130,83 @@ body::before {
   background: var(--parete);
 }
 
+/* In cima alla pagina la barra è trasparente, con il testo scuro.
+   Quando scorri (classe is-scrolled) una pennellata verde notte si stende
+   da sinistra dietro il nome e le voci, e il testo diventa chiaro. */
 .testata {
   position: sticky;
   top: env(safe-area-inset-top, 0px);
   z-index: 30;
-  background: var(--parete);
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s ease;
+  color: var(--inchiostro);
 }
-.testata.is-scrolled { border-bottom-color: var(--linea); }
+.testata.is-scrolled { color: var(--parete); --firma: var(--acido); }
+.testata.is-scrolled :focus-visible { outline-color: var(--acido); }
+
+/* La pennellata: tre strati, perché ognuno fa una cosa sola.
+   .testata-fondo  l'ombra morbida sotto la pennellata
+   .testata-colpo  il colpo di pennello che la stende da sinistra (e la ritira)
+   .testata-pennellata  la forma della pennellata, con le setole agli estremi */
+.testata-fondo {
+  position: absolute;
+  top: 4px; bottom: 0;
+  left: max(6px, calc(max(0px, (100% - var(--larghezza)) / 2) + var(--margine) - 2.75rem));
+  right: max(6px, calc(max(0px, (100% - var(--larghezza)) / 2) + var(--margine) - 2.75rem));
+  pointer-events: none;
+  filter: drop-shadow(0 10px 12px var(--ombra-forte));
+  transition: opacity 0.3s ease;
+}
+.testata-colpo {
+  height: 100%;
+  -webkit-mask-image: var(--maschera-destra); mask-image: var(--maschera-destra);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+  transition: -webkit-mask-position 0.45s cubic-bezier(0.6, 0.05, 0.3, 1), mask-position 0.45s cubic-bezier(0.6, 0.05, 0.3, 1);
+}
+.testata.is-scrolled .testata-colpo {
+  -webkit-mask-position: 0 0; mask-position: 0 0;
+  transition-duration: 0.8s;
+}
+.testata-pennellata {
+  position: relative;
+  height: 100%;
+  /* un filo di luce in alto e di buio in basso, e righe sottili come i segni delle setole */
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%, rgba(0, 0, 0, 0.2)),
+    var(--fascia);
+  -webkit-mask-image: var(--banda); mask-image: var(--banda);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+/* Il filo verde acido dentro la pennellata si allunga mentre scorri la pagina */
+.testata-pennellata::after {
+  content: "";
+  position: absolute; left: 3.5%; right: 3.5%; bottom: 11%;
+  height: 2px;
+  background: var(--acido);
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  clip-path: inset(0 calc(100% - var(--progresso, 0%)) 0 0);
+  opacity: 0.75;
+}
 
 .testata-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1.5rem;
   min-height: 4.25rem;
 }
 
+/* Il nome, con un ghirigoro sotto come una firma */
 .marchio {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  padding-block: 0.3rem 0.45rem;
   font-family: var(--font-display);
   font-style: italic;
   font-weight: 600;
@@ -154,56 +214,105 @@ body::before {
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
+  transition: color 0.3s ease;
+}
+.marchio-firma {
+  position: absolute; left: -3%; bottom: -0.2rem;
+  width: 106%; height: 0.65rem;
+  overflow: visible;
+  pointer-events: none;
+}
+.marchio-firma path {
+  fill: none;
+  stroke: var(--firma, var(--accento));
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition: stroke 0.3s ease;
 }
 
 .menu-btn { display: none; }
 
+.menu { position: relative; margin-left: auto; }
+
 .menu-lista {
+  position: relative;
+  z-index: 1;
   list-style: none; margin: 0; padding: 0;
   display: flex; align-items: center;
-  gap: clamp(1.25rem, 3vw, 2.75rem);
+  gap: clamp(1.4rem, 3vw, 2.75rem);
 }
 .menu-voce { position: relative; }
 
 .menu-link {
   position: relative;
-  isolation: isolate;
   display: inline-flex; align-items: center; gap: 0.45rem;
   padding-block: 0.75rem;
   font-size: var(--t-s);
+  letter-spacing: 0.02em;
   text-decoration: none;
+  transition: color 0.25s ease;
 }
 .menu-freccia { width: 0.6rem; height: 0.4rem; transition: transform 0.2s ease; }
 
-/* Sottolineatura a pennello: ogni voce ha un pigmento dei riccioli del quadro
-   (--pigmento in index.html). Si dipinge da sinistra al passaggio del mouse
-   e resta sulla sezione che stai guardando. */
-.menu-link::after {
-  content: "";
-  position: absolute; left: -0.2em; right: -0.2em; bottom: 0.3rem;
-  height: 0.55em;
-  z-index: -1;
-  background: var(--pigmento, var(--accento));
+/* Quando la pennellata arriva, il testo passa dallo scuro al chiaro
+   una voce dopo l'altra, come se il colore lo raggiungesse */
+.testata.is-scrolled .marchio { animation: inchiostro-via 0.35s ease 0.15s backwards; }
+@media (min-width: 761px) {
+  .testata.is-scrolled .menu-link { animation: inchiostro-via 0.35s ease calc(0.36s + var(--n, 0) * 0.06s) backwards; }
+  .testata.is-scrolled .testata-social a { animation: inchiostro-via 0.35s ease 0.6s backwards; }
+}
+@keyframes inchiostro-via { from { color: var(--inchiostro); } }
+
+/* La macchia di colore: scivola sotto la voce su cui passi col mouse e resta
+   sulla sezione che stai guardando. Prende il pigmento della voce
+   (--pigmento in index.html); la posizione la calcola js/script.js. */
+.menu-segno {
+  position: absolute;
+  left: var(--x, 0px); top: var(--y, 0px);
+  width: var(--w, 0px); height: var(--h, 0px);
+  z-index: 0;
+  background: var(--segno-colore, var(--acido));
   -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.45s cubic-bezier(0.6, 0.05, 0.3, 1);
   pointer-events: none;
+  transition:
+    left 0.5s cubic-bezier(0.65, 0, 0.25, 1),
+    top 0.5s cubic-bezier(0.65, 0, 0.25, 1),
+    width 0.5s cubic-bezier(0.65, 0, 0.25, 1),
+    height 0.5s cubic-bezier(0.65, 0, 0.25, 1),
+    background-color 0.45s ease,
+    clip-path 0.4s cubic-bezier(0.6, 0.05, 0.3, 1);
 }
-.menu-link:hover::after,
-.menu-link:focus-visible::after,
-.menu-link[aria-current]::after { clip-path: inset(0 0 0 0); }
+.menu-segno.visibile { clip-path: inset(0 0 0 0); }
+.menu-segno.senza-scivolo { transition: clip-path 0.4s cubic-bezier(0.6, 0.05, 0.3, 1); }
+/* La voce su cui sta la macchia torna scura, per leggersi bene sul colore */
+.testata .menu-link.sotto-segno { color: var(--inchiostro); transition-delay: 0.2s; }
 
+/* Il sottomenu delle opere è una piccola tavolozza: bordi morbidi e irregolari,
+   un campione di colore per ogni categoria e il foro per il pollice in basso */
 .sottomenu {
-  position: absolute; top: 100%; left: -1.25rem;
-  min-width: 15.5rem;
-  list-style: none; margin: 0; padding: 0.5rem 0;
+  position: absolute; top: 100%; left: -1.5rem;
+  min-width: 16.5rem;
+  list-style: none; margin: 0; padding: 0.75rem 0 2rem;
   background: var(--passepartout);
+  color: var(--inchiostro);
   border: 1px solid var(--linea);
+  border-radius: 1.4rem 2.6rem 1.8rem 2.2rem / 1.6rem 1.3rem 2.4rem 1.7rem;
   box-shadow: 0 18px 40px -20px var(--ombra-forte);
   opacity: 0; visibility: hidden;
   transition: opacity 0.18s ease, visibility 0s linear 0.18s;
+}
+.sottomenu::after {
+  content: "";
+  position: absolute; right: 1.5rem; bottom: 0.6rem;
+  width: 1.15rem; height: 0.9rem;
+  border-radius: 52% 48% 45% 55% / 55% 50% 50% 45%;
+  background: var(--parete);
+  box-shadow: inset 0 1px 3px var(--ombra-forte);
 }
 .menu-voce--opere:hover .sottomenu,
 .menu-voce--opere:focus-within .sottomenu {
@@ -226,17 +335,33 @@ body::before {
 .sottomenu a {
   position: relative;
   isolation: isolate;
-  display: flex; justify-content: space-between; align-items: baseline; gap: 1.5rem;
-  padding: 0.55rem 1.25rem;
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.5rem 1.4rem;
   font-size: var(--t-s);
   text-decoration: none;
 }
-/* Una pennellata leggera dietro la categoria su cui passi */
+.sottomenu-nome { flex: 1; }
+/* Il campione: una goccia del pigmento della categoria */
+.campione {
+  flex: none;
+  width: 0.95rem; height: 0.8rem;
+  background: var(--pigmento, var(--acido));
+  border-radius: 58% 42% 55% 45% / 52% 60% 40% 48%;
+  transform: rotate(-14deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.campione--tutti {
+  background: conic-gradient(from 40deg, var(--acido), var(--giallo), var(--magenta), var(--turchese), var(--acido));
+}
+.sottomenu a:hover .campione,
+.sottomenu a:focus-visible .campione { transform: rotate(10deg) scale(1.35); }
+/* Una pennellata leggera, del colore del campione, dietro la categoria su cui passi */
 .sottomenu a::before {
   content: "";
-  position: absolute; inset: 0.15rem 0.6rem;
+  position: absolute; inset: 0.15rem 0.7rem;
   z-index: -1;
   background: var(--velatura);
+  background: color-mix(in srgb, var(--pigmento, var(--acido)) 30%, transparent);
   -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -251,6 +376,40 @@ body::before {
   font-size: var(--t-xs);
   font-variant-numeric: tabular-nums;
 }
+
+/* I social in fondo alla barra (solo su schermi larghi) */
+.testata-social {
+  position: relative;
+  list-style: none;
+  margin: 0; padding: 0 0 0 clamp(1.25rem, 2.2vw, 2rem);
+  display: flex; align-items: center; gap: 0.35rem;
+}
+.testata-social::before {
+  content: "";
+  position: absolute; left: 0; top: 50%;
+  width: 1px; height: 1.4rem;
+  transform: translateY(-50%) rotate(12deg);
+  background: currentColor;
+  opacity: 0.35;
+}
+.testata-social:empty { display: none; }
+.testata-social a {
+  display: grid; place-items: center;
+  width: 2.1rem; height: 2.1rem;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition: color 0.25s ease, transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.testata-social a:hover,
+.testata-social a:focus-visible { color: var(--accento); transform: translateY(-2px) rotate(-8deg); }
+.testata.is-scrolled .testata-social a:hover,
+.testata.is-scrolled .testata-social a:focus-visible { color: var(--acido); }
+@media (max-width: 1100px) {
+  .testata-social { display: none; }
+}
+
+/* La parte in fondo al menu del telefono: su schermi larghi non serve */
+.menu-piede { display: none; }
 
 /* ---------- Apertura ---------- */
 /* L'alone verde acido del quadro, dietro l'opera in evidenza */
@@ -949,55 +1108,212 @@ body::before {
   }
 }
 
-/* ---------- Telefono: menu a pannello ---------- */
+/* ---------- Telefono: menu a tutto schermo ---------- */
 @media (max-width: 760px) {
+  .marchio { font-size: 1.4rem; }
+
+  /* Tre pennellate di lunghezza diversa che, aprendo, si incrociano in una X */
   .menu-btn {
-    display: inline-flex; align-items: center;
-    padding: 0.45rem 0.95rem;
-    border: 1px solid var(--linea);
+    position: relative;
+    z-index: 2;
+    display: inline-flex; align-items: center; gap: 0.7rem;
+    margin-left: auto;
+    padding: 0.6rem 0.1rem 0.6rem 0.6rem;
+    border: 0;
     background: none;
-    font-size: var(--t-s);
+    font-size: var(--t-xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     cursor: pointer;
+    transition: color 0.3s ease;
   }
+  .menu-btn-icona { display: grid; gap: 5px; width: 28px; }
+  .menu-btn-icona i {
+    display: block;
+    height: 4px;
+    background: currentColor;
+    -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    transition: transform 0.45s cubic-bezier(0.6, 0.05, 0.3, 1), width 0.45s cubic-bezier(0.6, 0.05, 0.3, 1), opacity 0.25s ease;
+  }
+  .menu-btn-icona i:nth-child(1) { width: 25px; }
+  .menu-btn-icona i:nth-child(2) { width: 19px; justify-self: end; }
+  .menu-btn-icona i:nth-child(3) { width: 28px; }
+  .menu-btn[aria-expanded="true"] .menu-btn-icona i:nth-child(1) { width: 28px; transform: translateY(9px) rotate(40deg); }
+  .menu-btn[aria-expanded="true"] .menu-btn-icona i:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .menu-btn[aria-expanded="true"] .menu-btn-icona i:nth-child(3) { transform: translateY(-9px) rotate(-38deg); }
+
+  /* Il menu copre lo schermo: un fondo verde notte con la luce acida del quadro,
+     che scende dall'alto come una pennellata e si ritira in chiusura */
   .menu {
     display: none;
-    position: absolute; top: 100%; left: 0; right: 0;
-    max-height: calc(100vh - 4.25rem);
-    max-height: calc(100dvh - 4.25rem);
-    overflow: auto;
-    padding-block: 0.5rem 1.75rem;
-    padding-left: max(var(--margine), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--margine), env(safe-area-inset-right, 0px));
-    background: var(--parete);
-    border-bottom: 1px solid var(--linea);
+    position: fixed; inset: 0;
+    z-index: 1;
+    margin: 0;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding:
+      calc(5.75rem + env(safe-area-inset-top, 0px))
+      max(var(--margine), env(safe-area-inset-right, 0px))
+      calc(2rem + env(safe-area-inset-bottom, 0px))
+      max(var(--margine), env(safe-area-inset-left, 0px));
+    color: var(--parete);
+    background: var(--fascia);
+    background:
+      radial-gradient(ellipse 90% 42% at 100% 0%, var(--alone), transparent 70%),
+      radial-gradient(ellipse 75% 38% at 0% 100%, color-mix(in srgb, var(--turchese) 16%, transparent), transparent 70%),
+      var(--fascia);
   }
-  /* Il pannello si apre con una pennellata dall'alto e si chiude "ritirando" il colore */
+  /* una grande pennellata appena più chiara, di traverso dietro le voci */
+  .menu::before {
+    content: "";
+    position: absolute; right: 3%; top: 15.5rem;
+    width: 92%; height: 5.5rem;
+    background: var(--pennellata-2);
+    opacity: 0.38;
+    -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    transform: rotate(-7deg);
+    pointer-events: none;
+  }
   .menu.is-open {
-    display: block;
+    display: flex;
     -webkit-mask-image: var(--maschera-giu); mask-image: var(--maschera-giu);
     -webkit-mask-size: 100% 300%; mask-size: 100% 300%;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-    animation: pannello-dentro 0.55s cubic-bezier(0.55, 0.05, 0.3, 1) both;
+    animation: pannello-dentro 0.6s cubic-bezier(0.55, 0.05, 0.3, 1) both;
   }
-  .menu.is-closing { animation: pannello-fuori 0.38s cubic-bezier(0.55, 0.05, 0.3, 1) both; }
+  .menu.is-closing { animation: pannello-fuori 0.4s cubic-bezier(0.55, 0.05, 0.3, 1) both; }
 
-  .menu-lista { flex-direction: column; align-items: stretch; gap: 0; }
-  .menu-link { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 2.4rem; padding-block: 0.4rem; align-self: flex-start; }
-  .menu-link::after { bottom: 0.5rem; height: 0.42em; }
-  /* All'apertura le voci vengono sottolineate una dopo l'altra, ognuna col suo pigmento */
+  /* Mentre il menu è aperto la pagina sotto resta ferma e la barra si fa chiara */
+  html.menu-aperto { overflow: hidden; }
+  .menu-aperto .testata { color: var(--parete); --firma: var(--acido); }
+  .menu-aperto .testata :focus-visible { outline-color: var(--acido); }
+  .menu-aperto .testata-fondo { opacity: 0; }
+
+  .menu-segno { display: none; }
+
+  /* Voci grandi in corsivo, numerate, che entrano una dopo l'altra */
+  .menu-lista {
+    flex-direction: column; align-items: stretch;
+    gap: 0.15rem;
+    counter-reset: voce;
+  }
+  .menu-voce {
+    counter-increment: voce;
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    align-items: baseline;
+  }
+  .menu-voce::before {
+    content: counter(voce, decimal-leading-zero);
+    font-size: var(--t-xs);
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+    color: var(--acido);
+  }
+  .menu.is-open .menu-voce { animation: voce-dentro 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) calc(0.2s + var(--n, 0) * 0.07s) both; }
+  .menu-link {
+    isolation: isolate;
+    justify-self: start;
+    padding-block: 0.3rem 0.45rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(2.3rem, 11vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .testata .menu-link,
+  .testata .menu-link.sotto-segno { color: var(--parete); }
+  /* Ogni voce viene sottolineata col suo pigmento, una dopo l'altra */
+  .menu-link::after {
+    content: "";
+    position: absolute; left: -0.1em; right: -0.15em; bottom: 0.2rem;
+    height: 0.2em;
+    z-index: -1;
+    background: var(--pigmento, var(--acido));
+    -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    pointer-events: none;
+  }
   .menu.is-open .menu-voce > .menu-link::after {
-    animation: tratto-dentro 0.45s cubic-bezier(0.6, 0.05, 0.3, 1) calc(0.28s + var(--n, 0) * 0.1s) both;
+    animation: tratto-dentro 0.5s cubic-bezier(0.6, 0.05, 0.3, 1) calc(0.42s + var(--n, 0) * 0.09s) both;
   }
   .menu-freccia { display: none; }
+
+  /* Le categorie diventano etichette, ognuna col suo campione di colore */
   .sottomenu {
+    grid-column: 2;
     position: static;
     min-width: 0;
-    padding: 0 0 0.75rem;
-    background: none; border: 0; box-shadow: none;
-    opacity: 1; visibility: visible; transform: none;
+    display: flex; flex-wrap: wrap; gap: 0.45rem;
+    margin: 0.35rem 0 1rem;
+    padding: 0;
+    background: none; border: 0; border-radius: 0; box-shadow: none;
+    color: inherit;
+    opacity: 1; visibility: visible;
   }
-  .sottomenu a { padding: 0.45rem 0; font-size: var(--t-m); }
-  .sottomenu a::before { inset: 0.1rem -0.5rem; }
+  .sottomenu::after { display: none; }
+  .sottomenu a {
+    gap: 0.45rem;
+    padding: 0.32rem 0.8rem 0.32rem 0.6rem;
+    border: 1px solid rgba(250, 250, 247, 0.24);
+    border-radius: 999px;
+    font-size: var(--t-s);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .sottomenu a::before { display: none; }
+  .sottomenu a:hover,
+  .sottomenu a:active { border-color: var(--pigmento, var(--acido)); }
+  .sottomenu-nome { flex: none; }
+  .campione { width: 0.72rem; height: 0.62rem; }
+  .sottomenu .conta { color: inherit; opacity: 0.6; }
+
+  /* In fondo: l'email e i social */
+  .menu-piede {
+    display: grid; gap: 0.9rem;
+    margin-top: auto;
+    padding-top: 2.25rem;
+  }
+  .menu-piede:empty { display: none; }
+  .menu.is-open .menu-piede { animation: voce-dentro 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.55s both; }
+  .menu-piede::before {
+    content: "";
+    display: block;
+    width: 6.5rem; height: 6px;
+    background: var(--acido);
+    -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  }
+  .menu-email {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.4rem;
+    line-height: 1.2;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .menu-social {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem;
+  }
+  .menu-social a {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-size: var(--t-s);
+    text-decoration: none;
+    opacity: 0.85;
+  }
+  .menu-social .icona { font-size: 1.05rem; color: var(--acido); }
+}
+
+@keyframes voce-dentro {
+  from { opacity: 0; transform: translateY(18px); }
 }
 
 @keyframes pannello-dentro {
@@ -1142,19 +1458,6 @@ html.js-sipario::after {
 .macchia--2 { background: var(--magenta); transform: rotate(160deg); }
 .macchia--3 { background: var(--turchese); transform: rotate(250deg); }
 @keyframes nastro { to { transform: translateX(-50%); } }
-
-/* ---------- Barra di avanzamento a pennello sotto la testata ---------- */
-.testata::after {
-  content: "";
-  position: absolute; left: 0; bottom: -4px;
-  width: 100%; height: 7px;
-  pointer-events: none;
-  background: var(--acido);
-  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
-  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  clip-path: inset(0 calc(100% - var(--progresso, 0%)) 0 0);
-}
 
 /* ---------- Cursore da galleria (solo con il mouse) ---------- */
 .cursore {
