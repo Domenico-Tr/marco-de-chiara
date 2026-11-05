@@ -324,7 +324,6 @@
     "anno": 2019,
     "tecnica": "Olio",
     "misure": "90x65",
-    "edizione": "N 1",
     "descrizione": "L'opera nasce dal cortocircuito visivo ed etico tra due immagini di profonda e agghiacciante indifferenza: i bagnanti isolati e assorti nei propri pensieri nei Bagnanti ad Asnières di Seurat e la celebre fotografia di Javier Bauluz sulla spiaggia di Tarifa, in cui la vita quotidiana prosegue impassibile accanto a un corpo senza vita.\nFondendo questi due riferimenti in un’unica scena sulle rive della Senna, il lavoro azzera il confine tra passato e presente per denunciare la disumanizzazione dell’essere umano contemporaneo. L’indifferenza diventa così il vero soggetto del dipinto: uno specchio spietato sulla perdita di empatia e sul trionfo dell'egoismo in un mondo assuefatto alla tragedia.",
     "stato": "Disponibile",
     "inEvidenza": false
@@ -335,7 +334,16 @@
     "anno": 2026,
     "tecnica": "Acrilico extra materiali ",
     "misure": "60x90 - 60x90",
-    "edizione": "N 1",
+    "stato": "Venduta",
+    "inEvidenza": false
+  },
+  {
+    "titolo": "Profondo ",
+    "immagine": "/img/img6415.jpeg",
+    "categoria": "Quadri",
+    "anno": 2026,
+    "tecnica": "Acrilico con extra materiali ",
+    "misure": "90x60",
     "stato": "Venduta",
     "inEvidenza": false
   }
