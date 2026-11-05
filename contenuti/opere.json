@@ -483,5 +483,16 @@
     "descrizione": "Un'opera sospesa tra la terra, il mare e il cielo stellato, in cui il fuoco diventa il punto d'incontro tra mondi diversi. Il calore del falò sulla spiaggia evoca i momenti vissuti, le parole e le emozioni condivise che continuano a ardere nel tempo. È un abbraccio visivo, un modo per custodire la memoria attraverso la bellezza e la forza rassicurante della natura.",
     "stato": "Venduta",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Memoria attiva ",
+    "immagine": "/img/img8111-1.jpeg",
+    "categoria": "Quadri",
+    "anno": 2023,
+    "tecnica": "Acrilico ",
+    "misure": "20x15",
+    "descrizione": "Un'opera che ribalta il concetto di rifiuto artistico, trasformando i residui di colore e le vecchie tavolozze in una forma di visione. I due occhi scolpiti nella materia densa e stratificata rappresentano la consapevolezza: lo sguardo dell'artista che attraversa i propri stessi strumenti per scrutare oltre la superficie, in un ciclo continuo di creazione, distruzione e rinascita.",
+    "stato": "Riservata",
+    "inEvidenza": false
   }
 ]
