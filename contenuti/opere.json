@@ -369,5 +369,17 @@
     "descrizione": "Premio del publico ",
     "stato": "Venduta",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Kore",
+    "immagine": "/img/img8759.jpeg",
+    "categoria": "Sculture",
+    "anno": 2025,
+    "tecnica": "Gesso -acrcilico -smalto",
+    "misure": "30x30",
+    "edizione": "Unica ",
+    "descrizione": "Premio miglior cortometraggio ",
+    "stato": "Venduta",
+    "inEvidenza": false
   }
 ]
