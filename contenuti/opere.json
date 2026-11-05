@@ -472,5 +472,16 @@
     "descrizione": "Una composizione che unisce la forza espressiva del segno alla delicatezza delle sfumature cromatiche. L'opera si sviluppa come un racconto visivo fatto di curve eleganti e profondità cromatiche, pensata per donare calore, energia e un tocco di esclusiva unicità.",
     "stato": "Venduta",
     "inEvidenza": false
+  },
+  {
+    "titolo": "L’eco delle fiamme ",
+    "immagine": "/img/img8112.jpeg",
+    "categoria": "Quadri",
+    "anno": 2024,
+    "tecnica": "Acrilico extra materiali ",
+    "misure": "60x50",
+    "descrizione": "Un'opera sospesa tra la terra, il mare e il cielo stellato, in cui il fuoco diventa il punto d'incontro tra mondi diversi. Il calore del falò sulla spiaggia evoca i momenti vissuti, le parole e le emozioni condivise che continuano a ardere nel tempo. È un abbraccio visivo, un modo per custodire la memoria attraverso la bellezza e la forza rassicurante della natura.",
+    "stato": "Venduta",
+    "inEvidenza": false
   }
 ]
