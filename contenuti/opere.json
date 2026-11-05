@@ -393,5 +393,27 @@
     "descrizione": "Premio del pubblico ",
     "stato": "Venduta",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Sole",
+    "immagine": "/img/img8755.jpeg",
+    "categoria": "Quadri",
+    "anno": 2016,
+    "tecnica": "Acrilico ",
+    "misure": "39x45",
+    "descrizione": "Dettaglio di un affresco fiammingo ",
+    "stato": "Disponibile",
+    "inEvidenza": false
+  },
+  {
+    "titolo": "Metamorfosi di fuoco ",
+    "immagine": "/img/img8748.jpeg",
+    "categoria": "Quadri",
+    "anno": 2020,
+    "tecnica": "Olio",
+    "misure": "70x50",
+    "descrizione": "L'opera esplora il confine tra corpo e passione, rappresentando una figura femminile immortalata nel momento esatto di una trasformazione interiore. Immersa in drappeggi caldi e avvolgenti che ricordano le sfumature della fiamma, la figura rivela sulla pelle trame e rilievi organici, quasi fosse una creatura che riemerge a nuova vita attraverso il calore della propria energia.",
+    "stato": "Riservata",
+    "inEvidenza": false
   }
 ]
