@@ -363,7 +363,7 @@
     "titolo": "Onore ",
     "categoria": "Sculture",
     "anno": 2025,
-    "tecnica": "Gesso -acrcilico -smalto ",
+    "tecnica": "Gesso -acrilico -smalto ",
     "misure": "30x35",
     "edizione": "Unica ",
     "descrizione": "Premio del publico ",
@@ -375,10 +375,22 @@
     "immagine": "/img/img8759.jpeg",
     "categoria": "Sculture",
     "anno": 2025,
-    "tecnica": "Gesso -acrcilico -smalto",
+    "tecnica": "Gesso -acrilico -smalto",
     "misure": "30x30",
     "edizione": "Unica ",
     "descrizione": "Premio miglior cortometraggio ",
+    "stato": "Venduta",
+    "inEvidenza": false
+  },
+  {
+    "titolo": "Onore",
+    "immagine": "/img/img8757.jpeg",
+    "categoria": "Sculture",
+    "anno": 2025,
+    "tecnica": "Gesso -acrcilico -smalto",
+    "misure": "30x35",
+    "edizione": "Ubica ",
+    "descrizione": "Premio del pubblico ",
     "stato": "Venduta",
     "inEvidenza": false
   }
