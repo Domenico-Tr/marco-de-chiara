@@ -358,5 +358,16 @@
     "descrizione": "Premio miglior performance ",
     "stato": "Venduta",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Onore ",
+    "categoria": "Sculture",
+    "anno": 2025,
+    "tecnica": "Gesso -acrcilico -smalto ",
+    "misure": "30x35",
+    "edizione": "Unica ",
+    "descrizione": "Premio del publico ",
+    "stato": "Venduta",
+    "inEvidenza": false
   }
 ]
