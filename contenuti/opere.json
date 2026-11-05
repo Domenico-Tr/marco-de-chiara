@@ -346,5 +346,17 @@
     "misure": "90x60",
     "stato": "Venduta",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Face ",
+    "immagine": "/img/img1545.jpeg",
+    "categoria": "Sculture",
+    "anno": 2025,
+    "tecnica": "Gesso -acrcilico -smalto ",
+    "misure": "30x40",
+    "edizione": "Unica ",
+    "descrizione": "Premio miglior performance ",
+    "stato": "Venduta",
+    "inEvidenza": false
   }
 ]
