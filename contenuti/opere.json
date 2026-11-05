@@ -428,5 +428,16 @@
     "descrizione": "Un paesaggio interiore ed enigmatico in cui la natura e l'umano si compenetrano. Il contrasto tra i toni verdi dello sfondo e il rosso acceso del cuore e del frutto morso evoca il peccato, la conoscenza e la fragilità dell'esistenza, sospesa tra ciò che nutre e ciò che consuma.",
     "stato": "Disponibile",
     "inEvidenza": false
+  },
+  {
+    "titolo": "Coccio rotto ",
+    "immagine": "/img/img8762.jpeg",
+    "categoria": "Quadri",
+    "anno": 2021,
+    "tecnica": "Olio vernici metalliche ",
+    "misure": "70x50",
+    "descrizione": "L'opera esplora il tema della fragilità e dell'instabilità emotiva, caratterizzata da oscillazioni intense e improvvise che si manifestano indipendentemente dagli eventi esterni. La figura, che richiama le sembianze classiche di un busto marmoreo, si copre il volto con le mani in un gesto di profonda sofferenza o smarrimento, mentre schizzi di colore metallico spezzano la composizione simboleggiando scatti d'ira, pianto o sbalzi d'umore. Lo sfondo, giocato su tonalità violacee nate dall'unione di colori caldi e freddi, traduce visivamente la frustrazione, l'ansia e la rabbia che accompagnano una condizione interiore percepita come opprimente.",
+    "stato": "Venduta",
+    "inEvidenza": false
   }
 ]
