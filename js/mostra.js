@@ -1587,10 +1587,301 @@
   }
 
   /* ------------------------------------------------------------------
+     6e. L'ingresso nella galleria (alla prima visita)
+     Al buio si disegna il logo MDC Art Studio: l'arco, la lampada, le
+     lettere. Poi l'arco diventa una porta: le ante si aprono, la luce
+     esce e si entra. Dura circa 4 secondi; un clic, un tocco, la rotella
+     o un tasto lo saltano. Lo decide lo script in cima a index.html
+     (classe con-ingresso): una volta per visita, mai se l'indirizzo porta
+     già a una sala (#eventi…) o con "riduci movimento".
+     ------------------------------------------------------------------ */
+  function preparaIngressoGalleria() {
+    const radice = document.documentElement;
+    const el = $("#ingresso-galleria");
+    if (!el) return;
+    if (!radice.classList.contains("con-ingresso")) {
+      el.remove();
+      return;
+    }
+    try {
+      sessionStorage.setItem("ingresso-visto", "1");
+    } catch (e) {
+      /* niente: tornerà alla prossima visita */
+    }
+    let dentro = false;
+    let finito = false;
+    const entra = () => {
+      if (dentro) return;
+      dentro = true;
+      document.dispatchEvent(new CustomEvent("ingresso:dentro"));
+    };
+    const chiudi = () => {
+      if (finito) return;
+      finito = true;
+      entra();
+      radice.classList.remove("con-ingresso");
+      el.remove();
+      eventi.forEach((ev) => window.removeEventListener(ev, salta));
+    };
+    function salta() {
+      if (finito || el.classList.contains("ig-salta")) return;
+      el.classList.add("ig-salta");
+      entra();
+      setTimeout(chiudi, 480);
+    }
+    const invito = $(".ig-invito", el);
+    if (invito) invito.textContent = conMouse() ? "Clicca per entrare" : "Tocca per entrare";
+    const eventi = ["pointerdown", "wheel", "keydown", "touchmove"];
+    eventi.forEach((ev) => window.addEventListener(ev, salta, { passive: true }));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        el.classList.add("ig-via");
+        setTimeout(entra, 3350);
+        setTimeout(chiudi, 4350);
+      })
+    );
+  }
+
+  /* ------------------------------------------------------------------
+     6f. Il passaggio da una sala all'altra
+     Quando scegli una sala dal menu (o da un link della pagina) si entra
+     nella sala nuova, e ogni sala ha la sua entrata:
+       Ingresso    due porte di legno che si chiudono e si riaprono
+       Galleria    un varco: il buio si stringe e la porta si allarga
+       Opere       il sipario di velluto si chiude e si apre
+       Processo    il proiettore si accende e lo schermo si allarga
+       Eventi      la serranda scende, l'insegna al neon sfarfalla, risale
+       Su misura   la lampada dell'atelier oscilla e la luce si allarga
+       Contatti    le porte scorrevoli dell'uscita, con l'insegna verde
+     Mentre lo schermo è coperto compare il cartello con il nome della
+     sala, e sotto la pagina si sposta. js/script.js lo usa al posto delle
+     vecchie pennellate (window.Passaggio).
+     ------------------------------------------------------------------ */
+  const ENTRATE = {
+    inizio: "porte",
+    mostra: "varco",
+    opere: "tende",
+    processo: "proiettore",
+    eventi: "neon",
+    "su-misura": "lampada",
+    contatti: "scorrevoli",
+  };
+  const Passaggio = (() => {
+    let el = null;
+    let occupato = false;
+    const attendi = (ms) => new Promise((r) => setTimeout(r, ms));
+    const fatto = (animazioni) => Promise.all(animazioni.filter(Boolean).map((a) => a.finished.catch(() => {})));
+
+    function prepara() {
+      el = document.createElement("div");
+      el.className = "passaggio";
+      el.setAttribute("aria-hidden", "true");
+      el.innerHTML =
+        '<div class="pa-fondo"></div><div class="pa-fascio"></div>' +
+        '<div class="pa-anta pa-anta--sx"><span class="pa-maniglia"></span></div><div class="pa-anta pa-anta--dx"><span class="pa-maniglia"></span></div>' +
+        '<div class="pa-serranda"></div>' +
+        '<p class="pa-cartello"><span class="pa-n"></span><span class="pa-nome"></span><span class="pa-insegna"></span></p>';
+      document.body.append(el);
+    }
+
+    // il buio con un buco (rettangolo o cerchio) in mezzo, per clip-path
+    const W = () => window.innerWidth;
+    const H = () => window.innerHeight;
+    const cornice = () => `0px 0px, ${W()}px 0px, ${W()}px ${H()}px, 0px ${H()}px, 0px 0px`;
+    function buco(w, h, cx = W() / 2, cy = H() / 2) {
+      const x1 = cx - w / 2;
+      const x2 = cx + w / 2;
+      const y1 = cy - h / 2;
+      const y2 = cy + h / 2;
+      return `polygon(evenodd, ${cornice()}, ${x1}px ${y1}px, ${x2}px ${y1}px, ${x2}px ${y2}px, ${x1}px ${y2}px, ${x1}px ${y1}px)`;
+    }
+    function cerchio(r, cx = W() / 2, cy = H() / 2) {
+      const p = [];
+      for (let i = 0; i <= 36; i++) {
+        const a = (i / 36) * Math.PI * 2;
+        p.push(`${(cx + Math.cos(a) * r).toFixed(1)}px ${(cy + Math.sin(a) * r).toFixed(1)}px`);
+      }
+      return `polygon(evenodd, ${cornice()}, ${p.join(", ")})`;
+    }
+    const tutto = () => buco(W() * 1.3, H() * 1.3);
+    const niente = (cx, cy) => buco(0, 0, cx, cy);
+    const diagonale = () => Math.hypot(W(), H());
+
+    function cartello(id) {
+      const voce = $(`.guida-voce .guida-link[href="#${id}"]`);
+      const n = voce ? $(".guida-n", voce).textContent : "";
+      let nome = voce ? $(".guida-nome", voce).textContent : "";
+      if (id === "mostra") nome = "La galleria";
+      if (id === "contatti") nome = "Contatti";
+      $(".pa-n", el).textContent = n ? `Sala ${n}` : "";
+      $(".pa-nome", el).textContent = nome;
+      $(".pa-insegna", el).textContent = id === "contatti" ? "Uscita" : id === "eventi" ? "Stasera in sala" : "";
+    }
+
+    const C = { duration: 520, easing: "cubic-bezier(0.7, 0, 0.3, 1)", fill: "forwards" };
+    const A = { duration: 720, easing: "cubic-bezier(0.6, 0, 0.2, 1)", fill: "forwards" };
+    const parte = (sel) => $(sel, el);
+    const cartelloDentro = (ritardo = 260) =>
+      parte(".pa-cartello").animate([{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: 420, delay: ritardo, easing: "ease-out", fill: "forwards" });
+    const cartelloFuori = () => parte(".pa-cartello").animate([{ opacity: 1 }, { opacity: 0, transform: "scale(1.06)" }], { duration: 260, easing: "ease-in", fill: "forwards" });
+
+    // ogni entrata: chiude (copre lo schermo) e apre (scopre la sala nuova)
+    const MODI = {
+      porte: {
+        chiudi: () => [
+          parte(".pa-anta--sx").animate([{ transform: "perspective(1600px) rotateY(84deg)" }, { transform: "perspective(1600px) rotateY(0deg)" }], C),
+          parte(".pa-anta--dx").animate([{ transform: "perspective(1600px) rotateY(-84deg)" }, { transform: "perspective(1600px) rotateY(0deg)" }], C),
+        ],
+        apri: () => [
+          parte(".pa-anta--sx").animate([{ transform: "perspective(1600px) rotateY(0deg)" }, { transform: "perspective(1600px) rotateY(86deg)", opacity: 0.4 }], A),
+          parte(".pa-anta--dx").animate([{ transform: "perspective(1600px) rotateY(0deg)" }, { transform: "perspective(1600px) rotateY(-86deg)", opacity: 0.4 }], A),
+          parte(".pa-fascio").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 700, easing: "ease-out", fill: "forwards" }),
+        ],
+      },
+      tende: {
+        chiudi: () => [
+          parte(".pa-anta--sx").animate([{ transform: "translateX(-100%) scaleX(0.4)" }, { transform: "translateX(0) scaleX(1)" }], { ...C, duration: 600, easing: "cubic-bezier(0.3, 0.7, 0.3, 1)" }),
+          parte(".pa-anta--dx").animate([{ transform: "translateX(100%) scaleX(0.4)" }, { transform: "translateX(0) scaleX(1)" }], { ...C, duration: 600, easing: "cubic-bezier(0.3, 0.7, 0.3, 1)" }),
+        ],
+        apri: () => [
+          parte(".pa-anta--sx").animate([{ transform: "translateX(0) scaleX(1) skewY(0deg)" }, { transform: "translateX(-6%) scaleX(0.16) skewY(-2deg)" }], { ...A, duration: 820 }),
+          parte(".pa-anta--dx").animate([{ transform: "translateX(0) scaleX(1) skewY(0deg)" }, { transform: "translateX(6%) scaleX(0.16) skewY(2deg)" }], { ...A, duration: 820 }),
+        ],
+        poi: () => [
+          parte(".pa-anta--sx").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, fill: "forwards" }),
+          parte(".pa-anta--dx").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 260, fill: "forwards" }),
+        ],
+      },
+      scorrevoli: {
+        chiudi: () => [
+          parte(".pa-anta--sx").animate([{ transform: "translateX(-100%)" }, { transform: "translateX(0)" }], { ...C, duration: 480, easing: "cubic-bezier(0.5, 0, 0.2, 1)" }),
+          parte(".pa-anta--dx").animate([{ transform: "translateX(100%)" }, { transform: "translateX(0)" }], { ...C, duration: 480, easing: "cubic-bezier(0.5, 0, 0.2, 1)" }),
+        ],
+        apri: () => [
+          parte(".pa-anta--sx").animate([{ transform: "translateX(0)" }, { transform: "translateX(-101%)" }], { ...A, duration: 620, easing: "cubic-bezier(0.6, 0, 0.3, 1)" }),
+          parte(".pa-anta--dx").animate([{ transform: "translateX(0)" }, { transform: "translateX(101%)" }], { ...A, duration: 620, easing: "cubic-bezier(0.6, 0, 0.3, 1)" }),
+        ],
+      },
+      varco: {
+        chiudi: () => [parte(".pa-fondo").animate([{ clipPath: tutto() }, { clipPath: niente(W() / 2, H() * 0.55) }], { ...C, duration: 560 })],
+        apri: () => {
+          const w = Math.min(W() * 0.18, 150);
+          return [
+            parte(".pa-fondo").animate(
+              [
+                { clipPath: niente(W() / 2, H() * 0.55), offset: 0 },
+                { clipPath: buco(w, w * 1.75, W() / 2, H() * 0.55), offset: 0.35 },
+                { clipPath: buco(W() * 1.6, H() * 2.2, W() / 2, H() * 0.55), offset: 1 },
+              ],
+              { ...A, duration: 900, easing: "cubic-bezier(0.55, 0, 0.25, 1)" }
+            ),
+            parte(".pa-fascio").animate([{ opacity: 0 }, { opacity: 1, offset: 0.35 }, { opacity: 0 }], { duration: 900, fill: "forwards" }),
+          ];
+        },
+      },
+      proiettore: {
+        chiudi: () => [
+          parte(".pa-fondo").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: "ease-in", fill: "forwards" }),
+          parte(".pa-fascio").animate([{ opacity: 0 }, { opacity: 0, offset: 0.4 }, { opacity: 0.8, offset: 0.5 }, { opacity: 0.1, offset: 0.6 }, { opacity: 1, offset: 0.75 }, { opacity: 0.5, offset: 0.82 }, { opacity: 1 }], { duration: 700, fill: "forwards" }),
+        ],
+        apri: () => {
+          const w = Math.min(W() * 0.5, 360);
+          return [
+            parte(".pa-fondo").animate(
+              [
+                { clipPath: niente(W() / 2, H() * 0.5), offset: 0 },
+                { clipPath: buco(w, (w * 9) / 16, W() / 2, H() * 0.5), offset: 0.3 },
+                { clipPath: buco(W() * 1.3, H() * 1.3, W() / 2, H() * 0.5), offset: 1 },
+              ],
+              { ...A, duration: 820 }
+            ),
+            parte(".pa-fascio").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: "forwards" }),
+          ];
+        },
+      },
+      neon: {
+        chiudi: () => [
+          parte(".pa-serranda").animate(
+            [{ transform: "translateY(-102%)" }, { transform: "translateY(0)", offset: 0.82 }, { transform: "translateY(-2.5%)", offset: 0.91 }, { transform: "translateY(0)" }],
+            { duration: 620, easing: "cubic-bezier(0.55, 0, 0.6, 1)", fill: "forwards" }
+          ),
+        ],
+        insegna: () =>
+          parte(".pa-cartello").animate(
+            [{ opacity: 0 }, { opacity: 1, offset: 0.12 }, { opacity: 0.15, offset: 0.2 }, { opacity: 1, offset: 0.32 }, { opacity: 0.4, offset: 0.4 }, { opacity: 1, offset: 0.5 }, { opacity: 1 }],
+            { duration: 480, fill: "forwards" }
+          ),
+        apri: () => [parte(".pa-serranda").animate([{ transform: "translateY(0)" }, { transform: "translateY(-102%)" }], { ...A, duration: 760, easing: "cubic-bezier(0.6, 0, 0.3, 1)" })],
+      },
+      lampada: {
+        chiudi: () => [
+          parte(".pa-fondo").animate([{ opacity: 0 }, { opacity: 1 }], { duration: 360, easing: "ease-in", fill: "forwards" }),
+          parte(".pa-fascio").animate(
+            [{ opacity: 0, transform: "rotate(-14deg)" }, { opacity: 1, transform: "rotate(9deg)", offset: 0.55 }, { opacity: 1, transform: "rotate(-4deg)", offset: 0.8 }, { opacity: 1, transform: "rotate(0deg)" }],
+            { duration: 900, easing: "ease-in-out", fill: "forwards" }
+          ),
+        ],
+        apri: () => {
+          const cy = H() * 0.62;
+          return [
+            parte(".pa-fondo").animate([{ clipPath: cerchio(0, W() / 2, cy) }, { clipPath: cerchio(60, W() / 2, cy), offset: 0.25 }, { clipPath: cerchio(diagonale(), W() / 2, cy) }], { ...A, duration: 860 }),
+            parte(".pa-fascio").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: "forwards" }),
+          ];
+        },
+      },
+    };
+
+    async function transizione(alCentro, id) {
+      if (occupato) return;
+      const modo = MODI[ENTRATE[id] || "varco"];
+      if (menoMovimento() || !document.body.animate) {
+        alCentro();
+        return;
+      }
+      occupato = true;
+      let spostata = false;
+      const sposta = () => {
+        if (spostata) return;
+        spostata = true;
+        alCentro();
+      };
+      try {
+        if (!el) prepara();
+        el.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+        el.className = `passaggio pa--${ENTRATE[id] || "varco"} is-attivo`;
+        // le entrate con il buco partono da "tutto aperto"
+        if (modo === MODI.varco) parte(".pa-fondo").style.clipPath = tutto();
+        cartello(id);
+        // nel varco il cartello arriva quando il buio si è quasi chiuso
+        const insegna = modo.insegna ? modo.insegna : () => cartelloDentro(ENTRATE[id] === "varco" ? 400 : 260);
+        await fatto(modo.chiudi().concat([ENTRATE[id] === "neon" ? null : insegna()]));
+        if (ENTRATE[id] === "neon") await fatto([insegna()]);
+        sposta();
+        await attendi(ENTRATE[id] === "proiettore" || ENTRATE[id] === "lampada" ? 260 : 160);
+        const fuori = cartelloFuori();
+        await fatto(modo.apri().concat([fuori]));
+        if (modo.poi) await fatto(modo.poi());
+      } catch (e) {
+        sposta();
+      } finally {
+        if (el) {
+          el.classList.remove("is-attivo");
+          el.getAnimations({ subtree: true }).forEach((a) => a.cancel());
+          parte(".pa-fondo").style.clipPath = "";
+        }
+        occupato = false;
+      }
+    }
+    return { transizione };
+  })();
+  window.Passaggio = Passaggio;
+
+  /* ------------------------------------------------------------------
      7. Avvio
      ------------------------------------------------------------------ */
   function prepara() {
     document.documentElement.classList.add("galleria-notturna");
+    preparaIngressoGalleria();
     preparaInterruttore();
     preparaSale();
     preparaGuida();

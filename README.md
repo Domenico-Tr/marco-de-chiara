@@ -20,7 +20,8 @@ vetrina-artista/
 ├── js/categorie.js     categorie del menu
 ├── js/script.js        funzionamento del sito
 ├── js/su-misura.js     "Proponi la tua opera": bozzetto, atelier, PDF
-├── js/mostra.js        la galleria notturna: muro, luci, lanterna, sala 3D
+├── js/mostra.js        la galleria notturna: muro, luci, lanterna, sala 3D, ingresso e passaggi
+├── marchio/            l'icona del sito (dal logo MDC Art Studio)
 ├── js/lib/             jsPDF e i caratteri per il PDF (non toccarli)
 └── img/                foto delle opere
 ```
@@ -150,19 +151,26 @@ Sul telefono alcune cose sono più leggere, perché lo scorrimento resti liscio:
 - **Colori delle finestre chiare** ("Provalo nella tua stanza", atelier): `--parete` (fondo), `--inchiostro` (testo) e `--grafite` (testo secondario) all'inizio del blocco GALLERIA NOTTURNA. La scheda dell'opera, buia, ha i suoi colori in `.scheda` nello stesso blocco.
 - **Caratteri**, da Google Fonts (link in `index.html`): Instrument Serif per il nome, i titoli delle sale, delle opere e degli eventi (`--font-display`); Manrope per i testi, il menu e le didascalie (`--font-testo`). Le stesse due famiglie sono in `js/lib/font` per il PDF della proposta.
 
-**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08g` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08h` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
-## Transizioni a pennello
+## L'ingresso nella galleria e il logo MDC Art Studio
 
-- **Passaggio tra sezioni**: cliccando una voce del menu (o una categoria, o il nome in alto) lo schermo si copre di pennellate, la pagina si sposta sotto il colore e altre pennellate la ripuliscono. È disegnato in `js/script.js`, sezione "2b. Pennellate a tutto schermo".
-- **Opere**: cambiando categoria le opere compaiono dipinte una dopo l'altra; nella scheda a tutto schermo ogni opera si dipinge da sinistra (avanti) o da destra (indietro).
+- **Il logo**: un arco (l'ingresso di una galleria) con la lampada verde acido in cima, il monogramma **MDC** (la D in corsivo) e sotto **ART STUDIO**. I file sono nella cartella `marchio/`: l'icona del sito (`mdc-icona.svg`, la vedi nella scheda del browser e, salvando il sito sulla schermata del telefono, `mdc-icona-180.png`). Le versioni complete del logo (chiaro, scuro, per il profilo dei social) sono a parte, per usarle dove vuoi.
+- **L'ingresso**: la prima volta che si apre il sito (una volta per visita) lo schermo è buio: l'arco del logo si disegna, la lampada si accende, arrivano le lettere MDC e ART STUDIO si allarga. Poi l'arco diventa una porta: tra le ante passa una lama di luce, le ante si aprono, la luce calda invade lo schermo e si entra nella galleria, mentre il nome di Marco sale lettera per lettera. Dura circa 4 secondi; un clic, un tocco, la rotella o un tasto lo saltano. Non compare se l'indirizzo porta già a una sala (per esempio `…/#eventi`) né per chi ha attivato "riduci movimento". È tutto in `index.html` (il disegno, in fondo allo script in cima alla pagina), nel blocco **L'INGRESSO NELLA GALLERIA E I PASSAGGI TRA LE SALE** in fondo a `css/style.css` e in `js/mostra.js` (sezione 6e).
 
-Cosa si può cambiare:
+## I passaggi tra le sale
 
-- **Colori delle pennellate**: `--pennellata-1` … `--pennellata-4` nel blocco GALLERIA NOTTURNA in fondo a `css/style.css`: ora tre neri e l'ultima verde acido.
-- **Velocità del passaggio**: in `js/script.js` cerca `await anima(` (due righe): i numeri `0.42` e `0.36` sono i secondi di ogni pennellata.
-- **Velocità delle comparse**: la variabile `--durata` (in `.rivela` e `.cornice .rivela` nel CSS).
-- Chi ha attivato "riduci movimento" nelle impostazioni del telefono o del computer non vede animazioni: il sito salta direttamente alla sezione.
+Quando scegli una sala dall'audioguida, dalla pianta o da un link della pagina, non si salta: si entra nella sala nuova, e ogni sala ha la sua entrata. Mentre lo schermo è coperto compare il cartello con il numero e il nome della sala.
+
+- **00 Ingresso**: due porte di legno con le maniglie d'ottone si chiudono e si riaprono sulla luce.
+- **01 La galleria**: un varco: il buio si stringe, poi una porta si allarga fino a diventare la sala.
+- **02 Opere**: il sipario di velluto rosso si chiude e si apre raccogliendosi ai lati.
+- **03 Processo**: si accende il proiettore e lo schermo si allarga.
+- **04 Eventi**: scende la serranda, l'insegna al neon sfarfalla, la serranda risale.
+- **05 Su misura**: la lampada dell'atelier oscilla e la sua luce si allarga.
+- **06 Contatti**: le porte scorrevoli dell'uscita, con l'insegna verde.
+
+Con le luci accese porte e varco diventano chiari. Chi ha attivato "riduci movimento" va direttamente alla sala. Le entrate sono in `js/mostra.js`, sezione 6f (`ENTRATE` dice quale entrata ha ogni sala); colori e forme nel blocco in fondo a `css/style.css`.
 
 ## Effetti
 

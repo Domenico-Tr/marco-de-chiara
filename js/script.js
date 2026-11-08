@@ -1985,7 +1985,10 @@
   function vaiA(id, categoria) {
     const meta = document.getElementById(id);
     if (!meta) return;
-    Pittura.transizione(() => {
+    // nella galleria notturna si entra nella sala con la sua entrata (js/mostra.js);
+    // altrimenti le pennellate di prima
+    const passa = window.Passaggio ? window.Passaggio.transizione : Pittura.transizione;
+    passa(() => {
       if (categoria) impostaFiltro(categoria, "rivela");
       const radice = document.documentElement;
       radice.style.scrollBehavior = "auto"; // salto istantaneo, tanto è coperto
@@ -2006,7 +2009,7 @@
         titolo.setAttribute("tabindex", "-1");
         titolo.focus({ preventScroll: true });
       }
-    });
+    }, id);
   }
 
   function preparaNavigazione() {
@@ -3827,7 +3830,10 @@
     const pronto = new Promise((risolvi) => {
       segnalaPronto = risolvi;
     });
-    if (radice.classList.contains("js-sipario")) {
+    if (radice.classList.contains("con-ingresso")) {
+      // prima l'ingresso nella galleria (js/mostra.js): il nome sale quando si entra
+      document.addEventListener("ingresso:dentro", avviaApertura, { once: true });
+    } else if (radice.classList.contains("js-sipario")) {
       try {
         sessionStorage.setItem("sipario-visto", "1");
       } catch (e) {
