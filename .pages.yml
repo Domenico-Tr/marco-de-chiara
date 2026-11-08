@@ -19,6 +19,12 @@ media:
     output: /video
     extensions: [mp4, webm, mov]
     rename: safe
+  - name: modelli
+    label: Modelli 3D
+    input: modelli
+    output: /modelli
+    extensions: [glb]
+    rename: safe
 
 content:
   # ---------------- Opere ----------------
@@ -77,7 +83,19 @@ content:
       - name: inEvidenza
         label: In mostra
         type: boolean
-        description: Le opere da esporre nel corridoio della mostra, la prima sala del sito. Attivalo su almeno tre opere (fino a dodici); se no, nella mostra vanno le prime dodici dell'elenco.
+        description: Le opere che vanno per prime nel loro corridoio della galleria in 3D (Quadri, Stampe o Sculture). In ogni corridoio entrano fino a venti opere.
+      - name: scontornata
+        label: Foto scontornata (solo sculture)
+        type: image
+        description: Facoltativa. La foto della scultura senza sfondo, in PNG o WebP trasparente (si fa gratis, per esempio tenendo premuto sul soggetto nelle Foto dell'iPhone, o con remove.bg). Nella galleria la scultura diventa solida e gira sul piedistallo; senza, sta in una teca di vetro.
+        options:
+          media: immagini
+      - name: modello3d
+        label: Modello 3D (solo sculture)
+        type: file
+        description: Facoltativo. Il modello 3D in formato .glb, fatto girando intorno alla scultura col telefono con un'app gratuita come Scaniverse, Polycam o KIRI Engine. Toccando la scultura nella galleria, si gira a 360° con il dito.
+        options:
+          media: modelli
 
   # ---------------- Processo creativo ----------------
   - name: processo
@@ -203,5 +221,6 @@ content:
         label: "Mi piace: chiave web Firebase"
         type: string
         description: La "apiKey" della configurazione web di Firebase. È fatta per stare nel sito, non è una password.
+
 
 
