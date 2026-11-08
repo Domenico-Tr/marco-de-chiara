@@ -75,9 +75,9 @@ content:
         type: string
         description: Es. 1.200 €. Lascia vuoto per mostrare "Prezzo su richiesta".
       - name: inEvidenza
-        label: Opera grande in apertura
+        label: In mostra
         type: boolean
-        description: Attivalo su una o più opere. Se ne attivi più di una, l'apertura le mostra a turno, dipingendole una sull'altra. Se non lo attivi su nessuna, l'apertura gira tra le prime sei opere dell'elenco.
+        description: Le opere da esporre nel corridoio della mostra, la prima sala del sito. Attivalo su almeno tre opere (fino a dodici); se no, nella mostra vanno le prime dodici dell'elenco.
 
   # ---------------- Processo creativo ----------------
   - name: processo
