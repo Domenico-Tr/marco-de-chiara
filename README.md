@@ -135,13 +135,22 @@ Le foto caricate dal pannello sono quelle del telefono: anche 2 MB l'una, più d
 - Le foto della galleria in 3D partono solo quando ti avvicini all'opera.
 - Per spegnere tutto: in `js/script.js` cerca `const MINIATURE` e scrivi `attive: false`.
 
+## Scorrimento fluido sul telefono
+
+Sul telefono alcune cose sono più leggere, perché lo scorrimento resti liscio:
+- quando cambi sala le luci si dissolvono su due strati (cambia solo la trasparenza, il telefono non ridisegna tutto lo schermo);
+- la lanterna, la polvere e il bagliore delle lettere ci sono solo all'ingresso; i titoli non scivolano di lato;
+- nel catalogo le opere compaiono con una dissolvenza invece della pennellata;
+- ogni foto tiene il suo spazio prima di arrivare (dalle misure dell'opera, base x altezza), così la pagina non salta mentre le foto si caricano;
+- la galleria in 3D non si ricalcola quando la barra degli indirizzi del browser entra o esce.
+
 ## Cambiare colori e caratteri
 
 - **Luci delle sale**: vedi sopra, nel blocco GALLERIA NOTTURNA.
 - **Colori delle finestre chiare** ("Provalo nella tua stanza", atelier): `--parete` (fondo), `--inchiostro` (testo) e `--grafite` (testo secondario) all'inizio del blocco GALLERIA NOTTURNA. La scheda dell'opera, buia, ha i suoi colori in `.scheda` nello stesso blocco.
 - **Caratteri**, da Google Fonts (link in `index.html`): Instrument Serif per il nome, i titoli delle sale, delle opere e degli eventi (`--font-display`); Manrope per i testi, il menu e le didascalie (`--font-testo`). Le stesse due famiglie sono in `js/lib/font` per il PDF della proposta.
 
-**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08f` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08g` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 

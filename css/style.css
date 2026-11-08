@@ -2897,20 +2897,34 @@ body::before { background: var(--muro); }
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(70% 55% at 10% 0%, var(--luce-a), transparent 72%),
-    radial-gradient(62% 62% at 96% 100%, var(--luce-b), transparent 72%),
-    radial-gradient(46% 42% at 72% 32%, var(--luce-c), transparent 76%),
-    linear-gradient(180deg, #0C0D11 0%, #08090B 45%, #060709 100%);
-  transition: --luce-a 1.4s ease, --luce-b 1.4s ease, --luce-c 1.4s ease, filter 0.8s ease;
+  background: linear-gradient(180deg, #0C0D11 0%, #08090B 45%, #060709 100%);
 }
+/* le luci colorate della sala stanno su due strati: quando cambi sala il
+   nuovo si accende sopra il vecchio (cambia solo la trasparenza, e anche il
+   telefono scorre liscio). I colori li scrive js/mostra.js. */
+.luci-strato {
+  position: absolute; inset: 0;
+  --la: var(--luce-a);
+  --lb: var(--luce-b);
+  --lc: var(--luce-c);
+  background:
+    radial-gradient(70% 55% at 10% 0%, var(--la), transparent 72%),
+    radial-gradient(62% 62% at 96% 100%, var(--lb), transparent 72%),
+    radial-gradient(46% 42% at 72% 32%, var(--lc), transparent 76%);
+  opacity: 0;
+  transition: opacity 1.3s ease;
+  will-change: opacity;
+}
+.luci-strato.is-acceso { opacity: 1; }
+.luci-strato.is-sopra { z-index: 1; }
+.luci-strato.subito { transition: none; }
 /* una seconda luce che respira e si sposta piano, come una lampada che oscilla */
 .luci-sala::before {
   content: "";
   position: absolute; inset: -25%;
   background:
-    radial-gradient(32% 28% at 30% 38%, var(--luce-a), transparent 70%),
-    radial-gradient(28% 34% at 74% 66%, var(--luce-b), transparent 70%);
+    radial-gradient(32% 28% at 30% 38%, rgba(255, 214, 160, 0.09), transparent 70%),
+    radial-gradient(28% 34% at 74% 66%, rgba(130, 140, 255, 0.07), transparent 70%);
   opacity: 0.6;
 }
 @media (hover: hover) and (pointer: fine) {
@@ -4400,17 +4414,14 @@ html.luci-accese[data-sala="su-misura"] { --luce-a: rgba(255, 170, 110, 0.42); -
 html.luci-accese[data-sala="contatti"]  { --luce-a: rgba(150, 230, 180, 0.36); --luce-b: rgba(220, 245, 150, 0.3);  --luce-c: rgba(140, 220, 210, 0.24); --accento-sala: #1E7A4C; }
 .luci-accese .luci-sala {
   filter: none;
-  background:
-    radial-gradient(70% 55% at 10% 0%, var(--luce-a), transparent 72%),
-    radial-gradient(62% 62% at 96% 100%, var(--luce-b), transparent 72%),
-    radial-gradient(46% 42% at 72% 32%, var(--luce-c), transparent 76%),
-    linear-gradient(180deg, #F8F4EC 0%, #F1ECE3 45%, #E8E1D5 100%);
+  background: linear-gradient(180deg, #F8F4EC 0%, #F1ECE3 45%, #E8E1D5 100%);
 }
 .luci-accese .luci-sala::before { opacity: 0.75; }
 .luci-accese .luci-sala::after { opacity: 0.1; }
 /* la luce delle finestre sui muri: due finestre che il sole proietta di sbieco */
 .finestra {
   position: absolute;
+  z-index: 2;
   top: -6%;
   width: 30vw; height: 92vh;
   opacity: 0;
@@ -4542,4 +4553,27 @@ html.luci-accese[data-sala="contatti"]  { --luce-a: rgba(150, 230, 180, 0.36); -
 /* sul telefono i cartellini del muro coprirebbero il nome: lì un tocco fa dondolare il quadro */
 @media (max-width: 760px) {
   .muro-cartellino { display: none; }
+}
+
+/* sul telefono: meno lavoro mentre scorri */
+@media (hover: none), (pointer: coarse) {
+  .guida { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgb(var(--vetro-rgb) / 0.95); }
+  .galleria-notturna.fuori-ingresso .lanterna { opacity: 0; }
+  .titolo-sezione,
+  .mostra-titolo { will-change: auto; transform: none; }
+}
+@media (hover: none), (pointer: coarse) {
+  /* nel catalogo le opere compaiono con una dissolvenza leggera invece della
+     pennellata (che il telefono doveva ridisegnare a ogni fotogramma) */
+  #opere-griglia .media.rivela {
+    -webkit-mask-image: none;
+    mask-image: none;
+    animation: comparsa-leggera 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) var(--ritardo, 0s) both;
+  }
+  /* il nome si scalda senza il bagliore sfocato, più leggero da ridisegnare */
+  .galleria-notturna .ingresso .nome .lettera { text-shadow: none; }
+}
+@keyframes comparsa-leggera {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
 }

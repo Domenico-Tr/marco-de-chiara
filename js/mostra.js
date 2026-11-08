@@ -28,6 +28,24 @@
   const menoMovimento = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const conMouse = () => window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const limita = (v, a, b) => Math.min(b, Math.max(a, v));
+  // Sul telefono la barra degli indirizzi entra ed esce mentre scorri e
+  // cambia l'altezza della finestra: le misure si rifanno solo se cambia la
+  // larghezza (o l'altezza di molto, girando il telefono), altrimenti la
+  // pagina farebbe uno scatto ogni volta.
+  function suRidimensiona(fn, ritardo = 150) {
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    let t = 0;
+    window.addEventListener("resize", () => {
+      const nw = window.innerWidth;
+      const nh = window.innerHeight;
+      if (nw === w && Math.abs(nh - h) < 160) return;
+      w = nw;
+      h = nh;
+      clearTimeout(t);
+      t = setTimeout(fn, ritardo);
+    });
+  }
 
   // un solo ascoltatore dello scorrimento per tutto il file, una volta per fotogramma
   const alloScorrere = [];
@@ -149,12 +167,64 @@
       if (radice.classList.contains("luci-accese")) meta.setAttribute("content", "#F1ECE3");
       else if (COLORE_BARRA[nome]) meta.setAttribute("content", COLORE_BARRA[nome]);
     };
+    // le luci della sala: il nuovo colore si accende su uno strato sopra il vecchio
+    const strati = $$(".luci-strato");
+    let attivo = 0;
+    let ultime = "";
+    let spegni = 0;
+    const luciSala = (subito) => {
+      if (strati.length < 2) return;
+      const cs = getComputedStyle(radice);
+      const c = ["--luce-a", "--luce-b", "--luce-c"].map((n) => cs.getPropertyValue(n).trim());
+      const chiave = c.join("|");
+      if (chiave === ultime) return;
+      if (!ultime) {
+        // la prima volta: i colori fissati sullo strato acceso, senza dissolvenza
+        ultime = chiave;
+        strati[attivo].style.setProperty("--la", c[0]);
+        strati[attivo].style.setProperty("--lb", c[1]);
+        strati[attivo].style.setProperty("--lc", c[2]);
+        return;
+      }
+      ultime = chiave;
+      const vecchio = strati[attivo];
+      const nuovo = strati[1 - attivo];
+      clearTimeout(spegni);
+      if (subito || menoMovimento()) {
+        [vecchio, nuovo].forEach((x) => x.classList.add("subito"));
+        nuovo.style.setProperty("--la", c[0]);
+        nuovo.style.setProperty("--lb", c[1]);
+        nuovo.style.setProperty("--lc", c[2]);
+        nuovo.classList.add("is-acceso", "is-sopra");
+        vecchio.classList.remove("is-acceso", "is-sopra");
+        void nuovo.offsetWidth;
+        [vecchio, nuovo].forEach((x) => x.classList.remove("subito"));
+      } else {
+        nuovo.classList.add("subito");
+        nuovo.classList.remove("is-acceso");
+        nuovo.style.setProperty("--la", c[0]);
+        nuovo.style.setProperty("--lb", c[1]);
+        nuovo.style.setProperty("--lc", c[2]);
+        nuovo.classList.add("is-sopra");
+        vecchio.classList.remove("is-sopra");
+        void nuovo.offsetWidth;
+        nuovo.classList.remove("subito");
+        nuovo.classList.add("is-acceso");
+        // il vecchio si spegne quando il nuovo è acceso del tutto (sotto non si vede)
+        spegni = setTimeout(() => vecchio.classList.remove("is-acceso"), 1400);
+      }
+      attivo = 1 - attivo;
+    };
     const imposta = (nome) => {
       if (radice.dataset.sala === nome) return;
       radice.dataset.sala = nome;
       coloreBarra();
+      luciSala(false);
     };
-    document.addEventListener("luci-cambiate", coloreBarra);
+    document.addEventListener("luci-cambiate", () => {
+      coloreBarra();
+      luciSala(true);
+    });
     const aggiorna = () => {
       const y = window.innerHeight * 0.52;
       for (const s of sale) {
@@ -234,13 +304,30 @@
     if (ingresso && "IntersectionObserver" in window) {
       new IntersectionObserver((v) => {
         ingressoVisibile = v[0].isIntersecting;
+        // sul telefono, fuori dall'ingresso la lanterna si spegne (il dito scorre, non illumina)
+        document.documentElement.classList.toggle("fuori-ingresso", !ingressoVisibile);
         avvia();
       }).observe(ingresso);
     }
+    const conIlMouse = conMouse();
+    const avvio = performance.now();
+    // dove stanno le lettere del nome, rispetto all'ingresso: si misura poche volte
+    let centri = null;
+    let misurateA = 0;
+    suRidimensiona(() => (centri = null), 60);
 
+    let dispari = false;
     function fotogramma(ora) {
       ciclo = 0;
       if (document.hidden) return;
+      // sul telefono basta mezzo ritmo (30 volte al secondo): la luce si muove piano
+      if (!conIlMouse) {
+        dispari = !dispari;
+        if (dispari) {
+          ciclo = requestAnimationFrame(fotogramma);
+          return;
+        }
+      }
       const W = window.innerWidth;
       const H = window.innerHeight;
       // all'arrivo (e sul telefono quando nessuno la tocca) la luce passa da sola sulle opere
@@ -274,11 +361,23 @@
           const sy = Math.min(H, Math.max(0, -r.top));
           muroScritto = { r, dx, dy, sy, accese: Muro.opere.map((f) => f.getBoundingClientRect()) };
           if (nome && !lettere.length) lettere = $$(".lettera", nome);
-          scalda(lettere);
+          if (lettere.length && (!centri || (ora - avvio < 3200 && ora - misurateA > 400))) {
+            centri = lettere.map((l) => {
+              const m = l.getBoundingClientRect();
+              return [m.left + m.width / 2 - r.left, m.top + m.height / 2 - r.top];
+            });
+            misurateA = ora;
+          }
+          if (centri) {
+            lettere.forEach((l, i) => {
+              const d = Math.hypot(r.left + centri[i][0] - Lanterna.x, r.top + centri[i][1] - Lanterna.y);
+              scrivi.push([l, Math.max(0, 1 - d / raggio)]);
+            });
+          }
         }
       }
-      // i titoli delle sale vicini alla luce
-      if (!titoli) {
+      // i titoli delle sale vicini alla luce (solo col mouse: sul telefono scorrerebbe a scatti)
+      if (!titoli && conIlMouse) {
         const t = $$(".titolo-sezione, .mostra-titolo").filter((el) => el.querySelector(".titolo-lettera"));
         if (t.length) titoli = t.map((el) => ({ el, lettere: $$(".titolo-lettera", el) }));
       }
@@ -347,7 +446,21 @@
       H = tela.height = window.innerHeight;
     }
     dimensiona();
-    window.addEventListener("resize", dimensiona);
+    suRidimensiona(dimensiona, 50);
+    // sul telefono la polvere vola solo all'ingresso: altrove il telefono risparmia le forze
+    let attiva = true;
+    let inCorso = true;
+    const ingresso = $(".ingresso");
+    if (!conMouse() && ingresso && "IntersectionObserver" in window) {
+      new IntersectionObserver((v) => {
+        attiva = v[0].isIntersecting;
+        tela.style.opacity = attiva ? "" : "0";
+        if (attiva && !inCorso) {
+          inCorso = true;
+          requestAnimationFrame(fotogramma);
+        }
+      }).observe(ingresso);
+    }
     for (let i = 0; i < quanti; i++) {
       granelli.push({
         x: Math.random() * W,
@@ -361,6 +474,11 @@
     }
     let ultimo = 0;
     function fotogramma(ora) {
+      if (!attiva) {
+        inCorso = false;
+        ctx.clearRect(0, 0, W, H);
+        return;
+      }
       requestAnimationFrame(fotogramma);
       if (document.hidden || ora - ultimo < 33) return; // circa 30 fotogrammi al secondo bastano
       ultimo = ora;
@@ -459,6 +577,7 @@
 
   function animaGalleria(pista, mondo, pannelli, fine, tela) {
     const palco = $("#galleria-palco");
+    const vista = $(".mostra-vista", pista);
     const barra = $("#mostra-barra");
     const conta = $("#mostra-conta");
     const testa = $(".mostra-testa");
@@ -525,7 +644,8 @@
       fine.dataset.z = String(-fineZ);
       fine.style.transform = `translate3d(0, ${(-altezza * 0.05).toFixed(1)}px, ${-fineZ}px) translate(-50%, -50%)`;
       // la pista è lunga quanto il cammino (più un respiro all'inizio e alla fine)
-      pista.style.height = `${Math.round(window.innerHeight * 1.35 + camFine * 0.72)}px`;
+      G.vistaH = vista.clientHeight || window.innerHeight;
+      pista.style.height = `${Math.round(G.vistaH * 1.35 + camFine * 0.72)}px`;
     }
 
     // Disegna la sala vista dalla posizione attuale: stessa matematica della
@@ -682,8 +802,9 @@
 
     function avanzamento() {
       const r = pista.getBoundingClientRect();
-      const corsa = pista.offsetHeight - window.innerHeight;
-      return limita((-r.top - window.innerHeight * 0.15) / Math.max(1, corsa - window.innerHeight * 0.2), 0, 1);
+      const h = G.vistaH;
+      const corsa = pista.offsetHeight - h;
+      return limita((-r.top - h * 0.15) / Math.max(1, corsa - h * 0.2), 0, 1);
     }
 
     function fotogramma() {
@@ -753,8 +874,9 @@
       const el = e.target.closest(".galleria-pannello, .galleria-fine");
       if (!el) return;
       const voluto = limita((-Number(el.dataset.z) - G.prospettiva * 1.2) / G.camFine, 0, 1);
-      const corsa = pista.offsetHeight - window.innerHeight;
-      const y = pista.getBoundingClientRect().top + window.scrollY + window.innerHeight * 0.15 + voluto * (corsa - window.innerHeight * 0.2);
+      const h = G.vistaH;
+      const corsa = pista.offsetHeight - h;
+      const y = pista.getBoundingClientRect().top + window.scrollY + h * 0.15 + voluto * (corsa - h * 0.2);
       window.scrollTo({ top: y, behavior: "auto" });
       cam = voluto * G.camFine;
     });
@@ -769,13 +891,9 @@
     document.addEventListener("luci-cambiate", () => {
       if (!ciclo && visibile) ciclo = requestAnimationFrame(fotogramma);
     });
-    let ritardo = 0;
-    window.addEventListener("resize", () => {
-      clearTimeout(ritardo);
-      ritardo = setTimeout(() => {
-        geometria();
-        avvia();
-      }, 150);
+    suRidimensiona(() => {
+      geometria();
+      avvia();
     });
     geometria();
     cam = avanzamento() * G.camFine;
@@ -806,10 +924,12 @@
       if (testa) testa.classList.add("visibile");
       return;
     }
+    if (!conMouse()) return; // sul telefono i titoli restano fermi: lo scorrimento è più fluido
     const scivola = () => {
       const h = window.innerHeight;
-      titoli.forEach((t) => {
-        const r = t.getBoundingClientRect();
+      const misure = titoli.map((t) => t.getBoundingClientRect());
+      titoli.forEach((t, i) => {
+        const r = misure[i];
         if (r.bottom < -100 || r.top > h + 100) return;
         const p = (r.top + r.height / 2) / h;
         t.style.setProperty("--deriva", `${((p - 0.5) * 7).toFixed(2)}vw`);
@@ -1065,8 +1185,10 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(sposta);
 
     // quanto della visita hai fatto
+    let altezzaPagina = document.documentElement.scrollHeight;
+    if ("ResizeObserver" in window) new ResizeObserver(() => (altezzaPagina = document.documentElement.scrollHeight)).observe(document.body);
     suScorrimento(() => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const max = altezzaPagina - window.innerHeight;
       if (barra) barra.style.transform = `scaleX(${max > 0 ? limita(window.scrollY / max, 0, 1).toFixed(4) : 0})`;
     });
 

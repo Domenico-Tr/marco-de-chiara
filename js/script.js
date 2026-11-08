@@ -710,6 +710,15 @@
 
   // Foto vera se c'è, altrimenti segnaposto dipinto.
   // dopo = true: la foto non parte subito (la carica chi la mostra, con carica(img))
+  function proporzione(testo) {
+    const m = String(testo || "").replace(/,/g, ".").match(/(\d+(?:\.\d+)?)\s*[x×X*]\s*(\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    const a = Number(m[1]);
+    const b = Number(m[2]);
+    if (!a || !b || a / b < 0.2 || a / b > 5) return null;
+    return `${a} / ${b}`;
+  }
+
   function creaMedia(o, lato, subito, dopo) {
     if (o.immagine) {
       const img = document.createElement("img");
@@ -717,6 +726,9 @@
       img.alt = `${o.titolo}${o.anno ? ", " + o.anno : ""}. ${o.tecnica || ""}`;
       img.loading = subito ? "eager" : "lazy";
       img.decoding = "async";
+      // lo spazio della foto è pronto prima che arrivi (dalle misure dell'opera, base x altezza):
+      // così la pagina non salta mentre le foto si caricano; arrivata la foto vale la sua forma vera
+      img.style.aspectRatio = `auto ${proporzione(o.misure) || "4 / 5"}`;
       img.dataset.originale = o.immagine;
       const leggera = miniatura(o.immagine, lato);
       // crossOrigin serve per leggere i colori della foto (alone, tavolozza dell'atelier)
@@ -2246,6 +2258,7 @@
   // La pennellata sotto la testata si allunga mentre si scorre la pagina
   function preparaProgresso() {
     const testata = $(".testata");
+    if (!testata || !$(".testata-pennellata")) return; // la barra con la pennellata non c'è più
     let inAttesa = false;
     const aggiorna = () => {
       inAttesa = false;
@@ -3132,6 +3145,7 @@
   ];
 
   function creaColpiSfondo() {
+    if ($(".guida")) return; // non servono nella galleria notturna
     COLPI_SFONDO.forEach((c) => {
       const sezione = document.getElementById(c.sezione);
       if (!sezione) return;
@@ -3153,7 +3167,9 @@
     const titoli = Array.from(document.querySelectorAll(".titolo-sezione"));
     const colpi = Array.from(document.querySelectorAll(".colpo-sfondo"));
     const apertura = $(".apertura");
-    if (menoMovimento()) {
+    // nella galleria notturna (con l'audioguida) pennellate e apertura non ci sono più:
+    // niente calcoli a ogni scorrimento, che sul telefono facevano scattare la pagina
+    if (menoMovimento() || $(".guida")) {
       titoli.forEach((t) => t.style.setProperty("--pennello", "1"));
       return;
     }
