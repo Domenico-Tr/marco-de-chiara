@@ -56,7 +56,7 @@ content:
       - name: misure
         label: Misure
         type: string
-        description: Es. 100 × 80 cm (altezza × base)
+        description: Es. 50 × 70 cm. L'ordine non importa, il sito capisce dalla foto se l'opera è verticale o orizzontale.
       - name: edizione
         label: Edizione
         type: string
@@ -77,7 +77,7 @@ content:
       - name: inEvidenza
         label: Opera grande in apertura
         type: boolean
-        description: Attivalo su una sola opera. Se nessuna lo ha, si usa la prima dell'elenco.
+        description: Attivalo su una o più opere. Se ne attivi più di una, l'apertura le mostra a turno, dipingendole una sull'altra. Se non lo attivi su nessuna, l'apertura gira tra le prime sei opere dell'elenco.
 
   # ---------------- Processo creativo ----------------
   - name: processo
