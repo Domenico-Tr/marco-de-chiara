@@ -5046,9 +5046,11 @@ html.con-ingresso body { overflow: hidden; }
   border: 3px solid rgb(var(--testo-rgb) / 0.85);
   border-bottom-width: 0;
   border-radius: 999px 999px 0 0;
-  background: radial-gradient(70% 60% at 50% 40%, #2A2119, #0E0C0A 80%);
   box-shadow: inset 0 0 0 6px rgb(var(--buio-rgb)), inset 0 0 0 7px rgb(var(--testo-rgb) / 0.3);
 }
+.bivio-varco::before { content: ""; position: absolute; inset: 0; background: radial-gradient(70% 60% at 50% 40%, #2A2119, #0E0C0A 80%); }
+.bivio-varco > * { position: relative; }
+.bivio-varco > .bivio-luce { position: absolute; }
 .bivio-varco .media,
 .bivio-scultura {
   width: 62%;
@@ -5070,9 +5072,19 @@ html.con-ingresso body { overflow: hidden; }
   .bivio-arco:hover .bivio-varco { border-color: var(--giallo); }
 }
 .bivio-arco:focus-visible { outline: 2px solid var(--acido); outline-offset: 6px; }
-.verso-corridoio .bivio-arco:not(.scelto) { opacity: 0; transform: scale(0.9); }
-.verso-corridoio .bivio-arco.scelto { transform: scale(1.9); transition-duration: 0.7s; }
-.verso-corridoio .bivio-titolo { opacity: 0; transition: opacity 0.3s ease; }
+/* scelto un corridoio: gli altri archi scivolano via, dentro quello scelto
+   compare il corridoio vero (la sala 3D, ritagliata a forma d'arco da js/mostra.js) */
+.verso-corridoio { pointer-events: none; }
+.verso-corridoio .bivio-arco { animation: none; }
+.verso-corridoio .bivio-arco:not(.scelto) { opacity: 0; transform: translateX(calc(var(--verso, 0) * 14vw)) scale(0.94); transition: opacity 0.5s ease, transform 0.8s cubic-bezier(0.5, 0, 0.3, 1); }
+.verso-corridoio .bivio-titolo,
+.verso-corridoio .scelto .bivio-nome,
+.verso-corridoio .scelto .bivio-conta { opacity: 0; transition: opacity 0.35s ease; }
+.verso-corridoio .scelto .bivio-varco::before,
+.verso-corridoio .scelto .bivio-varco > * { opacity: 0; transition: opacity 0.45s ease; }
+.verso-corridoio .scelto .bivio-varco { border-color: rgba(255, 226, 180, 0.9); box-shadow: 0 0 40px rgba(255, 214, 160, 0.35); transition: border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease 0.4s; opacity: 0; }
+.galleria-vestibolo.di-colpo,
+.galleria-vestibolo.di-colpo * { transition: none !important; animation: none !important; }
 @media (max-width: 760px) {
   .galleria-vestibolo { padding: 8.5rem 0.75rem 6.5rem; }
   .bivio-conta { font-size: 0.64rem; }
@@ -5245,7 +5257,7 @@ html.con-ingresso body { overflow: hidden; }
 .vista-3d-aiuto { margin: 0.3rem 0 0; font-size: 0.78rem; opacity: 0.7; }
 
 /* ---------- Con le luci accese ---------- */
-.luci-accese .bivio-varco { background: radial-gradient(70% 60% at 50% 40%, #FFFFFF, #E9E2D6 80%); }
+.luci-accese .bivio-varco::before { background: radial-gradient(70% 60% at 50% 40%, #FFFFFF, #E9E2D6 80%); }
 .luci-accese .galleria-corridoi button { background: rgba(255, 255, 255, 0.6); }
 .luci-accese .pd--sopra { background: radial-gradient(closest-side, rgba(90, 70, 45, 0.3), rgba(90, 70, 45, 0) 70%), #FFFFFF; }
 

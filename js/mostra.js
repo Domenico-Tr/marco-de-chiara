@@ -520,6 +520,8 @@
      sta in una teca di vetro. Se nel pannello c'è un modello 3D (.glb),
      toccandola si apre il modello da girare a 360°.
      ------------------------------------------------------------------ */
+  // chiude la porta della galleria (la usa anche il passaggio verso la sala 01)
+  let chiudiGalleria = null;
   const CORRIDOI = [
     { id: "quadri", nome: "Quadri", nota: "Il corridoio dei dipinti" },
     { id: "stampe", nome: "Stampe", nota: "Incisioni e grafica" },
@@ -748,6 +750,8 @@
     }
     stato("porta");
 
+    let attesaBivio = 0;
+    let occupato = false;
     function apriPorta() {
       if (vest.classList.contains("porta-aperta")) return;
       // si entra proprio dal vano della porta
@@ -756,7 +760,7 @@
       const rs = scena.getBoundingClientRect();
       scena.style.transformOrigin = `${(rp.left - rs.left + rp.width / 2).toFixed(0)}px ${(rp.top - rs.top + rp.height * 0.66).toFixed(0)}px`;
       vest.classList.add("porta-aperta");
-      setTimeout(
+      attesaBivio = setTimeout(
         () => {
           vest.classList.add("mostra-bivio");
           $(".bivio", vest).hidden = false;
@@ -767,36 +771,134 @@
         menoMovimento() ? 0 : 1700
       );
     }
+
+    // nel corridoio: le opere sono in sala, il vestibolo sparisce
+    function inCorridoio(c, dati) {
+      motore.carica(dati, { cammina: true });
+      pista.classList.add("in-corridoio");
+      stato("corridoio", c.id);
+    }
+    function lasciaVestibolo() {
+      vest.hidden = true;
+      vest.classList.remove("verso-corridoio");
+      $$(".bivio-arco", vest).forEach((a) => {
+        a.classList.remove("scelto");
+        a.style.removeProperty("--verso");
+      });
+    }
     function entra(id) {
       const c = corridoi.find((x) => x.id === id);
-      if (!c) return;
-      const dopo = () => {
-        const prossimo = corridoi[(corridoi.indexOf(c) + 1) % corridoi.length];
-        motore.carica(costruisciCorridoio(c, prossimo, corridoi.length > 1, tutte, V));
-        vest.hidden = true;
-        vest.classList.remove("verso-corridoio");
-        pista.classList.add("in-corridoio");
-        stato("corridoio", c.id);
+      if (!c || occupato) return;
+      const prossimo = corridoi[(corridoi.indexOf(c) + 1) % corridoi.length];
+      const dati = costruisciCorridoio(c, prossimo, corridoi.length > 1, tutte, V);
+      const dalBivio = !vest.hidden;
+      if (motore.piatta || menoMovimento() || !palco.animate) {
+        inCorridoio(c, dati);
+        lasciaVestibolo();
         aCapo();
+        return;
+      }
+      occupato = true;
+      const fine = () => {
+        occupato = false;
       };
-      if (!vest.hidden && !menoMovimento()) {
-        const arco = $(`.bivio-arco[data-corridoio="${id}"]`, vest);
-        if (arco) arco.classList.add("scelto");
-        vest.classList.add("verso-corridoio");
-        setTimeout(dopo, 650);
-      } else dopo();
+      if (!dalBivio) {
+        // da un corridoio all'altro: la sala si spegne e se ne accende un'altra
+        const buio = palco.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, easing: "ease-in", fill: "forwards" });
+        buio.finished
+          .catch(() => {})
+          .then(() => {
+            inCorridoio(c, dati);
+            aCapo();
+            buio.cancel();
+            palco.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 700, easing: "ease-out" });
+            fine();
+          });
+        return;
+      }
+      // dal bivio: dentro l'arco scelto compare il corridoio vero, l'arco si
+      // allarga fino a diventare la sala e intanto si cammina in avanti
+      aCapo();
+      const arco = $(`.bivio-arco[data-corridoio="${id}"]`, vest);
+      const archi = $$(".bivio-arco", vest);
+      const qui = archi.indexOf(arco);
+      archi.forEach((a, i) => i !== qui && a.style.setProperty("--verso", i < qui ? -1 : 1));
+      const rp = palco.getBoundingClientRect();
+      const rv = $(".bivio-varco", arco).getBoundingClientRect();
+      const R = (rv.width / 2).toFixed(1);
+      const da = `inset(${(rv.top - rp.top).toFixed(1)}px ${(rp.right - rv.right).toFixed(1)}px ${(rp.bottom - rv.bottom).toFixed(1)}px ${(rv.left - rp.left).toFixed(1)}px round ${R}px ${R}px 0px 0px)`;
+      const tutto = "inset(0px 0px 0px 0px round 0px 0px 0px 0px)";
+      arco.classList.add("scelto");
+      vest.classList.add("verso-corridoio");
+      inCorridoio(c, dati);
+      const varco = palco.animate([{ clipPath: da }, { clipPath: da, offset: 0.28 }, { clipPath: tutto }], {
+        duration: 1600,
+        easing: "cubic-bezier(0.65, 0, 0.3, 1)",
+      });
+      varco.finished
+        .catch(() => {})
+        .then(() => {
+          if (pista.dataset.stato === "corridoio") lasciaVestibolo();
+          fine();
+        });
     }
     function bivio() {
+      palco.getAnimations().forEach((a) => a.cancel());
+      occupato = false;
       motore.carica({});
       pista.classList.remove("in-corridoio");
+      lasciaVestibolo();
       vest.hidden = false;
       vest.classList.add("porta-aperta", "mostra-bivio");
-      $$(".bivio-arco", vest).forEach((a) => a.classList.remove("scelto"));
       $(".bivio", vest).hidden = false;
       stato("bivio");
       aCapo();
       const primo = $(".bivio-arco", vest);
       if (primo) primo.focus({ preventScroll: true });
+    }
+    // la porta si richiude: ogni volta che si torna nella galleria si entra di nuovo
+    function chiudi() {
+      if (pista.dataset.stato === "porta") return;
+      clearTimeout(attesaBivio);
+      palco.getAnimations().forEach((a) => a.cancel());
+      occupato = false;
+      const b0 = pista.getBoundingClientRect().bottom;
+      const y0 = window.scrollY;
+      radice.style.overflowAnchor = "none";
+      vest.classList.add("di-colpo");
+      motore.carica({});
+      pista.classList.remove("in-corridoio");
+      lasciaVestibolo();
+      vest.hidden = false;
+      vest.classList.remove("porta-aperta", "mostra-bivio");
+      $(".bivio", vest).hidden = true;
+      $(".porta-scena", vest).style.transformOrigin = "";
+      stato("porta");
+      // se la galleria è ormai alle spalle, quello che viene dopo resta fermo dov'è
+      if (b0 < window.innerHeight * 0.5) {
+        // (in coordinate della pagina: accorciandosi, la pagina può aver già spostato lo scorrimento)
+        const b1 = pista.getBoundingClientRect().bottom + window.scrollY;
+        radice.style.scrollBehavior = "auto";
+        window.scrollTo(0, Math.max(0, y0 + (b1 - (b0 + y0))));
+        radice.style.scrollBehavior = "";
+      }
+      void vest.offsetWidth;
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          vest.classList.remove("di-colpo");
+          radice.style.overflowAnchor = "";
+        })
+      );
+    }
+    chiudiGalleria = chiudi;
+    if ("IntersectionObserver" in window) {
+      // (la fascia in alto, sotto la firma, conta come fuori)
+      new IntersectionObserver(
+        (v) => {
+          if (!v[0].isIntersecting) chiudi();
+        },
+        { rootMargin: "-90px 0px 0px 0px" }
+      ).observe(pista);
     }
     $(".porta", vest).addEventListener("click", apriPorta);
     vest.addEventListener("click", (e) => {
@@ -1233,7 +1335,11 @@
       ciclo = 0;
       if (!visibile) return;
       if (testa && !testa.classList.contains("visibile") && pista.getBoundingClientRect().top < window.innerHeight * 0.6) testa.classList.add("visibile");
-      if (!S.pannelli.length) return;
+      if (!S.pannelli.length) {
+        // davanti alla porta e al bivio il titolo e la guida tornano in vista
+        if (testa) testa.classList.remove("in-cammino");
+        return;
+      }
       const p = avanzamento();
       camMeta = p * G.camFine;
       cam += (camMeta - cam) * 0.09; // il passo: si arriva con un po' di inerzia
@@ -1337,14 +1443,15 @@
     return {
       piatta: false,
       // mette in sala le opere di un corridoio (o nessuna, davanti alla porta e al bivio)
-      carica({ pannelli, fine } = {}) {
+      carica({ pannelli, fine } = {}, { cammina = false } = {}) {
         mondo.replaceChildren();
         S.pannelli = pannelli || [];
         S.fine = fine || null;
         S.pannelli.forEach((el) => mondo.append(el));
         if (S.fine) mondo.append(S.fine);
         geometria();
-        cam = 0;
+        // entrando nel corridoio si parte un passo più indietro e si cammina avanti
+        cam = cammina ? -G.passo * 0.9 : 0;
         camMeta = 0;
         avvia();
       },
@@ -2282,8 +2389,12 @@
       },
     };
 
-    async function transizione(alCentro, id) {
+    async function transizione(vaiAlCentro, id) {
       if (occupato) return;
+      const alCentro = () => {
+        if (id === "mostra" && chiudiGalleria) chiudiGalleria();
+        vaiAlCentro();
+      };
       const modo = MODI[ENTRATE[id] || "varco"];
       if (menoMovimento() || !document.body.animate) {
         alCentro();
