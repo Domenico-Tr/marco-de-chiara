@@ -506,34 +506,167 @@
 
   /* ------------------------------------------------------------------
      5. La galleria in 3D
-     Una sala al buio: pavimento, soffitto, pareti e pannelli con le opere,
-     disposti a zig-zag in profondità, ognuno con il suo faretto. Scorrendo
-     la pagina si cammina in avanti (con un po' di inerzia, come un passo),
-     col mouse ci si guarda intorno. Le opere lontane restano nell'ombra e
-     si accendono avvicinandosi. Con "riduci movimento" diventa una fila
-     di opere da sfogliare.
+     Arrivando alla Sala 01 c'è una porta chiusa: si tocca e si apre.
+     Dietro c'è un bivio con tre corridoi: Quadri, Stampe, Sculture.
+     Scegliendone uno si cammina scorrendo la pagina: le opere sono
+     appese a zig-zag (le sculture stanno sui piedistalli e si possono
+     girare trascinandole), ognuna con il suo faretto. Col mouse ci si
+     guarda intorno; le opere lontane restano nell'ombra e si accendono
+     avvicinandosi. In fondo al corridoio si passa al successivo o si
+     torna al bivio. Con "riduci movimento" i corridoi diventano file di
+     opere da sfogliare.
+     Sculture: se in img/scontornate/ c'è la foto scontornata (stesso nome
+     della foto, in .webp o .png) la scultura è solida e si gira; se manca,
+     sta in una teca di vetro. Se nel pannello c'è un modello 3D (.glb),
+     toccandola si apre il modello da girare a 360°.
      ------------------------------------------------------------------ */
-  function operePerLaMostra(opere) {
-    const segnate = opere.filter((o) => o.inEvidenza && o.immagine);
-    const lista = segnate.length >= 3 ? segnate : opere.filter((o) => o.immagine);
-    return lista.slice(0, 12);
+  const CORRIDOI = [
+    { id: "quadri", nome: "Quadri", nota: "Il corridoio dei dipinti" },
+    { id: "stampe", nome: "Stampe", nota: "Incisioni e grafica" },
+    { id: "sculture", nome: "Sculture", nota: "Sui piedistalli, da girare" },
+  ];
+  function operePer(cat, opere) {
+    const tutte = opere.filter((o) => o.categoria === cat && (o.immagine || cat === "sculture"));
+    return tutte.filter((o) => o.inEvidenza).concat(tutte.filter((o) => !o.inEvidenza)).slice(0, 20);
   }
+  // la foto scontornata di una scultura (si prova .webp, poi .png)
+  const SCONTORNATE = new Map();
+  function scontornata(o) {
+    if (SCONTORNATE.has(o.immagine)) return SCONTORNATE.get(o.immagine);
+    const nome = String(o.immagine || "").split("/").pop().replace(/\.[^.]+$/, "");
+    const prove = [o.scontornata, nome && `img/scontornate/${nome}.webp`, nome && `img/scontornate/${nome}.png`]
+      .filter(Boolean)
+      .map((p) => String(p).trim().replace(/^\/+/, ""));
+    const promessa = new Promise((risolvi) => {
+      const prova = (i) => {
+        if (i >= prove.length) return risolvi(null);
+        const im = new Image();
+        im.onload = () => risolvi(prove[i]);
+        im.onerror = () => prova(i + 1);
+        im.src = prove[i];
+      };
+      prova(0);
+    });
+    SCONTORNATE.set(o.immagine, promessa);
+    return promessa;
+  }
+
+  // la porta della galleria: il portale in pietra con la lunetta di vetro,
+  // le applique, il cordone di velluto e due battenti di legno (in HTML,
+  // così si aprono davvero in 3D sui cardini)
+  const PORTA_ANTA = (lato) => `<svg viewBox="0 0 90 232" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="pl-${lato}" x1="0" x2="1"><stop offset="0" stop-color="#2A2017"/><stop offset="0.55" stop-color="#3B2D20"/><stop offset="1" stop-color="#4A3826"/></linearGradient>
+        <linearGradient id="pc-${lato}" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#FFE9C2" stop-opacity="0.9"/><stop offset="1" stop-color="#E7A35A" stop-opacity="0.75"/></linearGradient>
+        <linearGradient id="po-${lato}" x1="0" x2="1"><stop offset="0" stop-color="#7A5A2C"/><stop offset="0.5" stop-color="#F3DDA8"/><stop offset="1" stop-color="#7A5A2C"/></linearGradient>
+      </defs>
+      <rect width="90" height="232" fill="url(#pl-${lato})"/>
+      <path d="M9 0v232M23 0c1 60-2 120 0 232M41 0c-2 80 2 150 0 232M58 0c1 50-1 140 1 232M74 0v232" stroke="#000" stroke-opacity="0.16" stroke-width="0.6" fill="none"/>
+      <rect x="11" y="12" width="68" height="74" fill="#1A130D"/>
+      <rect x="15" y="16" width="60" height="66" fill="url(#pc-${lato})" class="porta-vetrino"/>
+      <path d="M45 16v66M15 49h60" stroke="#2A2017" stroke-width="3"/>
+      <path d="M17 18l22 0-22 30z" fill="#FFF" opacity="0.12"/>
+      <path d="M11 98h68v116H11z" fill="#1E1710"/>
+      <path d="M11 98h68l-6 6H17v104l-6 6z" fill="#FFE6BE" opacity="0.08"/>
+      <path d="M79 98v116H11l6-6h56V104z" fill="#000" opacity="0.38"/>
+      <rect x="17" y="104" width="56" height="104" fill="url(#pl-${lato})"/>
+      <rect x="25" y="114" width="40" height="84" fill="none" stroke="#000" stroke-opacity="0.3"/>
+      <rect x="82" y="96" width="4" height="52" rx="2" fill="url(#po-${lato})"/>
+      <rect x="80" y="100" width="6" height="3" fill="#6B4E25"/><rect x="80" y="141" width="6" height="3" fill="#6B4E25"/>
+      <rect x="80.5" y="156" width="7" height="15" rx="3.5" fill="url(#po-${lato})"/>
+      <path class="porta-serratura" d="M84 160.5a1.6 1.6 0 1 1 0 3.2l0.9 4h-1.8z" fill="#FFD9A0"/>
+      <rect x="0" y="220" width="90" height="12" fill="url(#po-${lato})" opacity="0.55"/>
+      <rect x="88.6" y="0" width="1.4" height="232" fill="#000" opacity="0.5"/>
+    </svg>`;
+  const PORTA_HTML = `<svg class="porta-svg porta-svg--fondo" viewBox="0 0 400 460" aria-hidden="true">
+      <defs>
+        <radialGradient id="pt-dentro" cx="50%" cy="62%" r="70%"><stop offset="0" stop-color="#FFFBF0"/><stop offset="0.45" stop-color="#FFE0AA"/><stop offset="1" stop-color="#C98642"/></radialGradient>
+        <radialGradient id="pt-vetro" cx="200" cy="180" r="92" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFF1CF"/><stop offset="0.55" stop-color="#F5BE6E"/><stop offset="1" stop-color="#9C6430"/></radialGradient>
+        <linearGradient id="pt-pietra" x1="0" y1="0" x2="0" y2="1"><stop class="pt-pietra-a" offset="0" stop-color="#5A5045"/><stop class="pt-pietra-b" offset="1" stop-color="#2E2822"/></linearGradient>
+        <radialGradient id="pt-applique"><stop offset="0" stop-color="#FFD9A0" stop-opacity="0.55"/><stop offset="0.45" stop-color="#FFC77A" stop-opacity="0.16"/><stop offset="1" stop-color="#FFC77A" stop-opacity="0"/></radialGradient>
+        <linearGradient id="pt-spiraglio" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD9A0" stop-opacity="0.55"/><stop offset="1" stop-color="#FFD9A0" stop-opacity="0"/></linearGradient>
+        <linearGradient id="pt-ottone" x1="0" x2="1"><stop offset="0" stop-color="#7A5A2C"/><stop offset="0.5" stop-color="#F3DDA8"/><stop offset="1" stop-color="#7A5A2C"/></linearGradient>
+        <linearGradient id="pt-velluto" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B0262F"/><stop offset="1" stop-color="#5A0C14"/></linearGradient>
+      </defs>
+      <circle class="porta-alone" cx="52" cy="206" r="96" fill="url(#pt-applique)"/>
+      <circle class="porta-alone" cx="348" cy="206" r="96" fill="url(#pt-applique)"/>
+      <path class="porta-spiraglio" d="M110 416H290L352 460H48Z" fill="url(#pt-spiraglio)"/>
+      <g class="porta-dentro">
+        <rect x="110" y="180" width="180" height="240" fill="url(#pt-dentro)"/>
+        <path d="M110 416L176 330H224L290 416Z" fill="#7A4E26" opacity="0.28"/>
+        <path d="M176 330V262H224V330" fill="none" stroke="#9C6A38" stroke-opacity="0.45"/>
+        <rect x="190" y="282" width="20" height="26" fill="none" stroke="#7A4E26" stroke-opacity="0.6" stroke-width="2"/>
+        <path d="M128 300l26 6v34l-26 10zM272 300l-26 6v34l26 10z" fill="#7A4E26" opacity="0.32"/>
+      </g>
+      <g class="porta-lunetta">
+        <path d="M110 180A90 90 0 0 1 290 180Z" fill="url(#pt-vetro)"/>
+        <path d="M200 180L110 180M200 180L122 135M200 180L155 102M200 180L200 90M200 180L245 102M200 180L278 135M200 180L290 180" stroke="#2A2017" stroke-width="3"/>
+        <path d="M166 180A34 34 0 0 1 234 180Z" fill="#2A2017"/>
+        <path d="M174 180A26 26 0 0 1 226 180" fill="none" stroke="url(#pt-ottone)" stroke-width="1.5"/>
+        <path d="M110 180A90 90 0 0 1 290 180" fill="none" stroke="#2A2017" stroke-width="5"/>
+      </g>
+      <rect x="106" y="176" width="188" height="8" fill="#2A2017"/>
+      <rect x="106" y="176" width="188" height="1.5" fill="#FFE6BE" opacity="0.2"/>
+      <rect class="porta-sotto" x="112" y="415" width="176" height="3" rx="1.5" fill="#FFD9A0"/>
+      <path class="porta-portale" d="M84 420V180A116 116 0 0 1 316 180V420H290V180A90 90 0 0 0 110 180V420Z" fill="url(#pt-pietra)"/>
+      <path d="M200 180m-90 0a90 90 0 0 1 180 0M200 180m-116 0a116 116 0 0 1 232 0" fill="none" stroke="#FFF1DA" stroke-opacity="0.22"/>
+      <path d="M90.4 180H116M93.9 150l24.7 6.6M104.3 122l22.5 13M120 98l18.4 18.4M142 82.4l13 22.5M170 72.1l6.7 24.8M230 72.1l-6.7 24.8M258 82.4l-13 22.5M280 98l-18.4 18.4M295.7 122l-22.5 13M306.1 150l-24.7 6.6M309.6 180H284" stroke="#000" stroke-opacity="0.35"/>
+      <path d="M185 60H215L209 94H191Z" fill="#6E6255"/>
+      <path d="M185 60H215L214 66H186Z" fill="#FFF1DA" opacity="0.25"/>
+      <text class="porta-chiave" x="200" y="82" text-anchor="middle">MDC</text>
+      <rect x="78" y="170" width="44" height="11" fill="#6E6255"/><rect x="278" y="170" width="44" height="11" fill="#6E6255"/>
+      <rect x="78" y="394" width="40" height="26" fill="#3A332B"/><rect x="282" y="394" width="40" height="26" fill="#3A332B"/>
+      <path d="M78 394h40M282 394h40" stroke="#FFF1DA" stroke-opacity="0.2"/>
+      <circle class="porta-alone porta-alone--forte" cx="52" cy="206" r="60" fill="url(#pt-applique)"/>
+      <circle class="porta-alone porta-alone--forte" cx="348" cy="206" r="60" fill="url(#pt-applique)"/>
+      <path d="M0 420H400" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.4"/>
+      <g class="porta-applique">
+        <path d="M48 196h8v22h-8zM344 196h8v22h-8z" fill="url(#pt-ottone)"/>
+        <path d="M52 214v-14q0-6 9-6h3M348 214v-14q0-6-9-6h-3" fill="none" stroke="url(#pt-ottone)" stroke-width="2"/>
+        <path d="M58 194h12l-2 6h-8zM330 194h12l-2 6h-8z" fill="url(#pt-ottone)"/>
+        <ellipse class="porta-fiamma" cx="64" cy="186" rx="4" ry="8" fill="#FFF3D6"/>
+        <ellipse class="porta-fiamma" cx="336" cy="186" rx="4" ry="8" fill="#FFF3D6"/>
+      </g>
+    </svg>
+    <span class="porta-battente porta-battente--sx" aria-hidden="true">${PORTA_ANTA("sx")}</span>
+    <span class="porta-battente porta-battente--dx" aria-hidden="true">${PORTA_ANTA("dx")}</span>
+    <span class="porta-fessura" aria-hidden="true"></span>
+    <svg class="porta-svg porta-svg--fronte" viewBox="0 0 400 460" aria-hidden="true">
+      <g class="porta-colonnine">
+        <ellipse cx="62" cy="446" rx="15" ry="4" fill="#000" opacity="0.45"/>
+        <ellipse cx="338" cy="446" rx="15" ry="4" fill="#000" opacity="0.45"/>
+        <path d="M50 446q12-6 24 0zM326 446q12-6 24 0z" fill="url(#pt-ottone)"/>
+        <rect x="59.5" y="364" width="5" height="80" fill="url(#pt-ottone)"/>
+        <rect x="335.5" y="364" width="5" height="80" fill="url(#pt-ottone)"/>
+        <circle cx="62" cy="361" r="6.5" fill="url(#pt-ottone)"/>
+        <circle cx="338" cy="361" r="6.5" fill="url(#pt-ottone)"/>
+      </g>
+      <g class="porta-cordone porta-cordone--sx">
+        <path d="M64 368Q132 400 200 400" fill="none" stroke="url(#pt-velluto)" stroke-width="6.5" stroke-linecap="round"/>
+        <path d="M70 368Q132 396 196 397" fill="none" stroke="#FF9AA0" stroke-opacity="0.35" stroke-width="1.2"/>
+      </g>
+      <g class="porta-cordone porta-cordone--dx">
+        <path d="M200 400Q268 400 336 368" fill="none" stroke="url(#pt-velluto)" stroke-width="6.5" stroke-linecap="round"/>
+        <path d="M204 397Q268 396 330 368" fill="none" stroke="#FF9AA0" stroke-opacity="0.35" stroke-width="1.2"/>
+        <circle cx="200" cy="400" r="5" fill="none" stroke="url(#pt-ottone)" stroke-width="2.2"/>
+      </g>
+    </svg>`;
 
   function costruisciGalleria() {
     const V = window.Vetrina;
     const mondo = $("#galleria-mondo");
     const pista = $("#mostra-pista");
-    if (!V || !mondo || !pista) return;
+    const palco = $("#galleria-palco");
+    if (!V || !mondo || !pista || !palco) return;
     const tutte = V.opere || [];
-    const lista = operePerLaMostra(tutte);
-    if (!lista.length) {
+    const corridoi = CORRIDOI.map((c) => ({ ...c, opere: operePer(c.id, tutte) })).filter((c) => c.opere.length);
+    if (!corridoi.length) {
       $("#mostra").hidden = true;
       return;
     }
     mondo.replaceChildren();
     // la sala (pavimento, pareti, soffitto, luci) è disegnata su una tela
     // grande quanto lo schermo, con la stessa prospettiva delle opere
-    const palco = $("#galleria-palco");
     let tela = $(".galleria-sala", palco);
     if (!tela) {
       tela = document.createElement("canvas");
@@ -541,47 +674,310 @@
       tela.setAttribute("aria-hidden", "true");
       palco.prepend(tela);
     }
-    const pannelli = lista.map((o, i) => {
-      const p = document.createElement("article");
-      p.className = `galleria-pannello ${i % 2 ? "is-destra" : "is-sinistra"}`;
-      p.innerHTML = '<span class="galleria-fascio" aria-hidden="true"></span><span class="galleria-alone" aria-hidden="true"></span>';
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "opera-apri galleria-apri";
-      btn.setAttribute("aria-label", `Guarda ${String(o.titolo).trim()} a schermo intero`);
-      const cornice = document.createElement("span");
-      cornice.className = "galleria-cornice";
-      cornice.append(V.creaMedia(o, 640, true, true)); // la foto parte quando ci si avvicina
-      btn.append(cornice);
-      btn.addEventListener("click", () => V.apriScheda(lista, i, btn));
-      const cartellino = document.createElement("div");
-      cartellino.className = "galleria-cartellino";
-      const dettagli = [o.tecnica, o.misure].filter(Boolean).map((x) => esc(String(x).trim())).join(" · ");
-      cartellino.innerHTML =
-        `<span class="galleria-numero" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>` +
-        `<div class="galleria-testi"><p class="galleria-titolo-opera"><em>${esc(String(o.titolo).trim())}</em>${o.anno ? `, ${esc(o.anno)}` : ""}</p>` +
-        (dettagli ? `<p class="galleria-dettagli">${dettagli}</p>` : "") +
-        `</div><div class="reazioni">${V.visteHTML(o)}${V.bottonePiace(o)}</div>`;
-      p.append(btn, cartellino);
-      mondo.append(p);
-      return p;
+    const motore = animaGalleria(pista, mondo, tela);
+
+    /* --- la porta e il bivio --- */
+    const vista = $(".mostra-vista", pista);
+    const guida = $(".mostra-guida");
+    const schede = $("#galleria-corridoi");
+    const conMouseOra = conMouse();
+    const testi = {
+      porta: `La porta è chiusa: ${conMouseOra ? "cliccala" : "toccala"} per entrare.`,
+      bivio: "Tre corridoi: scegli da che parte andare.",
+      corridoio: `Scorri per camminare tra le opere${conMouseOra ? ", muovi il mouse per guardarti intorno" : ""}. Toccane una per vederla da vicino.`,
+    };
+    const vest = document.createElement("div");
+    vest.className = "galleria-vestibolo";
+    vest.innerHTML =
+      `<div class="porta-scena">` +
+      `<button class="porta" type="button" aria-label="Apri la porta della galleria">${PORTA_HTML}` +
+      `<span class="porta-targa" aria-hidden="true"><span class="porta-targa-n">Sala 01</span><span class="porta-targa-nome">La galleria</span></span></button>` +
+      `<p class="porta-invito" aria-hidden="true">${conMouseOra ? "Clicca la porta per entrare" : "Tocca la porta per entrare"}</p></div>` +
+      `<div class="bivio" hidden><p class="bivio-titolo">Da che parte andiamo?</p><div class="bivio-archi">` +
+      corridoi
+        .map(
+          (c, i) =>
+            `<button class="bivio-arco" type="button" data-corridoio="${c.id}" style="--i:${i}"><span class="bivio-varco"><span class="bivio-luce" aria-hidden="true"></span></span>` +
+            `<span class="bivio-nome">${esc(c.nome)}</span><span class="bivio-conta">${c.opere.length} ${c.opere.length === 1 ? "opera" : "opere"} · ${esc(c.nota)}</span></button>`
+        )
+        .join("") +
+      `</div></div>`;
+    palco.after(vest);
+    // dentro ogni arco, la prima opera del corridoio
+    corridoi.forEach((c) => {
+      const varco = $(`.bivio-arco[data-corridoio="${c.id}"] .bivio-varco`, vest);
+      const o = c.opere.find((x) => x.immagine);
+      if (!o) return;
+      if (c.id === "sculture") {
+        scontornata(o).then((src) => {
+          const im = document.createElement("img");
+          im.alt = "";
+          im.className = src ? "bivio-scultura" : "media";
+          im.src = src || V.miniatura(o.immagine, 300);
+          im.onerror = () => (im.src = o.immagine);
+          varco.append(im);
+        });
+      } else {
+        const m = V.creaMedia(o, 300, false);
+        m.alt = "";
+        varco.append(m);
+      }
     });
-    const fine = document.createElement("a");
-    fine.className = "galleria-fine";
-    fine.href = "#opere";
-    fine.innerHTML = `<span class="galleria-fine-luce" aria-hidden="true"></span><span class="galleria-fine-testo">Tutte le ${tutte.length} opere</span><span class="galleria-fine-freccia" aria-hidden="true">→</span>`;
-    mondo.append(fine);
-    $("#mostra-totale").textContent = String(lista.length).padStart(2, "0");
-    animaGalleria(pista, mondo, pannelli, fine, tela);
+    // le schede dei corridoi, sotto il titolo
+    if (schede) {
+      schede.innerHTML =
+        corridoi.map((c) => `<button type="button" data-corridoio="${c.id}">${esc(c.nome)}</button>`).join("") +
+        `<button type="button" data-bivio>Bivio</button>`;
+    }
+
+    const radice = document.documentElement;
+    const aCapo = () => {
+      // si torna all'inizio della sala, senza scivolare
+      const y = pista.getBoundingClientRect().top + window.scrollY;
+      radice.style.scrollBehavior = "auto";
+      window.scrollTo(0, Math.max(0, y - (motore.piatta ? 60 : 0)));
+      radice.style.scrollBehavior = "";
+    };
+    function stato(s, corridoio) {
+      pista.dataset.stato = s;
+      if (guida) guida.textContent = testi[s];
+      if (schede) {
+        schede.hidden = s !== "corridoio";
+        $$("button", schede).forEach((b) => b.setAttribute("aria-current", String(b.dataset.corridoio === corridoio)));
+      }
+    }
+    stato("porta");
+
+    function apriPorta() {
+      if (vest.classList.contains("porta-aperta")) return;
+      // si entra proprio dal vano della porta
+      const scena = $(".porta-scena", vest);
+      const rp = $(".porta", vest).getBoundingClientRect();
+      const rs = scena.getBoundingClientRect();
+      scena.style.transformOrigin = `${(rp.left - rs.left + rp.width / 2).toFixed(0)}px ${(rp.top - rs.top + rp.height * 0.66).toFixed(0)}px`;
+      vest.classList.add("porta-aperta");
+      setTimeout(
+        () => {
+          vest.classList.add("mostra-bivio");
+          $(".bivio", vest).hidden = false;
+          stato("bivio");
+          const primo = $(".bivio-arco", vest);
+          if (primo) primo.focus({ preventScroll: true });
+        },
+        menoMovimento() ? 0 : 1700
+      );
+    }
+    function entra(id) {
+      const c = corridoi.find((x) => x.id === id);
+      if (!c) return;
+      const dopo = () => {
+        const prossimo = corridoi[(corridoi.indexOf(c) + 1) % corridoi.length];
+        motore.carica(costruisciCorridoio(c, prossimo, corridoi.length > 1, tutte, V));
+        vest.hidden = true;
+        vest.classList.remove("verso-corridoio");
+        pista.classList.add("in-corridoio");
+        stato("corridoio", c.id);
+        aCapo();
+      };
+      if (!vest.hidden && !menoMovimento()) {
+        const arco = $(`.bivio-arco[data-corridoio="${id}"]`, vest);
+        if (arco) arco.classList.add("scelto");
+        vest.classList.add("verso-corridoio");
+        setTimeout(dopo, 650);
+      } else dopo();
+    }
+    function bivio() {
+      motore.carica({});
+      pista.classList.remove("in-corridoio");
+      vest.hidden = false;
+      vest.classList.add("porta-aperta", "mostra-bivio");
+      $$(".bivio-arco", vest).forEach((a) => a.classList.remove("scelto"));
+      $(".bivio", vest).hidden = false;
+      stato("bivio");
+      aCapo();
+      const primo = $(".bivio-arco", vest);
+      if (primo) primo.focus({ preventScroll: true });
+    }
+    $(".porta", vest).addEventListener("click", apriPorta);
+    vest.addEventListener("click", (e) => {
+      const a = e.target.closest(".bivio-arco");
+      if (a) entra(a.dataset.corridoio);
+    });
+    const scegli = (e) => {
+      const b = e.target.closest("[data-corridoio], [data-bivio]");
+      if (!b || !pista.contains(b)) return;
+      if (b.hasAttribute("data-bivio")) bivio();
+      else if (!vest.contains(b)) entra(b.dataset.corridoio);
+    };
+    pista.addEventListener("click", scegli);
   }
 
-  function animaGalleria(pista, mondo, pannelli, fine, tela) {
+  // Le opere di un corridoio: pannelli appesi, o sculture sui piedistalli
+  function costruisciCorridoio(c, prossimo, altri, tutte, V) {
+    const lista = c.opere;
+    const pannelli = lista.map((o, i) => (c.id === "sculture" ? creaScultura(o, i, lista, V) : creaPannello(o, i, lista, V)));
+    const fine = document.createElement("div");
+    fine.className = "galleria-fine";
+    const quante = tutte.filter((o) => o.categoria === c.id).length;
+    fine.innerHTML =
+      `<span class="galleria-fine-luce" aria-hidden="true"></span>` +
+      `<p class="galleria-fine-testo"><span>Fine del corridoio</span><em>${esc(c.nome)}</em></p>` +
+      `<div class="galleria-fine-azioni">` +
+      (altri ? `<button type="button" class="galleria-fine-avanti" data-corridoio="${prossimo.id}">${esc(prossimo.nome)} <span aria-hidden="true">→</span></button>` : "") +
+      `<button type="button" class="galleria-fine-bivio" data-bivio>Torna al bivio</button>` +
+      `<a class="galleria-fine-tutte" href="#opere" data-categoria="${c.id}">Tutte le ${quante} ${esc(c.nome.toLowerCase())} nel catalogo</a>` +
+      `</div>`;
+    $("#mostra-totale").textContent = String(lista.length).padStart(2, "0");
+    return { pannelli, fine };
+  }
+
+  function creaPannello(o, i, lista, V) {
+    const p = document.createElement("article");
+    p.className = `galleria-pannello ${i % 2 ? "is-destra" : "is-sinistra"}`;
+    p.innerHTML = '<span class="galleria-fascio" aria-hidden="true"></span><span class="galleria-alone" aria-hidden="true"></span>';
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "opera-apri galleria-apri";
+    btn.setAttribute("aria-label", `Guarda ${String(o.titolo).trim()} a schermo intero`);
+    const cornice = document.createElement("span");
+    cornice.className = "galleria-cornice";
+    cornice.append(V.creaMedia(o, 640, true, true)); // la foto parte quando ci si avvicina
+    btn.append(cornice);
+    btn.addEventListener("click", () => V.apriScheda(lista, i, btn));
+    p.append(btn, cartellino(o, i, V));
+    return p;
+  }
+
+  function cartellino(o, i, V) {
+    const c = document.createElement("div");
+    c.className = "galleria-cartellino";
+    const dettagli = [o.tecnica, o.misure].filter(Boolean).map((x) => esc(String(x).trim())).join(" · ");
+    c.innerHTML =
+      `<span class="galleria-numero" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>` +
+      `<div class="galleria-testi"><p class="galleria-titolo-opera"><em>${esc(String(o.titolo).trim())}</em>${o.anno ? `, ${esc(o.anno)}` : ""}</p>` +
+      (dettagli ? `<p class="galleria-dettagli">${dettagli}</p>` : "") +
+      `</div><div class="reazioni">${V.visteHTML(o)}${V.bottonePiace(o)}</div>`;
+    return c;
+  }
+
+  // Una scultura su un piedistallo vero (un parallelepipedo in 3D), con la
+  // targhetta sul davanti. La scultura è fatta di strati della foto
+  // scontornata, uno dietro l'altro: girandola si vede che ha uno spessore.
+  function creaScultura(o, i, lista, V) {
+    const p = document.createElement("article");
+    p.className = `galleria-pannello galleria-scultura ${i % 2 ? "is-destra" : "is-sinistra"}`;
+    p.dataset.tipo = "scultura";
+    p.innerHTML =
+      '<span class="galleria-fascio" aria-hidden="true"></span>' +
+      '<span class="piedistallo" aria-hidden="true"><span class="pd pd--fronte"></span><span class="pd pd--retro"></span><span class="pd pd--sx"></span><span class="pd pd--dx"></span><span class="pd pd--sopra"></span></span>';
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "opera-apri galleria-apri scultura-apri";
+    btn.setAttribute("aria-label", `${o.modello3d ? "Gira in 3D" : "Guarda"} ${String(o.titolo).trim()}`);
+    const giro = document.createElement("span");
+    giro.className = "scultura-giro";
+    btn.append(giro);
+    if (!o.immagine) {
+      // la foto non c'è ancora: la scultura è coperta da un telo
+      giro.innerHTML = '<span class="scultura-telo"><svg viewBox="0 0 100 130" aria-hidden="true"><path d="M50 4c-9 0-14 9-15 20-1 9-6 14-12 22C14 58 9 80 6 126h88c-3-46-8-68-17-80-6-8-11-13-12-22C64 13 59 4 50 4z" fill="#E9E1D2"/><path d="M50 4c-4 30-10 70-14 122M50 4c5 34 9 74 12 122M35 24c-6 30-14 64-20 102M65 24c6 30 13 64 18 102" stroke="#BFB4A0" stroke-width="1.2" fill="none"/></svg></span><span class="scultura-nota">In allestimento</span>';
+    } else {
+      scontornata(o).then((src) => {
+        if (src) {
+          giro.classList.add("is-solida");
+          giro.innerHTML = Array.from({ length: 8 }, (_, k) => `<img class="scultura-strato" style="--k:${k}" src="${esc(src)}" alt="" draggable="false">`).join("");
+        } else {
+          // senza foto scontornata: in una teca di vetro
+          giro.classList.add("is-teca");
+          const m = V.creaMedia(o, 520, true);
+          m.draggable = false;
+          giro.append(m);
+          const vetro = document.createElement("span");
+          vetro.className = "teca-vetro";
+          giro.append(vetro);
+        }
+      });
+    }
+    // trascinando di lato la scultura gira (la pagina continua a scorrere in verticale)
+    let presa = null;
+    btn.addEventListener("pointerdown", (e) => {
+      presa = { x: e.clientX, base: Number(btn.dataset.giro || 0), mossa: false, id: e.pointerId };
+    });
+    btn.addEventListener("pointermove", (e) => {
+      if (!presa) return;
+      const dx = e.clientX - presa.x;
+      if (Math.abs(dx) > 6) {
+        presa.mossa = true;
+        try {
+          btn.setPointerCapture(presa.id);
+        } catch (err) {
+          /* niente */
+        }
+      }
+      if (presa.mossa) {
+        btn.dataset.giro = String(limita(presa.base + dx * 0.45, -70, 70));
+        p.dispatchEvent(new CustomEvent("scultura:gira", { bubbles: true }));
+      }
+    });
+    const lascia = () => {
+      if (presa && presa.mossa) btn._senzaClic = true;
+      presa = null;
+      setTimeout(() => (btn._senzaClic = false), 50);
+    };
+    btn.addEventListener("pointerup", lascia);
+    btn.addEventListener("pointercancel", lascia);
+    btn.addEventListener("click", (e) => {
+      if (btn._senzaClic) {
+        e.preventDefault();
+        return;
+      }
+      if (o.modello3d) apriModello3d(o);
+      else if (o.immagine) V.apriScheda(lista.filter((x) => x.immagine), lista.filter((x) => x.immagine).indexOf(o), btn);
+    });
+    const cart = cartellino(o, i, V);
+    cart.classList.add("scultura-targa");
+    if (o.modello3d) cart.insertAdjacentHTML("beforeend", '<span class="scultura-3d">3D</span>');
+    p.append(btn, cart);
+    return p;
+  }
+
+  // Il modello 3D vero (.glb, dal pannello): si gira a 360° con il dito o il mouse
+  let vistaModello = null;
+  function apriModello3d(o) {
+    if (!vistaModello) {
+      vistaModello = document.createElement("dialog");
+      vistaModello.className = "vista-3d";
+      vistaModello.innerHTML =
+        '<div class="vista-3d-scena"></div><div class="vista-3d-testa"><p class="vista-3d-titolo"></p><p class="vista-3d-aiuto">Trascina per girarla, avvicina le dita (o la rotella) per ingrandire</p></div>' +
+        '<button type="button" class="scheda-chiudi vista-3d-chiudi">Chiudi</button>';
+      document.body.append(vistaModello);
+      vistaModello.querySelector(".vista-3d-chiudi").addEventListener("click", () => vistaModello.close());
+      vistaModello.addEventListener("close", () => (vistaModello.querySelector(".vista-3d-scena").innerHTML = ""));
+    }
+    const carica = () =>
+      new Promise((risolvi) => {
+        if (window.customElements && customElements.get("model-viewer")) return risolvi();
+        const s = document.createElement("script");
+        s.type = "module";
+        s.src = "https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js";
+        s.onload = risolvi;
+        s.onerror = risolvi;
+        document.head.append(s);
+      });
+    vistaModello.querySelector(".vista-3d-titolo").innerHTML = `<em>${esc(String(o.titolo).trim())}</em>${o.anno ? `, ${esc(o.anno)}` : ""}`;
+    vistaModello.showModal();
+    carica().then(() => {
+      const src = String(o.modello3d).trim().replace(/^\/+/, "");
+      vistaModello.querySelector(".vista-3d-scena").innerHTML = `<model-viewer src="${esc(src)}" alt="${esc(String(o.titolo).trim())}" camera-controls auto-rotate shadow-intensity="1" exposure="1.1" environment-image="neutral" touch-action="pan-y" style="width:100%;height:100%;background:transparent"></model-viewer>`;
+    });
+  }
+
+  function animaGalleria(pista, mondo, tela) {
     const palco = $("#galleria-palco");
     const vista = $(".mostra-vista", pista);
     const barra = $("#mostra-barra");
     const conta = $("#mostra-conta");
     const testa = $(".mostra-testa");
-    const n = pannelli.length;
+    const S = { pannelli: [], fine: null };
     const piatta = menoMovimento() || !(window.CSS && CSS.supports("transform-style", "preserve-3d"));
     pista.classList.toggle("is-piatta", piatta);
     // le foto delle opere partono solo quando servono
@@ -593,9 +989,19 @@
       delete img.dataset.src;
     };
     if (piatta) {
-      pannelli.forEach((el) => carica(el, true));
       if (testa) testa.classList.add("visibile");
-      return;
+      return {
+        piatta: true,
+        carica({ pannelli, fine } = {}) {
+          mondo.replaceChildren();
+          S.pannelli = pannelli || [];
+          S.pannelli.forEach((el) => {
+            mondo.append(el);
+            carica(el, true);
+          });
+          if (fine) mondo.append(fine);
+        },
+      };
     }
     pista.classList.add("is-3d");
 
@@ -612,6 +1018,7 @@
     function geometria() {
       const W = palco.clientWidth;
       const H = palco.clientHeight;
+      const n = S.pannelli.length;
       const stretto = W < 760;
       const prospettiva = stretto ? 600 : 1000;
       const passo = stretto ? 820 : 1050;
@@ -622,10 +1029,18 @@
       const soffittoY = -(altezza / 2 + (stretto ? 160 : 230));
       const profondita = primo + n * passo + 1400;
       const fineZ = primo + n * passo + 200;
-      const camFine = fineZ - (stretto ? 560 : 780);
-      G = { W, H, stretto, prospettiva, passo, primo, largo, altezza, pavimentoY, soffittoY, profondita, fineZ, camFine, k: 1 };
+      const camFine = Math.max(1, fineZ - (stretto ? 360 : 720));
+      G = { W, H, n, stretto, prospettiva, passo, primo, largo, altezza, pavimentoY, soffittoY, profondita, fineZ, camFine, k: 1 };
       palco.style.perspective = `${prospettiva}px`;
       mondo.style.setProperty("--altezza-opera", `${altezza.toFixed(0)}px`);
+      // le misure delle sculture: piedistallo e scultura sopra
+      const sh = altezza * 0.72;
+      const ph = altezza * (stretto ? 0.5 : 0.62);
+      const pw = stretto ? Math.min(altezza * 0.5, W * 0.3) : Math.min(altezza * 0.56, largo * 1.15);
+      mondo.style.setProperty("--scultura-h", `${sh.toFixed(0)}px`);
+      mondo.style.setProperty("--piedistallo-h", `${ph.toFixed(0)}px`);
+      mondo.style.setProperty("--piedistallo-w", `${pw.toFixed(0)}px`);
+      mondo.style.setProperty("--spessore", `${Math.max(1.2, sh / 170).toFixed(2)}px`);
 
       // la tela della sala: un po' meno definita dello schermo (è luce morbida, e costa meno)
       const k = Math.min(1.25, window.devicePixelRatio || 1) * (stretto ? 0.75 : 0.6);
@@ -633,19 +1048,26 @@
       tela.height = Math.max(1, Math.round(H * k));
       G.k = tela.width / W;
 
-      // i pannelli a zig-zag, girati verso il centro della sala
-      pannelli.forEach((p, i) => {
+      // i pannelli a zig-zag, girati verso il centro della sala; le sculture più al centro
+      S.pannelli.forEach((p, i) => {
         const destra = i % 2 === 1;
-        const x = destra ? largo : -largo;
+        const scultura = p.dataset.tipo === "scultura";
+        const x = (destra ? 1 : -1) * (scultura ? largo * 0.62 : largo);
+        const y = scultura ? pavimentoY - (sh + ph) / 2 : -altezza * 0.08;
         const z = -(primo + i * passo);
         p.dataset.z = String(z);
-        p.style.transform = `translate3d(${x.toFixed(1)}px, ${(-altezza * 0.08).toFixed(1)}px, ${z}px) rotateY(${destra ? -24 : 24}deg) translate(-50%, -50%)`;
+        p.dataset.x = String(x);
+        const giro = scultura ? (destra ? -12 : 12) : destra ? -24 : 24;
+        p.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z}px) rotateY(${giro}deg) translate(-50%, -50%)`;
       });
-      fine.dataset.z = String(-fineZ);
-      fine.style.transform = `translate3d(0, ${(-altezza * 0.05).toFixed(1)}px, ${-fineZ}px) translate(-50%, -50%)`;
-      // la pista è lunga quanto il cammino (più un respiro all'inizio e alla fine)
+      if (S.fine) {
+        S.fine.dataset.z = String(-fineZ);
+        S.fine.style.transform = `translate3d(0, ${(altezza * (stretto ? 0.14 : -0.05)).toFixed(1)}px, ${-fineZ}px) translate(-50%, -50%)`;
+      }
+      // la pista è lunga quanto il cammino (più un respiro all'inizio e alla fine);
+      // davanti alla porta e al bivio è alta uno schermo
       G.vistaH = vista.clientHeight || window.innerHeight;
-      pista.style.height = `${Math.round(G.vistaH * 1.35 + camFine * 0.72)}px`;
+      pista.style.height = n ? `${Math.round(G.vistaH * 1.35 + camFine * 0.72)}px` : "";
     }
 
     // Disegna la sala vista dalla posizione attuale: stessa matematica della
@@ -744,10 +1166,10 @@
       // la luce che lava la parete dal suo lato
       const hParete = fy - sy;
       ctx.globalCompositeOperation = accese ? "source-over" : "lighter";
-      pannelli.forEach((el, i) => {
+      S.pannelli.forEach((el) => {
         if (el.style.visibility === "hidden" && Number(el.dataset.z) + cam > 0) return;
-        const xi = i % 2 ? largo : -largo;
-        const zi = -(primo + i * passo);
+        const xi = Number(el.dataset.x) || largo;
+        const zi = Number(el.dataset.z);
         const n = nebbia(zi) * lum;
         // pozza di luce sul pavimento, davanti all'opera
         const c = pr(xi, fy, zi + 120);
@@ -761,7 +1183,7 @@
         const r2 = pr(xi, fy, zi + 30 + passo * 0.5);
         if (r0 && r1 && r2) macchia([r0[0], (r0[1] + r2[1]) / 2], Math.abs(r1[0] - r0[0]), Math.abs(r2[1] - r0[1]) / 2, accese ? "90, 70, 45" : "255, 228, 196", accese ? 0.14 * n : 0.1 * n);
         // la parete dal suo lato
-        const xp = i % 2 ? X : -X;
+        const xp = xi > 0 ? X : -X;
         const cw = pr(xp, sy + hParete * 0.32, zi);
         const wa = pr(xp, sy + hParete * 0.32, zi + passo * 0.3);
         const wd = pr(xp, sy + hParete * 0.32, zi - passo * 0.3);
@@ -807,9 +1229,11 @@
       return limita((-r.top - h * 0.15) / Math.max(1, corsa - h * 0.2), 0, 1);
     }
 
-    function fotogramma() {
+    function fotogramma(ora) {
       ciclo = 0;
       if (!visibile) return;
+      if (testa && !testa.classList.contains("visibile") && pista.getBoundingClientRect().top < window.innerHeight * 0.6) testa.classList.add("visibile");
+      if (!S.pannelli.length) return;
       const p = avanzamento();
       camMeta = p * G.camFine;
       cam += (camMeta - cam) * 0.09; // il passo: si arriva con un po' di inerzia
@@ -821,7 +1245,8 @@
       // ogni opera: nell'ombra da lontano, accesa da vicino, svanisce quando la superi
       let vicina = 0;
       let minimo = Infinity;
-      pannelli.forEach((el, i) => {
+      let girano = false;
+      S.pannelli.forEach((el, i) => {
         const rel = Number(el.dataset.z) + cam; // distanza davanti a noi (negativa)
         const lontano = -rel;
         if (Math.abs(lontano - G.prospettiva * 0.3) < minimo) {
@@ -835,17 +1260,27 @@
         el.style.opacity = (1 - passata).toFixed(3);
         el.style.visibility = passata >= 1 || lontano > G.profondita ? "hidden" : "visible";
         el.classList.toggle("is-vicina", lontano < G.passo * 1.2 && passata < 0.5);
+        // le sculture vicine girano piano sul piedistallo (e col dito o il mouse)
+        if (el.dataset.tipo === "scultura" && passata < 1 && lontano < G.passo * 2.2) {
+          const b = el.querySelector(".scultura-apri");
+          const g = el.querySelector(".scultura-giro");
+          const t = (ora || performance.now()) * 0.00055 + i;
+          const deg = Number(b.dataset.giro || 0) + Math.sin(t) * 26;
+          if (g) g.style.setProperty("--giro", `${deg.toFixed(2)}deg`);
+          girano = true;
+        }
       });
-      const relFine = Number(fine.dataset.z) + cam;
-      fine.style.setProperty("--ombra", limita((-relFine - G.passo) / (G.passo * 2.4), 0, 1).toFixed(3));
+      if (S.fine) {
+        const relFine = Number(S.fine.dataset.z) + cam;
+        S.fine.style.setProperty("--ombra", limita((-relFine - G.passo) / (G.passo * 2.4), 0, 1).toFixed(3));
+      }
       disegnaSala(gradiX, gradiY);
       conta.textContent = String(vicina + 1).padStart(2, "0");
       barra.style.transform = `scaleX(${(cam / G.camFine).toFixed(4)})`;
       palco.style.setProperty("--nebbia", (1 - Math.min(1, cam / G.camFine) ** 1.5).toFixed(3));
-      if (testa && !testa.classList.contains("visibile") && pista.getBoundingClientRect().top < window.innerHeight * 0.6) testa.classList.add("visibile");
       if (testa) testa.classList.toggle("in-cammino", cam > G.passo * 0.35);
       // si continua finché il passo o lo sguardo non si sono fermati
-      if (Math.abs(camMeta - cam) > 0.5 || Math.abs(mx - guardaX) > 0.002 || Math.abs(my - guardaY) > 0.002) {
+      if (girano || Math.abs(camMeta - cam) > 0.5 || Math.abs(mx - guardaX) > 0.002 || Math.abs(my - guardaY) > 0.002) {
         ciclo = requestAnimationFrame(fotogramma);
       }
     }
@@ -872,7 +1307,7 @@
     // con la tastiera: l'opera che riceve il fuoco viene portata davanti
     mondo.addEventListener("focusin", (e) => {
       const el = e.target.closest(".galleria-pannello, .galleria-fine");
-      if (!el) return;
+      if (!el || !el.dataset.z) return;
       const voluto = limita((-Number(el.dataset.z) - G.prospettiva * 1.2) / G.camFine, 0, 1);
       const h = G.vistaH;
       const corsa = pista.offsetHeight - h;
@@ -895,9 +1330,25 @@
       geometria();
       avvia();
     });
+    mondo.addEventListener("scultura:gira", avvia);
     geometria();
     cam = avanzamento() * G.camFine;
     avvia();
+    return {
+      piatta: false,
+      // mette in sala le opere di un corridoio (o nessuna, davanti alla porta e al bivio)
+      carica({ pannelli, fine } = {}) {
+        mondo.replaceChildren();
+        S.pannelli = pannelli || [];
+        S.fine = fine || null;
+        S.pannelli.forEach((el) => mondo.append(el));
+        if (S.fine) mondo.append(S.fine);
+        geometria();
+        cam = 0;
+        camMeta = 0;
+        avvia();
+      },
+    };
   }
 
   /* ------------------------------------------------------------------
@@ -1413,7 +1864,7 @@
 
   function preparaMagneti() {
     if (!conMouse() || menoMovimento()) return;
-    const SEL = ".bottone, .ingresso-entra, .filtro, .guida-link, .evento-calendario, .galleria-fine-freccia, .pianta-chiudi";
+    const SEL = ".bottone, .ingresso-entra, .filtro, .guida-link, .evento-calendario, .galleria-fine-azioni > *, .pianta-chiudi";
     let attivo = null;
     const lascia = (el) => {
       el.style.transition = "translate 0.6s cubic-bezier(0.2, 0.9, 0.2, 1)";

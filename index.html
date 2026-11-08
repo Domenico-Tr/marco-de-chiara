@@ -20,7 +20,7 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-08h">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-08i">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi -->
@@ -202,7 +202,9 @@
           <header class="wrap mostra-testa">
             <p class="sala-numero">Sala 01</p>
             <h2 class="mostra-titolo" id="titolo-mostra">La galleria</h2>
-            <p class="mostra-guida">Scorri per camminare tra le opere, muovi il mouse per guardarti intorno. Toccane una per vederla da vicino.</p>
+            <p class="mostra-guida">La porta è chiusa: toccala per entrare.</p>
+            <!-- i tre corridoi (Quadri, Stampe, Sculture) e il ritorno al bivio: li crea js/mostra.js -->
+            <div class="galleria-corridoi" id="galleria-corridoi" role="group" aria-label="Corridoi della galleria" hidden></div>
           </header>
           <div class="galleria-palco" id="galleria-palco">
             <div class="galleria-mondo" id="galleria-mondo"></div>
@@ -487,9 +489,9 @@
   </dialog>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-08h"></script>
-  <script src="js/script.js?v=2026-11-08h"></script>
-  <script src="js/su-misura.js?v=2026-11-08h"></script>
-  <script src="js/mostra.js?v=2026-11-08h"></script>
+  <script src="js/categorie.js?v=2026-11-08i"></script>
+  <script src="js/script.js?v=2026-11-08i"></script>
+  <script src="js/su-misura.js?v=2026-11-08i"></script>
+  <script src="js/mostra.js?v=2026-11-08i"></script>
 </body>
 </html>

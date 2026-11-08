@@ -4846,3 +4846,416 @@ html.con-ingresso body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .con-ingresso .ingresso-galleria { display: none; }
 }
+
+/* =====================================================================
+   SALA 01: LA PORTA, IL BIVIO, I TRE CORRIDOI E LE SCULTURE
+   ===================================================================== */
+/* davanti alla porta e al bivio la sala 3D non si vede */
+.mostra-pista:not(.in-corridoio) .galleria-palco,
+.mostra-pista:not(.in-corridoio) .mostra-piede { visibility: hidden; }
+.mostra-pista:not(.in-corridoio) .mostra-vista { min-height: 100vh; min-height: 100svh; }
+.mostra-pista.is-piatta:not(.in-corridoio) .galleria-palco { display: none; }
+.mostra-testa { pointer-events: none; }
+.galleria-corridoi { pointer-events: auto; grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.25rem; }
+.galleria-corridoi[hidden] { display: none; }
+.galleria-corridoi button {
+  padding: 0.45rem 0.95rem;
+  border: 1px solid rgb(var(--testo-rgb) / 0.2);
+  border-radius: 999px;
+  background: rgb(var(--buio-rgb) / 0.5);
+  color: inherit;
+  font: 600 0.78rem/1 var(--font-testo);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.galleria-corridoi button[aria-current="true"] { background: var(--giallo); border-color: var(--giallo); color: #14110A; }
+.galleria-corridoi [data-bivio] { border-style: dashed; }
+
+/* ---------- La porta ---------- */
+.galleria-vestibolo {
+  position: absolute; inset: 0;
+  z-index: 1;
+  display: grid; place-items: center;
+  padding: 10rem 1rem 6.5rem;
+  overflow: hidden;
+}
+.mostra-pista.is-piatta .galleria-vestibolo { position: relative; inset: auto; min-height: 80vh; }
+.galleria-vestibolo[hidden] { display: none; }
+.porta-scena {
+  position: absolute; inset: 0;
+  display: grid; place-items: center; align-content: center; gap: 1.1rem;
+  padding: 8.5rem 1rem 7.5rem;
+  transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s ease;
+  transform-origin: 50% 58%;
+}
+/* il faretto sulla porta */
+.porta-scena::before {
+  content: "";
+  position: absolute; left: 50%; top: 0;
+  width: min(90vw, 60rem); height: 100%;
+  transform: translateX(-50%);
+  background: conic-gradient(from 180deg at 50% 0%, transparent 164deg, rgba(255, 230, 190, 0.08) 172deg, rgba(255, 230, 190, 0.12) 180deg, rgba(255, 230, 190, 0.08) 188deg, transparent 196deg);
+  -webkit-mask-image: linear-gradient(#000 30%, transparent 92%);
+  mask-image: linear-gradient(#000 30%, transparent 92%);
+  pointer-events: none;
+}
+.porta {
+  position: relative;
+  height: min(57vh, 600px, 104vw);
+  aspect-ratio: 400 / 460;
+  padding: 0; border: 0;
+  background: none;
+  color: rgb(var(--testo-rgb) / 0.9);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.porta:active { transform: scale(0.985); }
+.porta-svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.porta-svg--fronte { z-index: 2; }
+.porta-chiave { font-family: var(--font-display); font-size: 9px; letter-spacing: 0.12em; fill: #E9D3A0; }
+.porta-fiamma { filter: drop-shadow(0 0 4px #FFC77A) drop-shadow(0 0 10px rgba(255, 199, 122, 0.8)); animation: porta-trema 4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.porta-fiamma + .porta-fiamma { animation-delay: -1.7s; }
+@keyframes porta-trema { 0%, 100% { opacity: 1; transform: scale(1); } 40% { opacity: 0.86; transform: scale(0.94, 1.04); } 70% { opacity: 0.95; transform: scale(1.03, 0.97); } }
+.porta-lunetta { opacity: 0.62; transition: opacity 0.8s ease; }
+.porta-dentro { transition: opacity 0.6s ease; }
+.porta-spiraglio { opacity: 0.45; transition: opacity 0.8s ease; }
+.porta-sotto { opacity: 0.6; filter: drop-shadow(0 0 6px #FFC77A); animation: porta-respira 3.2s ease-in-out infinite; }
+@keyframes porta-respira { 50% { opacity: 1; } }
+/* i due battenti: legno vero, sui cardini, in prospettiva */
+.porta-battente {
+  position: absolute;
+  top: calc(184 / 460 * 100%);
+  width: calc(90 / 400 * 100%);
+  height: calc(232 / 460 * 100%);
+  z-index: 1;
+  transition: transform 1.25s cubic-bezier(0.6, 0, 0.25, 1), filter 1.25s ease;
+}
+.porta-battente svg { display: block; width: 100%; height: 100%; }
+.porta-battente--sx { left: calc(110 / 400 * 100%); transform-origin: 0 50%; transform: perspective(900px) rotateY(0deg); }
+.porta-battente--dx { left: 50%; transform-origin: 100% 50%; transform: perspective(900px) rotateY(0deg); }
+.porta-battente--dx svg { transform: scaleX(-1); }
+.porta-vetrino { opacity: 0.55; transition: opacity 0.6s ease; }
+.porta-serratura { filter: drop-shadow(0 0 2px #FFC77A); }
+.porta-fessura {
+  position: absolute; left: calc(50% - 1px);
+  top: calc(184 / 460 * 100%);
+  width: 2px; height: calc(232 / 460 * 100%);
+  z-index: 1;
+  background: linear-gradient(#FFE9BE00, #FFE9BE 20%, #FFF4DA 70%, #FFE9BE);
+  box-shadow: 0 0 10px 1px rgba(255, 210, 150, 0.6);
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+}
+/* un filo d'aria ogni tanto socchiude la porta: invita a entrare */
+.porta-battente--sx { animation: porta-spiffero-sx 7s ease-in-out 2.5s infinite; }
+.porta-battente--dx { animation: porta-spiffero-dx 7s ease-in-out 2.5s infinite; }
+@keyframes porta-spiffero-sx { 0%, 84%, 100% { transform: perspective(900px) rotateY(0deg); } 90% { transform: perspective(900px) rotateY(9deg); } 95% { transform: perspective(900px) rotateY(3deg); } }
+@keyframes porta-spiffero-dx { 0%, 84%, 100% { transform: perspective(900px) rotateY(0deg); } 90% { transform: perspective(900px) rotateY(-9deg); } 95% { transform: perspective(900px) rotateY(-3deg); } }
+.porta-cordone { transform-box: view-box; transition: transform 0.7s cubic-bezier(0.5, 0, 0.6, 1.4), opacity 0.5s ease 0.35s; }
+.porta-cordone--sx { transform-origin: 64px 368px; }
+.porta-cordone--dx { transform-origin: 336px 368px; }
+@media (hover: hover) {
+  .porta:hover .porta-battente--sx { animation: none; transform: perspective(900px) rotateY(14deg); }
+  .porta:hover .porta-battente--dx { animation: none; transform: perspective(900px) rotateY(-14deg); }
+  .porta:hover .porta-fessura { opacity: 0; }
+  .porta:hover .porta-lunetta { opacity: 0.85; }
+  .porta:hover .porta-spiraglio { opacity: 0.75; }
+  .porta:hover .porta-cordone--sx { transform: rotate(6deg); }
+  .porta:hover .porta-cordone--dx { transform: rotate(-6deg); }
+}
+.porta:focus-visible { outline: 2px solid var(--acido); outline-offset: 10px; border-radius: 50% 50% 6px 6px / 34% 34% 6px 6px; }
+.porta-targa {
+  position: absolute; left: 50%; top: 0;
+  z-index: 3;
+  transform: translate(-50%, -30%);
+  display: grid; justify-items: center; gap: 0.22rem;
+  padding: 0.55rem 1rem 0.6rem;
+  border-radius: 3px;
+  background: linear-gradient(160deg, #F3DFAE, #BC9A5E 55%, #8A6A3A);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  color: #2A1D0E;
+  white-space: nowrap;
+  transition: opacity 0.4s ease, transform 0.6s ease;
+}
+.porta-targa::before,
+.porta-targa::after { content: ""; position: absolute; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: #6B4E25; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+.porta-targa::before { left: 6px; }
+.porta-targa::after { right: 6px; }
+.porta-targa-n { font: 700 0.56rem/1 var(--font-testo); letter-spacing: 0.24em; text-transform: uppercase; }
+.porta-targa-nome { font-family: var(--font-display); font-style: italic; font-size: clamp(1rem, 2vw, 1.35rem); line-height: 1; }
+.porta-invito {
+  position: relative;
+  margin: 0;
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font: 700 0.7rem/1 var(--font-testo);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgb(var(--testo-rgb) / 0.75);
+  transition: opacity 0.3s ease;
+}
+.porta-invito::before { content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #FFD9A0; box-shadow: 0 0 12px 3px rgba(255, 214, 150, 0.7); animation: pulsa 1.6s ease-in-out infinite; }
+/* la porta si apre: il cordone si sgancia, i battenti girano sui cardini, si entra nella luce */
+.porta-aperta .porta-cordone--sx { transform: rotate(68deg); opacity: 0; }
+.porta-aperta .porta-cordone--dx { transform: rotate(-68deg); opacity: 0; }
+.porta-aperta .porta-battente { animation: none; transition-delay: 0.25s; filter: brightness(0.7); }
+.porta-aperta .porta-battente--sx { transform: perspective(900px) rotateY(80deg); }
+.porta-aperta .porta-battente--dx { transform: perspective(900px) rotateY(-80deg); }
+.porta-aperta .porta-fessura,
+.porta-aperta .porta-targa,
+.porta-aperta .porta-invito { opacity: 0; }
+.porta-aperta .porta-lunetta,
+.porta-aperta .porta-spiraglio { opacity: 1; }
+.porta-aperta .porta-scena { transform: scale(3.4); opacity: 0; transition: transform 1.1s cubic-bezier(0.6, 0, 0.4, 1) 0.95s, opacity 0.6s ease 1.4s; pointer-events: none; }
+.porta-aperta .porta { cursor: default; }
+.luci-accese .pt-pietra-a { stop-color: #E9E1D3; }
+.luci-accese .pt-pietra-b { stop-color: #C9BDA9; }
+.luci-accese .porta-chiave { fill: #6B5434; }
+
+/* ---------- Il bivio: tre archi ---------- */
+.bivio {
+  position: relative;
+  display: grid; justify-items: center; gap: clamp(1.25rem, 4vh, 2.25rem);
+  width: min(100%, 64rem);
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.mostra-bivio .bivio { opacity: 1; transform: none; }
+.bivio[hidden] { display: none; }
+.bivio-titolo { margin: 0; font-family: var(--font-display); font-style: italic; font-size: clamp(1.8rem, 4.5vw, 3.2rem); line-height: 1; text-align: center; }
+.bivio-archi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.75rem, 3vw, 2.5rem); width: 100%; }
+.bivio-arco {
+  display: grid; justify-items: center; gap: 0.55rem;
+  padding: 0; border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.5s ease;
+  animation: bivio-sale 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) calc(0.15s + var(--i) * 0.12s) both;
+}
+@keyframes bivio-sale { from { opacity: 0; transform: translateY(24px); } }
+.bivio-varco {
+  position: relative;
+  display: grid; place-items: center;
+  width: 100%;
+  aspect-ratio: 0.72;
+  max-height: 38vh;
+  overflow: hidden;
+  border: 3px solid rgb(var(--testo-rgb) / 0.85);
+  border-bottom-width: 0;
+  border-radius: 999px 999px 0 0;
+  background: radial-gradient(70% 60% at 50% 40%, #2A2119, #0E0C0A 80%);
+  box-shadow: inset 0 0 0 6px rgb(var(--buio-rgb)), inset 0 0 0 7px rgb(var(--testo-rgb) / 0.3);
+}
+.bivio-varco .media,
+.bivio-scultura {
+  width: 62%;
+  height: auto;
+  max-height: 64%;
+  object-fit: contain;
+  box-shadow: 0 18px 30px -12px rgba(0, 0, 0, 0.9);
+  transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.bivio-varco .media { border: clamp(3px, 0.5vw, 7px) solid #F2EDE3; aspect-ratio: auto !important; }
+.bivio-scultura { box-shadow: none; filter: drop-shadow(0 16px 18px rgba(0, 0, 0, 0.8)); }
+.bivio-luce { position: absolute; inset: 0; background: radial-gradient(45% 35% at 50% 30%, rgba(255, 226, 180, 0.28), transparent 70%); pointer-events: none; }
+.bivio-nome { font-family: var(--font-display); font-size: clamp(1.5rem, 3.4vw, 2.6rem); line-height: 1; }
+.bivio-conta { font-size: 0.74rem; color: var(--sala-tenue); max-width: 16rem; }
+@media (hover: hover) {
+  .bivio-arco:hover { transform: translateY(-6px); }
+  .bivio-arco:hover .media,
+  .bivio-arco:hover .bivio-scultura { transform: scale(1.06); }
+  .bivio-arco:hover .bivio-varco { border-color: var(--giallo); }
+}
+.bivio-arco:focus-visible { outline: 2px solid var(--acido); outline-offset: 6px; }
+.verso-corridoio .bivio-arco:not(.scelto) { opacity: 0; transform: scale(0.9); }
+.verso-corridoio .bivio-arco.scelto { transform: scale(1.9); transition-duration: 0.7s; }
+.verso-corridoio .bivio-titolo { opacity: 0; transition: opacity 0.3s ease; }
+@media (max-width: 760px) {
+  .galleria-vestibolo { padding: 8.5rem 0.75rem 6.5rem; }
+  .bivio-conta { font-size: 0.64rem; }
+  .bivio-varco { max-height: 34vh; border-width: 2px; }
+}
+
+/* ---------- Le sculture sui piedistalli ---------- */
+.galleria-scultura {
+  width: var(--piedistallo-w, 200px);
+  display: grid;
+  grid-template-rows: var(--scultura-h, 260px) var(--piedistallo-h, 200px);
+  justify-items: center;
+  gap: 0;
+  transform-style: preserve-3d;
+}
+.galleria-scultura > :not(.galleria-fascio) { grid-column: 1; }
+.galleria-scultura .galleria-fascio { bottom: 70%; }
+.scultura-apri {
+  grid-row: 1;
+  position: relative;
+  width: 160%;
+  height: 100%;
+  margin: 0 -30%;
+  transform-style: preserve-3d;
+  touch-action: pan-y;
+  cursor: grab;
+}
+.scultura-apri:active { cursor: grabbing; }
+.galleria-apri.opera-apri.scultura-apri { transform: none; }
+.scultura-giro {
+  position: absolute; inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--giro, 0deg));
+  transform-origin: 50% 100% calc(var(--spessore, 2px) * -3.5);
+}
+.scultura-strato {
+  position: absolute; left: 50%; bottom: 0;
+  height: 96%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: 50% 100%;
+  transform: translateX(-50%) translateZ(calc((var(--k) - 7) * var(--spessore, 2px)));
+  filter: brightness(calc((0.42 + var(--k) * 0.06) * (1 - var(--ombra, 0) * 0.75)));
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.scultura-strato[style*="--k:7"] { filter: brightness(calc(1.04 * (1 - var(--ombra, 0) * 0.75))) drop-shadow(0 0 1px rgba(0, 0, 0, 0.4)); }
+/* senza foto scontornata: nella teca di vetro */
+.is-teca .media {
+  position: absolute; left: 50%; bottom: 4%;
+  width: auto; height: auto;
+  max-width: 82%; max-height: 92%;
+  transform: translateX(-50%);
+  filter: brightness(calc(1 - var(--ombra, 0) * 0.75));
+}
+.teca-vetro {
+  position: absolute; left: 6%; right: 6%; top: 0; bottom: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 30%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.08) 80%);
+  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+/* senza foto: coperta da un telo, in allestimento */
+.scultura-telo { position: absolute; left: 50%; bottom: 0; height: 88%; transform: translateX(-50%); aspect-ratio: 100 / 130; filter: brightness(calc(1 - var(--ombra, 0) * 0.75)) drop-shadow(0 10px 14px rgba(0, 0, 0, 0.5)); }
+.scultura-telo svg { display: block; width: 100%; height: 100%; }
+.scultura-nota { position: absolute; left: 50%; top: 4%; transform: translateX(-50%); font: 700 0.62rem/1 var(--font-testo); letter-spacing: 0.2em; text-transform: uppercase; color: var(--sala-tenue); white-space: nowrap; }
+/* il piedistallo: un parallelepipedo in 3D */
+.piedistallo {
+  grid-row: 2;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+.pd { position: absolute; left: 0; top: 0; width: 100%; height: 100%; backface-visibility: hidden; }
+.pd--fronte { transform: translateZ(calc(var(--piedistallo-w) / 2)); background: linear-gradient(180deg, #EFEAE1, #CFC7B9); }
+.pd--retro { transform: rotateY(180deg) translateZ(calc(var(--piedistallo-w) / 2)); background: #B8B0A2; }
+.pd--sx { transform: rotateY(-90deg) translateZ(calc(var(--piedistallo-w) / 2)); background: linear-gradient(180deg, #C9C1B3, #A79F91); }
+.pd--dx { transform: rotateY(90deg) translateZ(calc(var(--piedistallo-w) / 2)); background: linear-gradient(180deg, #C9C1B3, #A79F91); }
+.pd--sopra {
+  height: var(--piedistallo-w);
+  transform-origin: 50% 0;
+  transform: rotateX(90deg) translateZ(calc(var(--piedistallo-w) / -2));
+  background: radial-gradient(closest-side, rgba(40, 30, 20, 0.45), rgba(40, 30, 20, 0) 70%), #F6F2EA;
+}
+.galleria-scultura .pd { filter: brightness(calc(1 - var(--ombra, 0) * 0.8)); }
+/* la targhetta sul davanti del piedistallo */
+.galleria-scultura .scultura-targa {
+  grid-row: 2;
+  align-self: start;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  width: 86%;
+  margin-top: 14%;
+  padding: 0.6rem 0.7rem;
+  transform: translateZ(calc(var(--piedistallo-w) / 2 + 1px));
+  border-radius: 2px;
+  background: linear-gradient(160deg, #2A2621, #15130F);
+  color: #F2EEE6;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+.scultura-targa .galleria-numero { font-size: 1.5rem; }
+.scultura-targa .galleria-titolo-opera { font-size: 1.05rem; }
+.scultura-targa .galleria-dettagli { font-size: 0.66rem; color: rgba(242, 238, 230, 0.7); }
+.scultura-targa .reazioni { display: none; }
+.scultura-3d { position: absolute; right: 0.4rem; top: -0.7rem; padding: 0.2rem 0.45rem; border-radius: 3px; background: var(--acido); color: #0D0F0C; font: 800 0.6rem/1 var(--font-testo); letter-spacing: 0.1em; }
+@media (max-width: 760px) {
+  .galleria-scultura .scultura-targa { width: 96%; padding: 0.4rem 0.45rem; margin-top: 8%; }
+  .scultura-targa .galleria-numero { font-size: 1.1rem; }
+  .scultura-targa .galleria-titolo-opera { font-size: 0.85rem; }
+  .scultura-targa .galleria-dettagli { display: none; }
+}
+
+/* ---------- La parete in fondo al corridoio ---------- */
+/* la parete è lontana: le scritte sono grandi perché da qui si leggano bene */
+.galleria-fine { width: clamp(34rem, 70vw, 72rem); font-size: clamp(1.4rem, 2.3vw, 2.4rem); gap: 1.2em; }
+.galleria-fine-testo { margin: 0; max-width: none; display: grid; gap: 0.35em; }
+.galleria-fine-testo span { font: 700 0.62em/1 var(--font-testo); font-style: normal; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.75; }
+.galleria-fine-testo em { font-family: var(--font-display); font-size: 3.6em; line-height: 0.95; }
+.galleria-fine-azioni { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5em 0.6em; }
+.galleria-fine-azioni button,
+.galleria-fine-azioni a {
+  padding: 0.7em 1.2em;
+  border-radius: 999px;
+  font: 700 0.78em/1 var(--font-testo);
+  font-style: normal;
+  letter-spacing: 0;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.2, 1), background-color 0.3s ease;
+}
+.galleria-fine-avanti { border: 0; background: var(--acido); color: #0D0F0C; box-shadow: 0 0 40px 4px rgba(200, 240, 60, 0.3); }
+.galleria-fine-bivio { border: 2px solid currentColor; background: none; color: inherit; }
+.galleria-fine-tutte { color: inherit; border: 2px solid rgb(247 242 232 / 0.3); }
+@media (hover: hover) {
+  .galleria-fine-azioni button:hover,
+  .galleria-fine-azioni a:hover { transform: translateY(-3px); }
+}
+@media (max-width: 760px) {
+  .galleria-fine { width: 120vw; aspect-ratio: auto; min-height: 120vw; padding: 2.4rem 1.6rem; font-size: 7.6vw; }
+  .galleria-fine-testo em { font-size: 2.6em; }
+  .galleria-fine-azioni { flex-direction: column; align-items: stretch; }
+}
+
+/* ---------- Senza 3D (riduci movimento): file da sfogliare ---------- */
+.mostra-pista.is-piatta .galleria-scultura { display: grid; transform: none !important; --piedistallo-w: min(60vw, 15rem); --scultura-h: min(38vh, 17rem); --piedistallo-h: 8rem; }
+.mostra-pista.is-piatta .scultura-apri { width: 100%; margin: 0; }
+.mostra-pista.is-piatta .galleria-fine { width: min(86vw, 26rem); aspect-ratio: auto; min-height: 0; padding: 2.4rem 1.4rem; font-size: 1rem; }
+.mostra-pista.is-piatta .galleria-fine-azioni { flex-direction: column; align-items: stretch; }
+.mostra-pista.is-piatta .pd:not(.pd--fronte) { display: none; }
+.mostra-pista.is-piatta .pd--fronte { transform: none; }
+.mostra-pista.is-piatta .scultura-targa { transform: none; }
+.mostra-pista.is-piatta .scultura-strato:not([style*="--k:7"]) { display: none; }
+
+/* ---------- Il modello 3D vero ---------- */
+.vista-3d {
+  width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0;
+  background: radial-gradient(60% 60% at 50% 45%, #2A241D, #0A0908 75%);
+  color: #F2EEE6;
+}
+.vista-3d::backdrop { background: #0A0908; }
+.vista-3d-scena { position: absolute; inset: 0; }
+.vista-3d-testa { position: absolute; left: 1.5rem; bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); pointer-events: none; }
+.vista-3d-titolo { margin: 0; font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 3rem); }
+.vista-3d-aiuto { margin: 0.3rem 0 0; font-size: 0.78rem; opacity: 0.7; }
+
+/* ---------- Con le luci accese ---------- */
+.luci-accese .bivio-varco { background: radial-gradient(70% 60% at 50% 40%, #FFFFFF, #E9E2D6 80%); }
+.luci-accese .galleria-corridoi button { background: rgba(255, 255, 255, 0.6); }
+.luci-accese .pd--sopra { background: radial-gradient(closest-side, rgba(90, 70, 45, 0.3), rgba(90, 70, 45, 0) 70%), #FFFFFF; }
+
+@media (prefers-reduced-motion: reduce) {
+  .porta-sotto,
+  .porta-invito::before,
+  .bivio-arco { animation: none; }
+  .porta-scena,
+  .porta-battente,
+  .bivio { transition: none; }
+  .porta-battente,
+  .porta-fiamma { animation: none; }
+}
