@@ -27,6 +27,7 @@
   --giallo: #F4C534;
   --magenta: #E6588F;
   --turchese: #43BDB4;
+  --arancio: #F08A2E;   /* la sezione "Su misura" */
 
   /* Colori delle pennellate nel passaggio tra sezioni, dall'alto in basso.
      Tavolozza attuale: Alone (i verdi del fondo del quadro, dal buio alla luce).
@@ -987,14 +988,33 @@ body::before {
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
-.bottone:hover { background: var(--accento); border-color: var(--accento); }
+/* Al passaggio del mouse una pennellata di colore attraversa il bottone */
+.bottone { position: relative; isolation: isolate; }
+.bottone::before {
+  content: "";
+  position: absolute; inset: -1px;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--accento);
+  -webkit-mask-image: var(--maschera-destra); mask-image: var(--maschera-destra);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+  transition: -webkit-mask-position 0.6s cubic-bezier(0.55, 0.05, 0.3, 1), mask-position 0.6s cubic-bezier(0.55, 0.05, 0.3, 1);
+}
+.bottone:hover { border-color: var(--accento); }
+@media (hover: hover) {
+  .bottone:hover::before { -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
 .bottone--leggero {
   padding: 0.6rem 1rem;
   background: transparent;
   color: var(--inchiostro);
   border-color: var(--linea);
 }
+.bottone--leggero::before { background: var(--velatura); }
 .bottone--leggero:hover { background: transparent; border-color: var(--inchiostro); }
+.bottone--grande { padding: 1.05rem 1.9rem; font-size: var(--t-m); letter-spacing: 0.01em; }
 
 .link-bottone {
   padding: 0; border: 0; background: none;
@@ -2148,4 +2168,631 @@ html.js-sipario::after {
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
   }
+}
+
+/* =====================================================================
+   SU MISURA — "Proponi la tua opera"
+   La sezione con la tela che si dipinge da sola e l'atelier in cui il
+   visitatore compone la sua opera (js/su-misura.js).
+   ===================================================================== */
+#su-misura { --pigmento-sezione: var(--arancio); }
+
+.su-misura-corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  align-items: center;
+  gap: clamp(2.5rem, 7vw, 7rem);
+}
+.su-misura-frase {
+  margin: 0;
+  max-width: 34rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.35rem);
+  line-height: 1.22;
+}
+.su-misura-frase em { font-style: italic; font-weight: 600; }
+.su-misura-passi {
+  list-style: none;
+  margin: clamp(1.75rem, 3.5vw, 2.75rem) 0 0;
+  padding: 0;
+  display: grid; gap: 0.95rem;
+  max-width: 30rem;
+}
+.su-misura-passi li {
+  display: grid; grid-template-columns: 2.6rem 1fr; align-items: baseline;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--linea);
+  color: var(--grafite);
+  font-size: var(--t-s);
+}
+.su-misura-passi strong { color: var(--inchiostro); font-weight: 500; }
+.su-misura-num {
+  position: relative;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--inchiostro);
+}
+.su-misura-num::after {
+  content: "";
+  position: absolute; left: -0.15em; bottom: 0.05em;
+  width: 1.15em; height: 0.32em;
+  z-index: -1;
+  background: var(--arancio);
+  opacity: 0.55;
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+.su-misura-passi li:nth-child(2) .su-misura-num::after { background: var(--magenta); }
+.su-misura-passi li:nth-child(3) .su-misura-num::after { background: var(--acido); }
+.su-misura-azioni { margin-top: clamp(1.75rem, 3.5vw, 2.5rem); display: grid; justify-items: start; gap: 0.75rem; }
+.su-misura-nota { margin: 0; font-size: var(--t-xs); color: var(--grafite); }
+
+/* La tela: in cornice bianca, su un alone arancio che respira */
+.su-misura-tela { position: relative; margin: 0; justify-self: center; width: min(100%, 27rem); }
+.su-misura-tela::before {
+  content: "";
+  position: absolute; inset: -16% -22%;
+  z-index: -1;
+  background: radial-gradient(closest-side, rgba(240, 138, 46, 0.3), rgba(240, 138, 46, 0) 100%);
+  animation: respira 7s ease-in-out infinite;
+}
+@keyframes respira { 50% { transform: scale(1.06); opacity: 0.8; } }
+.su-misura-cornice {
+  position: relative;
+  display: block; width: 100%;
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  border: 0;
+  background: var(--passepartout);
+  box-shadow: 0 2px 2px var(--ombra), 0 40px 70px -34px var(--ombra-forte);
+  cursor: pointer;
+  transform: rotate(-1.2deg);
+  transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.6s ease;
+}
+.su-misura-cornice:hover { transform: rotate(0deg) translateY(-6px); box-shadow: 0 2px 2px var(--ombra), 0 50px 80px -36px var(--ombra-forte); }
+.su-misura-cornice canvas { display: block; width: 100%; aspect-ratio: 4 / 5; background: #EFEAE0; }
+/* la trama della tela sopra il colore */
+.su-misura-cornice::after {
+  content: "";
+  position: absolute; inset: clamp(0.85rem, 2vw, 1.25rem);
+  pointer-events: none;
+  background: url("tela.webp") 0 0 / 160px 160px;
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+}
+.su-misura-didascalia {
+  margin-top: 1rem;
+  min-height: 1.5em;
+  font-size: var(--t-xs);
+  color: var(--grafite);
+  text-align: center;
+  transition: opacity 0.6s ease;
+}
+.su-misura-didascalia:not(.is-pronta) { opacity: 0; }
+
+@media (max-width: 820px) {
+  .su-misura-corpo { grid-template-columns: minmax(0, 1fr); }
+  .su-misura-tela { order: -1; width: min(86%, 22rem); }
+}
+
+/* ---------- La scheda dell'opera: "qualcosa di simile" ---------- */
+.scheda-simile { margin: 0.25rem 0 0; font-size: var(--t-xs); }
+.scheda-simile .link-bottone { color: var(--grafite); text-decoration-color: var(--arancio); text-decoration-thickness: 2px; }
+.scheda-simile .link-bottone:hover { color: var(--inchiostro); }
+
+/* ---------- L'atelier ---------- */
+html.atelier-aperto { overflow: hidden; }
+.atelier {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0;
+  background-color: var(--parete);
+  background-image: url("tela.webp");
+  background-size: 192px 192px;
+  background-blend-mode: multiply;
+  color: var(--inchiostro);
+  overflow: hidden;
+}
+.atelier::backdrop { background: rgba(11, 35, 22, 0.55); }
+/* entrando, l'atelier viene dipinto da sinistra con una pennellata */
+.atelier.is-entra {
+  -webkit-mask-image: var(--maschera-destra); mask-image: var(--maschera-destra);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  animation: dipingi-dentro 0.85s cubic-bezier(0.55, 0.05, 0.3, 1) both;
+}
+.atelier-inner {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 31rem);
+}
+
+/* Il palco del bozzetto: una parete con la luce del faretto */
+.atelier-vista {
+  position: relative;
+  min-width: 0; min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0.9rem;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) clamp(1rem, 3vw, 2.5rem) 1.5rem max(clamp(1rem, 3vw, 2.5rem), env(safe-area-inset-left, 0px));
+  background: radial-gradient(60% 55% at 50% 45%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 70%);
+}
+.atelier-viste { display: inline-flex; justify-self: start; gap: 0.25rem; padding: 0.25rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--passepartout); }
+.atelier-vista-btn {
+  padding: 0.4rem 0.95rem;
+  border: 0; border-radius: 999px;
+  background: none;
+  color: var(--grafite);
+  font-size: var(--t-xs);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.atelier-vista-btn[aria-pressed="true"] { background: var(--inchiostro); color: var(--parete); }
+.atelier-palco { position: relative; min-height: 0; display: grid; place-items: center; }
+.atelier-cornice {
+  position: relative;
+  width: 60%; height: 70%;
+  padding: 0;
+  background: var(--passepartout);
+  box-shadow: 0 0 0 clamp(8px, 1.4vw, 14px) var(--passepartout), 0 2px 3px clamp(8px, 1.4vw, 14px) var(--ombra), 0 50px 80px -30px var(--ombra-forte);
+  transition: width 0.55s cubic-bezier(0.3, 0.7, 0.2, 1), height 0.55s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.atelier-tela {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.atelier-tela.is-sopra { opacity: 1; }
+.atelier-scala { width: 100%; height: 100%; max-height: 100%; box-shadow: 0 30px 60px -36px var(--ombra-forte); }
+.atelier-riassunto {
+  margin: 0;
+  min-height: 1.4em;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--t-l);
+}
+.atelier-avviso {
+  margin: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0.35rem 1rem;
+  font-size: var(--t-xs);
+  color: var(--grafite);
+  text-align: center;
+}
+.atelier-avviso .link-bottone { font-size: var(--t-s); color: var(--inchiostro); text-decoration-color: var(--arancio); text-decoration-thickness: 2px; }
+
+/* Il pannello con i passi */
+.atelier-pannello {
+  min-width: 0; min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border-left: 1px solid var(--linea);
+  background: rgba(250, 250, 247, 0.72);
+}
+.atelier-testa { padding: calc(1.4rem + env(safe-area-inset-top, 0px)) max(1.75rem, env(safe-area-inset-right, 0px)) 0.9rem 1.75rem; border-bottom: 1px solid var(--linea); }
+.atelier-occhiello { margin: 0; font-size: var(--t-xs); letter-spacing: 0.18em; text-transform: uppercase; color: var(--accento); }
+.atelier-titolo { margin: 0.2rem 0 0.9rem; font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: var(--t-xl); line-height: 1.05; }
+.atelier-tappe { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0.25rem; }
+.tappa {
+  position: relative;
+  display: grid; justify-items: center; gap: 0.2rem;
+  width: 100%;
+  padding: 0.25rem 0 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--grafite);
+  font-size: 0.6875rem;
+  cursor: pointer;
+}
+.tappa-n {
+  display: grid; place-items: center;
+  width: 1.65rem; height: 1.65rem;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+  background: var(--passepartout);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+.tappa.is-fatta .tappa-n { border-color: var(--accento); color: var(--accento); }
+.tappa[aria-current="step"] { color: var(--inchiostro); }
+.tappa[aria-current="step"] .tappa-n { background: var(--inchiostro); border-color: var(--inchiostro); color: var(--parete); }
+.tappa[aria-current="step"]::after {
+  content: "";
+  position: absolute; left: 12%; right: 12%; bottom: 0;
+  height: 0.3rem;
+  background: var(--acido);
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  animation: tratto-dentro 0.5s cubic-bezier(0.6, 0.05, 0.3, 1) both;
+}
+.tappa-nome { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.atelier-corpo { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1.5rem max(1.75rem, env(safe-area-inset-right, 0px)) 2rem 1.75rem; }
+.passo.is-entra > * { animation: appare 0.45s ease both; }
+.passo.is-entra > :nth-child(2) { animation-delay: 0.05s; }
+.passo.is-entra > :nth-child(3) { animation-delay: 0.1s; }
+.passo.is-entra > :nth-child(n + 4) { animation-delay: 0.15s; }
+.passo-titolo {
+  display: flex; align-items: baseline; gap: 0.6rem;
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  line-height: 1.1;
+}
+.passo-titolo:focus { outline: none; }
+.passo-numero { font-style: italic; color: var(--arancio); }
+.passo-intro { margin: -0.5rem 0 1.25rem; font-size: var(--t-s); color: var(--grafite); }
+
+.campo { display: grid; gap: 0.45rem; margin: 0 0 1.5rem; padding: 0; border: 0; min-width: 0; }
+.campo[hidden] { display: none; }
+.campo-etichetta { margin: 0; padding: 0; font-size: var(--t-s); font-weight: 500; }
+.campo-aiuto { margin: -0.1rem 0 0.2rem; font-size: var(--t-xs); color: var(--grafite); }
+.campo-errore { margin: 0; font-size: var(--t-xs); color: var(--bollino); }
+.obbligatorio { font-weight: 400; font-size: var(--t-xs); color: var(--grafite); }
+.campo input[type="text"],
+.campo input[type="email"],
+.campo input[type="tel"],
+.campo input[type="number"],
+.campo input[type="date"],
+.campo textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  background: var(--passepartout);
+  color: var(--inchiostro);
+  font: inherit;
+  font-size: 16px; /* niente zoom automatico sul telefono */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.campo textarea { resize: vertical; min-height: 6.5rem; line-height: 1.5; }
+.campo input:focus,
+.campo textarea:focus { outline: none; border-color: var(--inchiostro); box-shadow: 0 0 0 3px var(--velatura); }
+.campo [aria-invalid="true"] { border-color: var(--bollino); }
+.campi-affiancati { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+
+/* Le scelte: bottoni a pillola, quella scelta viene sottolineata a pennello */
+.scelte { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.scelta {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex; align-items: baseline; gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  background: var(--passepartout);
+  font-size: var(--t-s);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.scelta:hover { border-color: var(--grafite); }
+.scelta input,
+.tipo input,
+.formato input,
+.tavolozza input {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.scelta::before {
+  content: "";
+  position: absolute; left: 0.55rem; right: 0.55rem; top: 32%; bottom: 22%;
+  z-index: -1;
+  background: var(--pigmento, var(--acido));
+  opacity: 0.8;
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.4s cubic-bezier(0.6, 0.05, 0.3, 1);
+}
+.scelta:has(input:checked) { border-color: var(--inchiostro); }
+.scelta:has(input:checked)::before { clip-path: inset(0 0 0 0); }
+.scelta-dettaglio { font-size: var(--t-xs); color: var(--grafite); }
+.scelta:has(input:focus-visible),
+.tipo:has(input:focus-visible),
+.formato:has(input:focus-visible),
+.tavolozza:has(input:focus-visible) { outline: 2px solid var(--accento); outline-offset: 3px; }
+
+/* I tipi di opera: piccole carte con un disegno a mano */
+.tipi { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.tipo {
+  position: relative;
+  display: grid; justify-items: start; gap: 0.15rem;
+  padding: 0.9rem 0.85rem 0.85rem;
+  border: 1px solid var(--linea);
+  background: var(--passepartout);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+.tipo:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -14px var(--ombra-forte); }
+.tipo-icona { width: 2.1rem; height: 2.1rem; margin-bottom: 0.35rem; fill: none; stroke: var(--inchiostro); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.tipo-nome { font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 1.25rem; line-height: 1; }
+.tipo-descr { font-size: 0.75rem; color: var(--grafite); line-height: 1.3; }
+.tipo:has(input:checked) { border-color: var(--inchiostro); box-shadow: inset 0 -0.35rem 0 var(--acido); }
+.tipo:has(input:checked) .tipo-icona { stroke: var(--accento); }
+
+.ispirazione {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.9rem;
+  margin: 0 0 1.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--linea);
+  background: var(--passepartout);
+  font-size: var(--t-s);
+}
+.ispirazione img { width: 3.5rem; height: 3.5rem; object-fit: cover; }
+.ispirazione p { margin: 0; color: var(--grafite); }
+.ispirazione em { font-family: var(--font-display); font-weight: 600; font-size: 1.15em; color: var(--inchiostro); }
+
+/* I formati: una sagoma in proporzione */
+.formati { display: grid; grid-template-columns: repeat(auto-fill, minmax(7.25rem, 1fr)); gap: 0.6rem; }
+.formato {
+  position: relative;
+  display: grid; justify-items: center; gap: 0.15rem;
+  padding: 0.75rem 0.5rem 0.7rem;
+  border: 1px solid var(--linea);
+  background: var(--passepartout);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.formato-sagoma { display: grid; place-items: end center; height: 40px; margin-bottom: 0.35rem; }
+.formato-sagoma i { display: block; background: var(--linea); border: 1px solid var(--grafite); transition: background-color 0.3s ease; }
+.formato-sagoma .formato-libero { width: 26px; height: 30px; border-style: dashed; background: none; }
+.formato-nome { font-size: var(--t-s); font-weight: 500; }
+.formato-misura { font-size: 0.75rem; color: var(--grafite); }
+.formato:has(input:checked) { border-color: var(--inchiostro); }
+.formato:has(input:checked) .formato-sagoma i { background: var(--acido); border-color: var(--inchiostro); }
+.misure-libere { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: 0 0.75rem; margin-top: 1rem; }
+.misure-libere[hidden] { display: none; }
+.misure-libere .campo { margin-bottom: 0.5rem; }
+
+/* Le tavolozze */
+.tavolozze { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+.tavolozza {
+  position: relative;
+  display: grid; gap: 0.45rem;
+  padding: 0.65rem;
+  border: 1px solid var(--linea);
+  background: var(--passepartout);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.tavolozza-colori { display: flex; height: 1.6rem; overflow: hidden; }
+.tavolozza-colori i {
+  flex: 1;
+  background: var(--c);
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 160% 100%; mask-size: 160% 100%;
+  -webkit-mask-position: center; mask-position: center;
+  margin-right: -6%;
+}
+.tavolozza-colori i:last-child { margin-right: 0; }
+.tavolozza-nome { font-size: var(--t-xs); }
+.tavolozza:has(input:checked) { border-color: var(--inchiostro); box-shadow: inset 0 0 0 1px var(--inchiostro); }
+
+/* I tuoi colori: macchie tonde da toccare */
+.miei-colori { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.mio-colore {
+  position: relative;
+  width: 2.75rem; height: 2.75rem;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 6px 12px -8px var(--ombra-forte);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.mio-colore:hover { transform: scale(1.08); }
+.mio-colore input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0; }
+.mio-colore:has(input:focus-visible) { outline: 2px solid var(--accento); outline-offset: 3px; }
+.mio-colore-azione {
+  width: 2.75rem; height: 2.75rem;
+  border: 1px dashed var(--grafite);
+  border-radius: 50%;
+  background: none;
+  font-size: 1.25rem;
+  color: var(--grafite);
+  cursor: pointer;
+}
+.mio-colore-azione:hover { border-style: solid; color: var(--inchiostro); }
+
+/* Immagini di ispirazione */
+.riferimenti { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.riferimento { position: relative; margin: 0; width: 5.25rem; height: 5.25rem; }
+.riferimento img { width: 100%; height: 100%; object-fit: cover; box-shadow: 0 6px 12px -8px var(--ombra-forte); }
+.riferimento-togli {
+  position: absolute; top: -0.5rem; right: -0.5rem;
+  width: 1.75rem; height: 1.75rem;
+  border: 1px solid var(--linea); border-radius: 50%;
+  background: var(--passepartout);
+  font-size: 1rem; line-height: 1;
+  cursor: pointer;
+}
+.riferimento-aggiungi {
+  display: grid; place-content: center; justify-items: center;
+  width: 5.25rem; height: 5.25rem;
+  border: 1px dashed var(--grafite);
+  font-size: var(--t-xs);
+  color: var(--grafite);
+  cursor: pointer;
+}
+.riferimento-aggiungi span { font-size: 1.4rem; line-height: 1; }
+.riferimento-aggiungi:hover { color: var(--inchiostro); border-style: solid; }
+.riferimento-aggiungi:has(input:focus-visible) { outline: 2px solid var(--accento); outline-offset: 3px; }
+.riferimento-aggiungi[hidden] { display: none; }
+
+.campo--consenso { margin-top: 0.5rem; }
+.consenso { display: grid; grid-template-columns: auto 1fr; gap: 0.65rem; align-items: start; font-size: var(--t-s); cursor: pointer; }
+.consenso input { width: 1.15rem; height: 1.15rem; margin: 0.15rem 0 0; accent-color: var(--accento); }
+
+/* Il riepilogo e l'invio */
+.riepilogo { display: grid; gap: 1.1rem; }
+.riepilogo-gruppo h4 {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin: 0 0 0.4rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--linea);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accento);
+}
+.riepilogo-gruppo h4 .link-bottone { font-size: var(--t-xs); letter-spacing: 0; text-transform: none; color: var(--grafite); }
+.riepilogo-gruppo dl { margin: 0; display: grid; gap: 0.3rem; }
+.riepilogo-gruppo dl > div { display: grid; grid-template-columns: 7rem 1fr; gap: 0.75rem; font-size: var(--t-s); }
+.riepilogo-gruppo dt { color: var(--grafite); }
+.riepilogo-gruppo dd { margin: 0; overflow-wrap: anywhere; white-space: pre-line; }
+.riepilogo-colori { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 0.35rem; }
+.riepilogo-colori i { width: 0.9rem; height: 0.9rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.invio { margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--inchiostro); display: grid; gap: 0.85rem; justify-items: start; }
+.invio-nota { margin: 0; font-size: var(--t-xs); color: var(--grafite); }
+.invio-nota strong { color: var(--inchiostro); font-weight: 500; }
+.bottone.is-occupato { cursor: progress; }
+.bottone.is-occupato::before { -webkit-mask-position: 0 0; mask-position: 0 0; animation: vernice 1.4s ease-in-out infinite; }
+@keyframes vernice { 50% { opacity: 0.35; } }
+.invio-fatto { width: 100%; display: grid; gap: 0.75rem; animation: appare 0.5s ease both; }
+.invio-fatto[hidden] { display: none; }
+.invio-titolo { margin: 0; font-family: var(--font-display); font-style: italic; font-size: var(--t-xl); line-height: 1.1; }
+.invio-titolo:focus { outline: none; }
+.invio-file { margin: 0; display: flex; align-items: center; gap: 0.65rem; font-size: var(--t-s); overflow-wrap: anywhere; }
+.invio-icona {
+  flex: none;
+  display: grid; place-items: center;
+  width: 2.3rem; height: 2.9rem;
+  background: var(--inchiostro);
+  color: var(--acido);
+  font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.08em;
+  clip-path: polygon(0 0, 72% 0, 100% 22%, 100% 100%, 0 100%);
+}
+.invio-passi { margin: 0; padding-left: 1.2rem; font-size: var(--t-s); color: var(--grafite); display: grid; gap: 0.2rem; }
+.invio-azioni { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.invio-ricomincia { margin: 0.25rem 0 0; font-size: var(--t-xs); }
+
+.atelier-piede {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.9rem max(1.75rem, env(safe-area-inset-right, 0px)) calc(0.9rem + env(safe-area-inset-bottom, 0px)) 1.75rem;
+  border-top: 1px solid var(--linea);
+  background: var(--parete);
+}
+.atelier-piede [hidden] { display: none; }
+.atelier-piede #atelier-avanti { margin-left: auto; }
+.atelier-conta { margin: 0; font-size: var(--t-xs); color: var(--grafite); text-align: center; }
+.atelier .scheda-chiudi { top: calc(1rem + env(safe-area-inset-top, 0px)); }
+
+/* Schermi medi e telefono: il bozzetto in alto, i passi sotto */
+@media (max-width: 900px) {
+  .atelier-inner { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(13rem, 36vh) minmax(0, 1fr); grid-template-rows: minmax(13rem, 36dvh) minmax(0, 1fr); }
+  .atelier-vista { grid-template-rows: auto minmax(0, 1fr) auto; gap: 0.5rem; padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 16px 0.6rem; }
+  .atelier-avviso span { display: none; }
+  .atelier-riassunto { font-size: var(--t-s); }
+  .atelier-viste { order: 0; }
+  .atelier-pannello { border-left: 0; border-top: 1px solid var(--linea); }
+  .atelier-testa { padding: 0.8rem 16px 0.6rem; }
+  .atelier-occhiello,
+  .atelier-titolo { display: none; }
+  .tappa-nome { display: none; }
+  .atelier-corpo { padding: 1.25rem 16px 1.5rem; }
+  .atelier-piede { padding: 0.7rem 16px calc(0.7rem + env(safe-area-inset-bottom, 0px)); }
+  .atelier .scheda-chiudi { top: calc(0.6rem + env(safe-area-inset-top, 0px)); right: max(0.6rem, env(safe-area-inset-right, 0px)); }
+}
+@media (max-width: 520px) {
+  .tipi { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tavolozze { grid-template-columns: minmax(0, 1fr); }
+  .campi-affiancati { grid-template-columns: minmax(0, 1fr); }
+  .riepilogo-gruppo dl > div { grid-template-columns: 5.5rem 1fr; }
+  .atelier-conta { display: none; }
+}
+
+/* ---------- La firma nel piede si dipinge come i titoli ---------- */
+.piede-nome { position: relative; }
+.js-anim .piede-nome[data-testo] { color: transparent; -webkit-text-stroke: 1px var(--inchiostro); }
+.js-anim .piede-nome[data-testo]::after {
+  content: attr(data-testo);
+  content: attr(data-testo) / "";
+  position: absolute; inset: 0;
+  color: var(--inchiostro);
+  -webkit-text-stroke: 0;
+  -webkit-mask-image: var(--maschera-destra); mask-image: var(--maschera-destra);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.js-anim .piede-firma.visibile .piede-nome[data-testo]::after { animation: dipingi-dentro 2.2s cubic-bezier(0.55, 0.05, 0.3, 1) 0.4s both; }
+.piede-nome::before {
+  content: "";
+  position: absolute; left: 6%; bottom: 0.02em;
+  width: 62%; height: 0.2em;
+  z-index: -1;
+  background: var(--acido);
+  opacity: 0.75;
+  -webkit-mask-image: var(--tratto); mask-image: var(--tratto);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+.js-anim .piede-firma:not(.visibile) .piede-nome::before { clip-path: inset(0 100% 0 0); }
+.js-anim .piede-firma.visibile .piede-nome::before { animation: tratto-dentro 1.1s cubic-bezier(0.6, 0.05, 0.3, 1) 1.9s both; }
+.piede-firma { isolation: isolate; }
+
+@media (prefers-reduced-motion: reduce) {
+  .su-misura-tela::before { animation: none; }
+  .su-misura-cornice { transform: none; transition: none; }
+  .bottone::before { transition: none; }
+  .atelier-cornice { transition: none; }
+  .atelier-tela { transition: none; }
+}
+
+/* =====================================================================
+   L'APERTURA VIVA — le opere in evidenza si dipingono una dopo l'altra
+   (js/script.js, sezione 9c)
+   ===================================================================== */
+.evidenza.is-viva .cornice { position: relative; aspect-ratio: 4 / 5; }
+.evidenza.is-viva .cornice > .media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.evidenza-pennello { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+.evidenza .didascalia { transition: opacity 0.25s ease, transform 0.35s ease; }
+.evidenza .didascalia.is-cambia { opacity: 0; transform: translateY(6px); }
+.evidenza-comandi { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; }
+.evidenza-punti { display: flex; gap: 0.15rem; }
+.evidenza-punto {
+  display: grid; align-items: center;
+  width: 2.1rem; height: 1.75rem;
+  padding: 0 0.2rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.evidenza-punto span { position: relative; display: block; height: 3px; overflow: hidden; border-radius: 2px; background: var(--linea); }
+.evidenza-punto span::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: var(--inchiostro);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.evidenza-punto:hover span { background: var(--grafite); }
+.evidenza-punto[aria-current] span::after { animation: avanza var(--intervallo, 7s) linear both; }
+.evidenza.is-ferma .evidenza-punto[aria-current] span::after { animation-play-state: paused; }
+@keyframes avanza { to { transform: scaleX(1); } }
+.evidenza-pausa {
+  display: grid; place-items: center;
+  width: 1.9rem; height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  background: var(--passepartout);
+  color: var(--inchiostro);
+  cursor: pointer;
+}
+.evidenza-pausa:hover { border-color: var(--inchiostro); }
+.evidenza-pausa span { width: 8px; height: 9px; border-left: 2px solid currentColor; border-right: 2px solid currentColor; }
+.evidenza-pausa[aria-pressed="true"] span {
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 5px 0 5px 8px;
+  border-color: transparent transparent transparent currentColor;
+  margin-left: 2px;
 }

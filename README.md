@@ -19,6 +19,8 @@ vetrina-artista/
 ├── css/tela.webp       la trama della tela sul fondo
 ├── js/categorie.js     categorie del menu
 ├── js/script.js        funzionamento del sito
+├── js/su-misura.js     "Proponi la tua opera": bozzetto, atelier, PDF
+├── js/lib/             jsPDF e i caratteri per il PDF (non toccarli)
 └── img/                foto delle opere
 ```
 
@@ -110,7 +112,7 @@ Il fondo è quasi bianco, come una parete di galleria. I colori vengono da un qu
 - `--fascia`: il colore della pennellata dietro la barra del menu e del fondo del menu sul telefono (ora il verde notte `--pennellata-1`).
 - Caratteri, da Google Fonts (link in `index.html`): Cormorant per il nome (in corsivo calligrafico) e per i titoli di sezioni, opere, eventi e video (`--font-display`); Jost per i testi, il menu e le didascalie (`--font-testo`).
 
-**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-04e` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o `script.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08a` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -145,7 +147,7 @@ Cursore, acquerello, inclinazione e lente ci sono solo con il mouse: su telefono
 Sono in `js/script.js` (sezione "9b. Effetti della tela") e in `css/style.css` (blocco "EFFETTI DELLA TELA").
 
 - **Tela sul fondo**: tutto il sito, la scheda dell'opera e "Provalo nella tua stanza" stanno su una tela di lino preparata, appena visibile. È il file `css/tela.webp`, ripetuto come una piastrella. Per un fondo liscio, in `css/style.css` cerca `tela.webp` dentro `body` e cancella le tre righe `background-image`, `background-size` e `background-blend-mode`.
-- **Titoli dipinti**: il titolo di ogni sezione entra come un disegno a matita (solo il contorno) e poi il colore lo riempie con una pennellata. Dietro, una pennellata del colore della sezione si allunga mentre scorri verso il titolo. I colori delle sezioni sono in cima al blocco: `#opere`, `#processo`, `#eventi`, `#contatti` con `--pigmento-sezione`.
+- **Titoli dipinti**: il titolo di ogni sezione entra come un disegno a matita (solo il contorno) e poi il colore lo riempie con una pennellata. Dietro, una pennellata del colore della sezione si allunga mentre scorri verso il titolo. I colori delle sezioni sono in cima al blocco: `#opere`, `#processo`, `#eventi`, `#contatti` con `--pigmento-sezione` (quello di `#su-misura` è nel blocco "SU MISURA").
 - **Alone dell'opera**: passando col mouse su un'opera, dietro di lei si accende una luce nei suoi stessi colori, come l'alone verde dell'apertura. Sul telefono si accende l'opera che passa al centro dello schermo. Il colore viene calcolato dalla foto; per le opere quasi senza colore (bianco e nero, bronzo, marmo) l'alone è verde acido.
 - **Pennellate tra le sezioni**: nello spazio tra una sezione e l'altra compare una grande pennellata leggera del colore della sezione che arriva, che scorre più piano della pagina. Colori, lato e inclinazione sono nell'elenco `COLPI_SFONDO` in `js/script.js`.
 - **Profondità nell'apertura**: scorrendo, il nome sale un po' più in fretta e svanisce piano, mentre l'opera in evidenza resta indietro, come su due piani diversi.
@@ -228,7 +230,45 @@ Nella scheda di ogni quadro e stampa, accanto a "Chiedi informazioni", c'è il p
 
 La foto resta nel browser del visitatore: non viene caricata da nessuna parte.
 
-Perché la messa in scala funzioni, nel pannello il campo **Misure** dell'opera deve essere scritto come altezza × base, ad esempio `70 × 50 cm`. Senza misure il pulsante resta, ma la dimensione si regola solo a occhio. Le categorie che mostrano il pulsante sono in `js/script.js`, nella riga `CATEGORIE_DA_PARETE`.
+Perché la messa in scala funzioni, nel pannello il campo **Misure** dell'opera deve contenere le due misure, ad esempio `50 × 70 cm`: l'ordine non importa, il sito capisce dalla foto se l'opera è verticale o orizzontale. Senza misure il pulsante resta, ma la dimensione si regola solo a occhio. Le categorie che mostrano il pulsante sono in `js/script.js`, nella riga `CATEGORIE_DA_PARETE`.
+
+## Su misura: "Proponi la tua opera"
+
+Tra Eventi e Contatti c'è la sezione **Su misura** (anche nel menu). A destra una tela si dipinge da sola, pennellata dopo pennellata, con un bozzetto dopo l'altro: un paesaggio, un astratto, una natura morta… Il bottone **Proponi la tua opera** apre l'atelier, a tutto schermo, dove il visitatore compone la sua opera in otto passi:
+
+1. **Opera**: quadro, scultura, incisione, stampa, disegno o altro (scritto da lui);
+2. **Tecnica**: cambia secondo il tipo (olio, acrilico, foglia d'oro… bronzo, gesso… xilografia, linoleografia…), più "Scegli tu" e "Altro";
+3. **Misure**: orientamento e formato (piccolo, medio, grande, molto grande) oppure misure scritte da lui;
+4. **Stile e soggetto**: natura morta, realismo, astratto, soggetti umani, ritratto, paesaggio, surreale, materico o altro; l'atmosfera (serena, intensa, malinconica, energica, misteriosa, luminosa) e un campo per raccontare l'idea;
+5. **Colori**: otto tavolozze pronte (la prima è quella delle opere di Marco) e i suoi colori, da cambiare toccandoli; il tono generale chiaro, medio o scuro;
+6. **Dettagli**: dove andrà, cornice, budget indicativo, tempi (anche una data precisa) e fino a quattro immagini di ispirazione;
+7. **Contatti**: nome ed email (obbligatori), telefono, città, note e il consenso;
+8. **Proposta**: il riepilogo, con "Modifica" per tornare a ogni passo.
+
+Mentre sceglie, a sinistra (sul telefono in alto) il sito **dipinge un bozzetto** dell'opera, con le proporzioni giuste, i colori, lo stile e l'atmosfera scelti; le incisioni diventano righe d'inchiostro come una xilografia, i disegni tratteggio a matita, le sculture una forma su un piedistallo nel materiale scelto. "Un'altra idea" ne dipinge un'altra variante. **In scala** mostra l'opera su una parete accanto a una persona alta 170 cm (e a un divano, per i quadri).
+
+Alla fine **Crea la proposta in PDF** prepara una scheda elegante (la fascia col nome di Marco, il bozzetto in cornice, la tavolozza con i nomi dei colori, la vista in scala, tutte le scelte, l'idea, le note e le immagini di ispirazione) e:
+
+- sul computer la scarica e apre l'email per Marco già scritta, con l'oggetto, il riepilogo e il suo indirizzo (quello di `contenuti/sito.json`): basta allegare il PDF e inviare;
+- sul telefono offre **Invia il PDF…**, che apre la condivisione (Mail, WhatsApp…), oltre ad aprire l'email o scaricare il file.
+
+Niente viene caricato o inviato da nessuna parte: il PDF si crea nel browser del visitatore. Le scelte restano salvate nel suo browser come bozza, così se chiude e riapre ritrova tutto (tranne le immagini e il consenso).
+
+Altri modi per aprire l'atelier:
+
+- nella scheda di ogni opera, il link **Vorresti qualcosa di simile? Proponi un'opera su misura** apre l'atelier già con tipo, tecnica, misure e **i colori presi dalla foto** di quell'opera, che finisce anche nel PDF;
+- il link diretto **`indirizzo-del-sito/#proponi`** (ad esempio `https://domenico-tr.github.io/marco-de-chiara/#proponi`) apre subito l'atelier: comodo da mettere nella bio di Instagram o in un messaggio.
+
+Testi, tecniche, formati e tavolozze sono in cima alla parte "Le scelte possibili" di `js/su-misura.js` (`TECNICHE`, `FORMATI`, `TAVOLOZZE`, `BUDGET`…). La cartella `js/lib` contiene jsPDF (licenza MIT) e i caratteri Cormorant e Jost per il PDF (licenza SIL Open Font License): si scaricano solo quando un visitatore crea il PDF.
+
+## Apertura viva
+
+Se nel pannello attivi **Opera grande in apertura** su più opere, l'apertura le mostra a turno: ogni sette secondi l'opera nuova viene dipinta sopra la vecchia con larghe pennellate fatte di setole, che stendono proprio i colori della foto. Se non l'attivi su nessuna, gira tra le prime sei opere dell'elenco; se l'attivi su una sola, resta ferma su quella. Sotto la didascalia ci sono le barrette per scegliere l'opera e il bottone di pausa; si ferma anche passandoci sopra col mouse. Con "riduci movimento" attivo resta ferma sulla prima.
+
+## Bottoni e firma
+
+- **Bottoni a pennello**: passando col mouse, una pennellata di colore attraversa il bottone da sinistra.
+- **Firma nel piè di pagina**: il nome grande entra come un disegno a matita e poi il colore lo riempie, con una pennellata verde acido sotto.
 
 ## Dominio personale
 

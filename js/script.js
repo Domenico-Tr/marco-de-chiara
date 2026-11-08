@@ -15,7 +15,9 @@
      9. Effetti a tema pittura
      10. Provalo nella tua stanza
      9b. Effetti della tela (titoli dipinti, alone delle opere, pennellate di fondo)
+     9c. L'apertura viva (le opere in evidenza si dipingono una dopo l'altra)
      11. Mi piace e visualizzazioni
+     ("Proponi la tua opera" sta in js/su-misura.js)
      8. Avvio
 ===================================================================== */
 (function () {
@@ -1063,13 +1065,16 @@
       filtro === "tutte" ? `${n} opere` : `${NOMI_CATEGORIE[filtro]}: ${n} ${n === 1 ? "opera" : "opere"}`;
   }
 
+  let operaApertura = null;
   function costruisciEvidenza() {
     const fig = $("#evidenza");
-    const o = OPERE.find((x) => x.inEvidenza) || OPERE[0];
+    const lista = candidatiApertura();
+    const o = lista[0] || OPERE[0];
     if (!o) {
       fig.hidden = true;
       return;
     }
+    operaApertura = o;
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "evidenza-apri";
@@ -1080,11 +1085,12 @@
     media.classList.add("rivela"); // dipinta sulla tela bianca all'apertura
     cornice.append(media);
     btn.append(cornice);
-    btn.addEventListener("click", () => apriScheda(OPERE, OPERE.indexOf(o), btn));
+    btn.addEventListener("click", () => apriScheda(OPERE, OPERE.indexOf(operaApertura), btn));
     const cap = document.createElement("figcaption");
     cap.className = "didascalia";
     cap.innerHTML = didascaliaHTML(o);
     fig.append(btn, cap);
+    if (lista.length > 1) preparaAperturaViva(fig, lista);
   }
 
   /* ------------------------------------------------------------------
@@ -1145,6 +1151,7 @@
     $("#scheda-email-riga").hidden = !CONTATTI.email;
     // "Provalo nella tua stanza" solo per le opere da appendere
     $("#scheda-stanza").hidden = !daParete(o);
+    $("#scheda-simile").hidden = !window.SuMisura;
 
     $("#scheda-piace").innerHTML = bottonePiace(o, true);
     Visite.conta(o.id);
@@ -1212,6 +1219,14 @@
     lente.setAttribute("aria-hidden", "true");
     scheda.append(lente);
     $("#scheda-chiudi").addEventListener("click", chiudiScheda);
+    $("#scheda-simile").addEventListener("click", () => {
+      const o = elenco[indice];
+      const foto = $("#scheda-media img");
+      chiudiScheda();
+      setTimeout(() => {
+        if (window.SuMisura) window.SuMisura.apri({ ispirazione: o, immagine: foto, da: document.activeElement });
+      }, 60);
+    });
     $("#scheda-prec").addEventListener("click", () => sposta(-1));
     $("#scheda-succ").addEventListener("click", () => sposta(1));
     scheda.addEventListener("keydown", (e) => {
@@ -1788,6 +1803,27 @@
      del sottomenu) copre lo schermo di colore, sposta la pagina sotto
      la vernice e poi la ripulisce.
      ------------------------------------------------------------------ */
+  // Le foto della galleria si caricano mentre scorri e allungano la pagina:
+  // dopo un salto, la sezione resta agganciata finché la pagina non si assesta
+  // (o finché il visitatore non scorre da solo).
+  function tieniFermo(meta) {
+    if (!meta || !("ResizeObserver" in window)) return;
+    let attivo = true;
+    const eventi = ["wheel", "touchstart", "keydown", "pointerdown"];
+    const smetti = () => {
+      if (!attivo) return;
+      attivo = false;
+      osservatore.disconnect();
+      eventi.forEach((ev) => window.removeEventListener(ev, smetti));
+    };
+    const osservatore = new ResizeObserver(() => {
+      if (attivo) meta.scrollIntoView({ block: "start" });
+    });
+    osservatore.observe(document.body);
+    eventi.forEach((ev) => window.addEventListener(ev, smetti, { passive: true }));
+    setTimeout(smetti, 3000);
+  }
+
   function vaiA(id, categoria) {
     const meta = document.getElementById(id);
     if (!meta) return;
@@ -1796,7 +1832,10 @@
       const radice = document.documentElement;
       radice.style.scrollBehavior = "auto"; // salto istantaneo, tanto è coperto
       if (id === "inizio") window.scrollTo(0, 0);
-      else meta.scrollIntoView();
+      else {
+        meta.scrollIntoView();
+        if (!categoria) tieniFermo(meta);
+      }
       radice.style.scrollBehavior = "";
       const ancora = categoria && categoria !== "tutte" ? categoria : id;
       try {
@@ -2346,13 +2385,21 @@
   }
 
   // "90 × 120 cm" vuol dire altezza × base, come nelle didascalie dei musei
-  function misureReali(testo) {
+  // "45 × 60": quale sia la base e quale l'altezza lo dice la foto
+  // (verticale o orizzontale); senza foto vale altezza × base
+  function misureReali(testo, rapporto) {
     const m = String(testo || "")
       .replace(/,/g, ".")
       .match(/(\d+(?:\.\d+)?)\s*[x×X*]\s*(\d+(?:\.\d+)?)/);
     if (!m) return null;
-    const altezza = parseFloat(m[1]);
-    const base = parseFloat(m[2]);
+    let altezza = parseFloat(m[1]);
+    let base = parseFloat(m[2]);
+    if (rapporto && Math.abs(rapporto - 1) > 0.06 && altezza !== base) {
+      const grande = Math.max(altezza, base);
+      const piccola = Math.min(altezza, base);
+      altezza = rapporto < 1 ? grande : piccola;
+      base = rapporto < 1 ? piccola : grande;
+    }
     return altezza > 0 && base > 0 ? { altezza, base } : null;
   }
   const cm = (n) => String(Math.round(n * 10) / 10).replace(".", ",");
@@ -2617,7 +2664,10 @@
     $("#stanza-nome-opera").innerHTML = `<em>${esc(o.titolo)}</em>${o.misure ? `, ${esc(o.misure)}` : ""}`;
     const img = $("#stanza-opera-img");
     img.alt = o.titolo;
-    img.onload = () => aggiornaOperaStanza();
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) statoStanza.misura = misureReali(o.misure, img.naturalWidth / img.naturalHeight);
+      aggiornaOperaStanza();
+    };
     if (o.immagine) {
       img.src = o.immagine;
     } else {
@@ -2930,7 +2980,8 @@
     { sezione: "opere", colore: "var(--giallo)", lato: "destra", rotazione: -5, velocita: 0.16 },
     { sezione: "processo", colore: "var(--magenta)", lato: "sinistra", rotazione: 4, velocita: 0.2 },
     { sezione: "eventi", colore: "var(--turchese)", lato: "destra", rotazione: -3, velocita: 0.14 },
-    { sezione: "contatti", colore: "var(--acido)", lato: "sinistra", rotazione: 5, velocita: 0.18 },
+    { sezione: "su-misura", colore: "var(--arancio)", lato: "sinistra", rotazione: 4, velocita: 0.17 },
+    { sezione: "contatti", colore: "var(--acido)", lato: "destra", rotazione: -5, velocita: 0.18 },
   ];
 
   function creaColpiSfondo() {
@@ -2999,6 +3050,241 @@
     window.addEventListener("scroll", chiedi, { passive: true });
     window.addEventListener("resize", chiedi);
     aggiornaScorrimento();
+  }
+
+  /* ------------------------------------------------------------------
+     9c. L'apertura viva
+     Se nel pannello più opere hanno "Opera grande in apertura", l'apertura
+     le mostra a turno; se non ne è segnata nessuna, gira tra le prime sei
+     opere con la foto. Ogni opera nuova viene dipinta sopra la vecchia con
+     larghe pennellate fatte di setole, che stendono proprio i colori della
+     foto. Si ferma passandoci sopra, con il bottone di pausa, quando
+     l'apertura non si vede e per chi preferisce meno movimento.
+     ------------------------------------------------------------------ */
+  function candidatiApertura() {
+    const segnate = OPERE.filter((o) => o.inEvidenza);
+    if (segnate.length) return segnate;
+    return OPERE.filter((o) => o.immagine).slice(0, 6);
+  }
+
+  function preparaAperturaViva(fig, lista) {
+    if (menoMovimento() || !lista.every((o) => o.immagine)) return;
+    const INTERVALLO = 7000;
+    const btn = fig.querySelector(".evidenza-apri");
+    const cornice = fig.querySelector(".cornice");
+    let img = cornice.querySelector("img");
+    if (!img) return;
+    fig.classList.add("is-viva");
+    let attuale = 0;
+    let timer = 0;
+    let fermo = false; // pausa scelta dal visitatore
+    let sopra = false; // mouse o fuoco sull'opera
+    let visibile = true;
+    let dipingendo = false;
+
+    // i puntini per scegliere l'opera e il bottone di pausa
+    const comandi = document.createElement("div");
+    comandi.className = "evidenza-comandi";
+    comandi.innerHTML =
+      `<div class="evidenza-punti" role="group" aria-label="Opere in apertura">${lista
+        .map((o, i) => `<button type="button" class="evidenza-punto" data-i="${i}" aria-label="Mostra ${esc(o.titolo)}"${i === 0 ? ' aria-current="true"' : ""}><span></span></button>`)
+        .join("")}</div>` +
+      `<button type="button" class="evidenza-pausa" aria-pressed="false" aria-label="Ferma lo scorrere delle opere"><span aria-hidden="true"></span></button>`;
+    fig.append(comandi);
+    fig.style.setProperty("--intervallo", `${INTERVALLO}ms`);
+    const punti = Array.from(comandi.querySelectorAll(".evidenza-punto"));
+    const pausa = comandi.querySelector(".evidenza-pausa");
+
+    const fermato = () => fermo || sopra || !visibile || document.hidden;
+    function programma() {
+      clearTimeout(timer);
+      fig.classList.toggle("is-ferma", fermato());
+      if (fermato() || dipingendo) return;
+      segna(attuale); // la barretta riparte insieme al conto alla rovescia
+      timer = setTimeout(() => mostra((attuale + 1) % lista.length), INTERVALLO);
+    }
+    function segna(i) {
+      punti.forEach((p, k) => {
+        if (k === i) p.setAttribute("aria-current", "true");
+        else p.removeAttribute("aria-current");
+      });
+      // riavvia l'animazione della barretta
+      const p = punti[i].querySelector("span");
+      p.style.animation = "none";
+      void p.offsetWidth;
+      p.style.animation = "";
+    }
+
+    function carica(src) {
+      return new Promise((ok, ko) => {
+        const i = new Image();
+        i.onload = () => ok(i);
+        i.onerror = ko;
+        i.src = src;
+      });
+    }
+
+    async function mostra(i) {
+      if (dipingendo || i === attuale) return;
+      const o = lista[i];
+      dipingendo = true;
+      clearTimeout(timer);
+      try {
+        const foto = await carica(o.immagine);
+        segna(i);
+        await dipingiSopra(foto);
+        img.src = o.immagine;
+        img.alt = `${o.titolo}${o.anno ? ", " + o.anno : ""}. ${o.tecnica || ""}`;
+        attuale = i;
+        operaApertura = o;
+        btn.setAttribute("aria-label", `Guarda ${o.titolo} a schermo intero`);
+        delete btn.dataset.alone;
+        const cap = fig.querySelector(".didascalia");
+        cap.classList.add("is-cambia");
+        setTimeout(() => {
+          cap.innerHTML = didascaliaHTML(o);
+          cap.classList.remove("is-cambia");
+        }, 220);
+      } catch (e) {
+        /* foto non trovata: si passa alla prossima */
+        attuale = i;
+      } finally {
+        dipingendo = false;
+        cornice.querySelector(".evidenza-pennello")?.remove();
+        programma();
+      }
+    }
+
+    // Dipinge la foto nuova sopra quella vecchia, a setole
+    function dipingiSopra(foto) {
+      return new Promise((fine) => {
+        const r = cornice.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const W = Math.round(r.width * dpr);
+        const H = Math.round(r.height * dpr);
+        const tela = document.createElement("canvas");
+        tela.className = "evidenza-pennello";
+        tela.width = W;
+        tela.height = H;
+        cornice.append(tela);
+        const ctx = tela.getContext("2d");
+        // la foto com'è nella cornice (tutta visibile, sul passepartout)
+        const fonte = document.createElement("canvas");
+        fonte.width = W;
+        fonte.height = H;
+        const f = fonte.getContext("2d");
+        f.fillStyle = getComputedStyle(cornice).backgroundColor || "#fff";
+        f.fillRect(0, 0, W, H);
+        const k = Math.min(W / foto.naturalWidth, H / foto.naturalHeight);
+        const fw = foto.naturalWidth * k;
+        const fh = foto.naturalHeight * k;
+        f.drawImage(foto, (W - fw) / 2, (H - fh) / 2, fw, fh);
+        const motivo = ctx.createPattern(fonte, "no-repeat");
+        const quante = 6;
+        const passo = H / quante;
+        const spessore = passo * 1.75;
+        const pennellate = [];
+        for (let i = 0; i < quante; i++) {
+          const setole = [];
+          for (let s = 0; s < 46; s++) {
+            const pos = s / 45 - 0.5;
+            const bordo = Math.abs(pos) > 0.36;
+            setole.push({
+              o: pos * spessore,
+              w: (spessore / 46) * (1.9 + Math.random() * 1.2),
+              a: bordo ? 0.5 + Math.random() * 0.45 : 0.9 + Math.random() * 0.1,
+              rit: Math.random() * 0.06 + (bordo ? 0.04 : 0),
+              fatto: 0,
+            });
+          }
+          pennellate.push({ verso: i % 2 ? -1 : 1, y: passo * (i + 0.5), incl: (Math.random() - 0.5) * 0.05, rit: i * 0.09, onda: Math.random() * 6, setole });
+        }
+        const punto = (pen, s, p) => {
+          const x = pen.verso > 0 ? -0.1 * W + p * 1.2 * W : 1.1 * W - p * 1.2 * W;
+          const y = pen.y + Math.sin(x / W * 3 + pen.onda) * H * 0.012 + (x - W / 2) * pen.incl + s.o * Math.min(1, 0.45 + p * 4);
+          return [x, y];
+        };
+        const durata = 0.55;
+        const morbido = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+        const t0 = performance.now();
+        ctx.lineCap = "butt";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = motivo;
+        function fotogramma(ora) {
+          const t = (ora - t0) / 1000;
+          let finito = true;
+          for (const pen of pennellate) {
+            for (const s of pen.setole) {
+              const grezzo = (t - pen.rit - s.rit) / durata;
+              if (grezzo < 1) finito = false;
+              const p = morbido(Math.min(1, Math.max(0, grezzo)));
+              if (p <= s.fatto) continue;
+              ctx.globalAlpha = s.a;
+              ctx.lineWidth = s.w;
+              ctx.beginPath();
+              const passi = Math.max(2, Math.ceil((p - s.fatto) / 0.01));
+              for (let k2 = 0; k2 <= passi; k2++) {
+                const [x, y] = punto(pen, s, s.fatto + ((p - s.fatto) * k2) / passi);
+                if (k2) ctx.lineTo(x, y);
+                else ctx.moveTo(x, y);
+              }
+              ctx.stroke();
+              s.fatto = p;
+            }
+          }
+          if (!finito) {
+            requestAnimationFrame(fotogramma);
+            return;
+          }
+          // ultima mano: la foto intera, nitida
+          ctx.globalAlpha = 1;
+          ctx.drawImage(fonte, 0, 0);
+          fine();
+        }
+        requestAnimationFrame(fotogramma);
+      });
+    }
+
+    punti.forEach((p) =>
+      p.addEventListener("click", () => {
+        mostra(Number(p.dataset.i));
+      })
+    );
+    pausa.addEventListener("click", () => {
+      fermo = !fermo;
+      pausa.setAttribute("aria-pressed", String(fermo));
+      pausa.setAttribute("aria-label", fermo ? "Fai scorrere di nuovo le opere" : "Ferma lo scorrere delle opere");
+      programma();
+    });
+    fig.addEventListener("pointerenter", (e) => {
+      if (e.pointerType === "mouse") {
+        sopra = true;
+        programma();
+      }
+    });
+    fig.addEventListener("pointerleave", () => {
+      sopra = false;
+      programma();
+    });
+    fig.addEventListener("focusin", () => {
+      sopra = true;
+      programma();
+    });
+    fig.addEventListener("focusout", (e) => {
+      if (!fig.contains(e.relatedTarget)) {
+        sopra = false;
+        programma();
+      }
+    });
+    document.addEventListener("visibilitychange", programma);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((v) => {
+        visibile = v[0].isIntersecting;
+        programma();
+      }, { threshold: 0.35 }).observe(fig);
+    }
+    // si comincia quando l'apertura ha finito di comparire
+    setTimeout(programma, 1600);
   }
 
   /* ------------------------------------------------------------------
@@ -3427,6 +3713,9 @@
     preparaAcquerello();
     requestAnimationFrame(() => aggiornaScorrimento());
     // i mi piace e le visualizzazioni di tutti, se nel pannello è collegato Firebase
+    // js/su-misura.js legge da qui l'email di Marco
+    window.Vetrina = { contatti: CONTATTI, opere: OPERE };
+    document.dispatchEvent(new CustomEvent("vetrina:pronta"));
     Firebase.configura({ progetto: CONTATTI.firebaseProgetto, chiave: CONTATTI.firebaseChiave });
     Piace.avvia();
     Visite.avvia();
@@ -3444,6 +3733,11 @@
       $("#opere").scrollIntoView();
     } else {
       disegnaGriglia();
+      const sezione = h && h !== "inizio" && document.getElementById(h);
+      if (sezione && sezione.classList.contains("sezione")) {
+        sezione.scrollIntoView();
+        tieniFermo(sezione);
+      }
     }
     osservaRivelazioni();
 

@@ -14,7 +14,7 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-04e">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-08a">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi.
@@ -77,7 +77,8 @@
           </li>
           <li class="menu-voce" style="--pigmento: var(--giallo); --n: 1"><a class="menu-link" href="#processo">Processo creativo</a></li>
           <li class="menu-voce" style="--pigmento: var(--magenta); --n: 2"><a class="menu-link" href="#eventi">Eventi</a></li>
-          <li class="menu-voce" style="--pigmento: var(--turchese); --n: 3"><a class="menu-link" href="#contatti">Contatti</a></li>
+          <li class="menu-voce" style="--pigmento: var(--arancio); --n: 3"><a class="menu-link" href="#su-misura">Su misura</a></li>
+          <li class="menu-voce" style="--pigmento: var(--turchese); --n: 4"><a class="menu-link" href="#contatti">Contatti</a></li>
         </ul>
         <!-- Solo nel menu del telefono: email e social, creati da js/script.js leggendo contenuti/sito.json -->
         <div class="menu-piede" id="menu-piede"></div>
@@ -172,6 +173,39 @@
       </div>
     </section>
 
+    <!-- ============ SU MISURA ============ -->
+    <!-- "Proponi la tua opera": la tela qui accanto si dipinge da sola, il bottone
+         apre l'atelier dove il visitatore compone la sua opera (js/su-misura.js).
+         Si può aprire anche con un link diretto: indirizzo-del-sito/#proponi -->
+    <section class="sezione su-misura" id="su-misura" aria-labelledby="titolo-su-misura">
+      <div class="wrap">
+        <div class="intestazione" data-rivela>
+          <h2 class="titolo-sezione" id="titolo-su-misura">Su misura</h2>
+          <p class="nota-sezione">Un quadro per una parete precisa, un ritratto, un regalo: raccontami l'opera che hai in mente.</p>
+        </div>
+        <div class="su-misura-corpo">
+          <div class="su-misura-testo" data-rivela>
+            <p class="su-misura-frase">Componi la tua opera: <em>tecnica, misure, stile e colori</em>. Mentre scegli, il sito ne dipinge un bozzetto e alla fine prepara una scheda in PDF da mandarmi.</p>
+            <ol class="su-misura-passi">
+              <li><span class="su-misura-num" aria-hidden="true">1</span><span><strong>Scegli</strong> il tipo di opera, la tecnica e le misure</span></li>
+              <li><span class="su-misura-num" aria-hidden="true">2</span><span><strong>Dipingi</strong> lo stile, l'atmosfera e i colori</span></li>
+              <li><span class="su-misura-num" aria-hidden="true">3</span><span><strong>Invia</strong> il PDF con la tua email</span></li>
+            </ol>
+            <div class="su-misura-azioni">
+              <button type="button" class="bottone bottone--grande" data-apri-atelier>Proponi la tua opera</button>
+              <p class="su-misura-nota">Gratis e senza impegno: è l'inizio di una conversazione.</p>
+            </div>
+          </div>
+          <figure class="su-misura-tela" data-rivela>
+            <button type="button" class="su-misura-cornice" data-apri-atelier aria-label="Proponi la tua opera">
+              <canvas id="su-misura-tela" aria-hidden="true"></canvas>
+            </button>
+            <figcaption class="su-misura-didascalia" id="su-misura-didascalia">Bozzetti dipinti dal sito</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ CONTATTI ============ -->
     <section class="sezione" id="contatti" aria-labelledby="titolo-contatti">
       <div class="wrap">
@@ -187,7 +221,7 @@
   <footer class="piede">
     <!-- La firma in grande, come in fondo a una tela -->
     <div class="wrap piede-firma" data-rivela>
-      <p class="piede-nome" aria-hidden="true">Marco De Chiara</p>
+      <p class="piede-nome" aria-hidden="true" data-testo="Marco De Chiara">Marco De Chiara</p>
       <a class="piede-su" href="#inizio">Torna su</a>
     </div>
     <div class="wrap piede-inner">
@@ -219,6 +253,8 @@
             <span class="scheda-piace" id="scheda-piace"></span>
           </div>
           <p class="scheda-email" id="scheda-email-riga">oppure scrivi a <span id="scheda-email"></span></p>
+          <!-- Apre l'atelier "Proponi la tua opera" con i colori e le misure di questa -->
+          <p class="scheda-simile"><button type="button" class="link-bottone" id="scheda-simile">Vorresti qualcosa di simile? Proponi un'opera su misura</button></p>
         </div>
         <div class="scheda-nav" id="scheda-nav">
           <button type="button" class="bottone bottone--leggero" id="scheda-prec">Precedente</button>
@@ -308,12 +344,55 @@
     </div>
   </dialog>
 
+  <!-- ============ ATELIER: PROPONI LA TUA OPERA ============ -->
+  <!-- I passi vengono creati da js/su-misura.js. Il PDF si crea nel browser
+       del visitatore: niente viene caricato o inviato da nessuna parte. -->
+  <dialog class="atelier" id="atelier" aria-labelledby="atelier-titolo">
+    <div class="atelier-inner">
+      <div class="atelier-vista">
+        <div class="atelier-viste" role="group" aria-label="Anteprima">
+          <button type="button" class="atelier-vista-btn" data-vista="bozzetto" aria-pressed="true">Bozzetto</button>
+          <button type="button" class="atelier-vista-btn" data-vista="scala" aria-pressed="false">In scala</button>
+        </div>
+        <div class="atelier-palco" id="atelier-palco">
+          <div class="atelier-cornice" id="atelier-cornice">
+            <canvas class="atelier-tela is-sopra" id="atelier-tela-a" role="img" aria-label="Bozzetto della tua opera"></canvas>
+            <canvas class="atelier-tela" id="atelier-tela-b" aria-hidden="true"></canvas>
+          </div>
+          <canvas class="atelier-scala" id="atelier-scala" role="img" aria-label="La tua opera in scala su una parete, accanto a una persona alta 170 cm" hidden></canvas>
+        </div>
+        <p class="atelier-riassunto" id="atelier-riassunto"></p>
+        <p class="atelier-avviso">
+          <button type="button" class="link-bottone" id="atelier-rimescola">Un'altra idea</button>
+          <span>Il bozzetto è solo un'idea di proporzioni e colori: l'opera vera la dipingo io, a mano.</span>
+        </p>
+      </div>
+
+      <form class="atelier-pannello" id="atelier-form" novalidate>
+        <header class="atelier-testa">
+          <p class="atelier-occhiello">Un'opera su misura</p>
+          <h2 class="atelier-titolo" id="atelier-titolo">Proponi la tua opera</h2>
+          <ol class="atelier-tappe" id="atelier-tappe" aria-label="Passi della proposta"></ol>
+        </header>
+        <div class="atelier-corpo" id="atelier-corpo"></div>
+        <footer class="atelier-piede">
+          <button type="button" class="bottone bottone--leggero" id="atelier-indietro">Indietro</button>
+          <p class="atelier-conta" id="atelier-conta" aria-live="polite"></p>
+          <button type="submit" class="bottone" id="atelier-avanti">Avanti</button>
+        </footer>
+      </form>
+
+      <button type="button" class="scheda-chiudi" id="atelier-chiudi">Chiudi</button>
+    </div>
+  </dialog>
+
   <!-- Icone di Instagram e TikTok: Font Awesome (gratuito), caricato da internet -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/brands.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-04e"></script>
-  <script src="js/script.js?v=2026-11-04e"></script>
+  <script src="js/categorie.js?v=2026-11-08a"></script>
+  <script src="js/script.js?v=2026-11-08a"></script>
+  <script src="js/su-misura.js?v=2026-11-08a"></script>
 </body>
 </html>
