@@ -20,7 +20,7 @@ vetrina-artista/
 ├── js/categorie.js     categorie del menu
 ├── js/script.js        funzionamento del sito
 ├── js/su-misura.js     "Proponi la tua opera": bozzetto, atelier, PDF
-├── js/mostra.js        la mostra immersiva: inchiostro fluido, sale, corridoio
+├── js/mostra.js        la galleria notturna: inchiostro, luci, lanterna, sala 3D
 ├── js/lib/             jsPDF e i caratteri per il PDF (non toccarli)
 └── img/                foto delle opere
 ```
@@ -102,25 +102,28 @@ Sono in `js/categorie.js`. Se ne aggiungi o rinomini una, cambia allo stesso mod
 
 Le icone di Instagram e TikTok arrivano da Font Awesome (gratuito), caricato da internet con i due `<script>` in fondo a `index.html`. Senza connessione le icone non compaiono, ma i link funzionano lo stesso.
 
-## La mostra immersiva
+## La galleria notturna
 
-Il sito è un percorso tra sale, come una mostra. Tutto quello che riguarda l'aspetto sta nel blocco **MOSTRA IMMERSIVA** in fondo a `css/style.css` e in `js/mostra.js`.
+Il sito è una galleria visitata di notte: al buio, con le luci colorate delle sale sul fondo e una lanterna che segue chi visita. Tutto quello che riguarda l'aspetto sta nel blocco **GALLERIA NOTTURNA** in fondo a `css/style.css` e in `js/mostra.js`.
 
-- **Ingresso**: a tutto schermo, su fondo nero, un inchiostro fluido nei colori dei quadri (verde acido, arancio, magenta, cobalto, giallo, turchese). All'arrivo esplode dal centro, poi continua a muoversi da solo; il mouse (o il dito) lo mescola, un tocco fa nascere una macchia nuova. Sopra, il nome gigante sale lettera per lettera, e il cerchio verde acido "Entra nella mostra" porta alla prima sala. È una piccola simulazione di fluido sulla scheda grafica (WebGL): si ferma quando l'ingresso non si vede. Su browser senza WebGL, e per chi ha attivato "riduci movimento", resta una composizione ferma di sfumature colorate. I colori sono in `COLORI_FLUIDO` in `js/mostra.js`.
-- **Sale di colore**: a ogni sezione cambia il colore di tutta la pagina, della barra in alto e perfino della barra del browser sul telefono. Ingresso nero, **Sala 01 La mostra** verde acido, **Sala 02 Opere** (il catalogo) carta, **Sala 03 Processo** giallo, **Sala 04 Eventi** magenta, **Sala 05 Su misura** arancio, **Uscita** (contatti e piè di pagina) nero. I colori sono le variabili `--notte`, `--carta`, `--acido`, `--giallo`, `--magenta`, `--arancio` all'inizio del blocco, e sotto le righe `html[data-sala="…"]` dicono quale colore va a quale sala (fondo, testo e testo secondario).
-- **La mostra (il corridoio)**: su computer e tablet la sala resta ferma mentre scorri e le opere passano di lato, come camminando lungo una parete; quella al centro si gira verso di te, le altre ruotano appena. In basso il numero dell'opera e una barra di avanzamento; dietro, la parola "Mostra" gigante scorre più piano. Alla fine un cerchio porta al catalogo completo. Sul telefono (e con "riduci movimento") le opere si sfogliano col dito. **Quali opere**: quelle con **In mostra** attivo nel pannello (se sono almeno tre), altrimenti le prime dodici dell'elenco.
-- **Titoli giganti**: i titoli delle sale (Instrument Serif, enormi) salgono lettera per lettera da sotto una linea e, scorrendo, scivolano piano di lato. Sopra ogni titolo il numero della sala.
-- **Grana**: sopra tutto una grana leggera da pellicola, che su computer si muove. Per toglierla cancella la riga `<div class="grana" …>` in `index.html`.
+- **Ingresso**: a tutto schermo, un inchiostro fluido nei colori dei quadri che esplode dal centro e continua a muoversi da solo; il mouse (o il dito) lo mescola. Dall'alto scendono tre fasci di luce che oscillano piano. Il nome gigante sale lettera per lettera, e il cerchio luminoso "Entra nella galleria" porta alla prima sala. È una piccola simulazione di fluido sulla scheda grafica (WebGL), ferma quando l'ingresso non si vede. Senza WebGL, o con "riduci movimento", restano macchie di colore ferme. I colori sono in `COLORI_FLUIDO` in `js/mostra.js`.
+- **La lanterna**: dove passa il mouse (o il dito) c'è luce, intorno è più buio. All'ingresso l'inchiostro si vede soprattutto vicino alla luce, e le lettere del nome e dei titoli delle sale si scaldano e brillano quando la luce passa vicino. Sul telefono, se non la tocchi, la luce vaga piano da sola. Nella luce galleggia la polvere. Quanto è buio lontano dalla lanterna: in `.galleria-notturna .lanterna`, l'ultimo numero di `rgba(5, 6, 8, 0.34)` (0 = niente buio).
+- **Le luci delle sale (mai un colore pieno)**: il fondo è un muro d'intonaco al buio, illuminato da due o tre luci colorate che respirano e si spostano piano. Ogni sala ha le sue: **Ingresso** cobalto e verde acido, **Sala 01 La galleria** ambra calda e viola, **Sala 02 Opere** luce bianca calda e un blu freddo, **Sala 03 Processo** azzurro da proiettore, **Sala 04 Eventi** neon magenta e arancio, **Sala 05 Su misura** la lampada arancio, **Uscita** verde come l'insegna di un'uscita. Passando da una sala all'altra le luci cambiano colore piano piano (anche la barra del browser sul telefono). Si cambiano nelle righe `html[data-sala="…"]` all'inizio del blocco: `--luce-a`, `--luce-b`, `--luce-c` sono le tre luci, `--bagliore` il colore del bagliore delle lettere.
+- **Sala 01, la galleria in 3D**: scorrendo si cammina dentro una sala buia, tra pannelli con le opere disposti a zig-zag, ognuno con il suo faretto, la pozza di luce sul pavimento lucido e il riflesso. Le opere lontane restano nell'ombra e si accendono avvicinandosi; quelle superate scivolano di lato e svaniscono. Col mouse ci si guarda intorno. In basso il numero dell'opera e una barra di avanzamento; in fondo alla sala una parete luminosa porta al catalogo completo. Le opere sono vere (si toccano per aprire la scheda, hanno il cuore "Mi piace"); pavimento, pareti e luci sono disegnati su una tela grande quanto lo schermo, per restare leggeri anche sul telefono. Con "riduci movimento" la galleria diventa una fila di opere da sfogliare. **Quali opere**: quelle con **In mostra** attivo nel pannello (se sono almeno tre), altrimenti le prime dodici dell'elenco.
+- **Accendi le luci**: l'interruttore nella barra in alto (sul telefono è il cerchio accanto a "Menu") accende tutto: niente lanterna, sale più luminose, opere tutte illuminate. Comodo per leggere; il browser se lo ricorda alla visita successiva.
+- **La scheda dell'opera**: si apre in una stanza buia, con una luce calda sul quadro.
+- **Titoli giganti**: i titoli delle sale salgono lettera per lettera e, scorrendo, scivolano piano di lato. Sopra ogni titolo il numero della sala con un puntino luminoso, e dietro un faretto del colore della sala.
+- **Grana**: sopra tutto una grana leggera da pellicola. Per toglierla cancella la riga `<div class="grana" …>` in `index.html`; per togliere la polvere, la riga `<canvas class="polvere" …>`.
 - **Cursore**: un cerchio che inverte i colori di quello che c'è sotto; sulle opere diventa un disco con "Guarda".
-- **Barra in alto**: trasparente sull'ingresso; scorrendo prende il colore della sala, sfumato e un po' trasparente. Le voci in maiuscoletto si sottolineano passando col mouse e sulla sala in cui sei.
+- **Barra in alto**: trasparente sull'ingresso; scorrendo diventa vetro scuro. Le voci si sottolineano con una linea luminosa del colore della sala.
 
 ## Cambiare colori e caratteri
 
-- **Colori delle sale**: vedi sopra, nel blocco MOSTRA IMMERSIVA.
-- **Colori delle finestre** (scheda dell'opera, "Provalo nella tua stanza", atelier): `--parete` (fondo), `--inchiostro` (testo) e `--grafite` (testo secondario), sempre nel blocco MOSTRA IMMERSIVA.
+- **Luci delle sale**: vedi sopra, nel blocco GALLERIA NOTTURNA.
+- **Colori delle finestre chiare** ("Provalo nella tua stanza", atelier): `--parete` (fondo), `--inchiostro` (testo) e `--grafite` (testo secondario) all'inizio del blocco GALLERIA NOTTURNA. La scheda dell'opera, buia, ha i suoi colori in `.scheda` nello stesso blocco.
 - **Caratteri**, da Google Fonts (link in `index.html`): Instrument Serif per il nome, i titoli delle sale, delle opere e degli eventi (`--font-display`); Manrope per i testi, il menu e le didascalie (`--font-testo`). Le stesse due famiglie sono in `js/lib/font` per il PDF della proposta.
 
-**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08b` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08c` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 
@@ -130,18 +133,18 @@ Il sito è un percorso tra sale, come una mostra. Tutto quello che riguarda l'as
 
 Cosa si può cambiare:
 
-- **Colori delle pennellate**: `--pennellata-1` … `--pennellata-4` nel blocco MOSTRA IMMERSIVA in fondo a `css/style.css`: ora tre neri e l'ultima verde acido.
+- **Colori delle pennellate**: `--pennellata-1` … `--pennellata-4` nel blocco GALLERIA NOTTURNA in fondo a `css/style.css`: ora tre neri e l'ultima verde acido.
 - **Velocità del passaggio**: in `js/script.js` cerca `await anima(` (due righe): i numeri `0.42` e `0.36` sono i secondi di ogni pennellata.
 - **Velocità delle comparse**: la variabile `--durata` (in `.rivela` e `.cornice .rivela` nel CSS).
 - Chi ha attivato "riduci movimento" nelle impostazioni del telefono o del computer non vede animazioni: il sito salta direttamente alla sezione.
 
 ## Effetti
 
-- **Cursore**: vedi "La mostra immersiva".
+- **Cursore**: vedi "La galleria notturna".
 - **Opere sotto le luci**: con il mouse sopra, le opere si inclinano appena e un riflesso segue il puntatore; nel catalogo dietro l'opera si accende una luce nei suoi stessi colori (sul telefono quella al centro dello schermo).
 - **Lente**: nella scheda dell'opera, passando sopra l'immagine si vede la pennellata ingrandita due volte e mezzo.
 - **Comparse allo scorrimento**: le linee sopra i titoli si tracciano, le opere del catalogo si dipingono entrando nello schermo, eventi, contatti e video salgono in sequenza.
-- **Menu del telefono**: il pulsante "Menu" apre un fondo nero a tutto schermo con le voci grandi in Instrument Serif, numerate, le categorie come etichette colorate e in fondo l'email e i social.
+- **Menu del telefono**: il pulsante "Menu" apre a tutto schermo un fondo buio con le luci della sala con le voci grandi in Instrument Serif, numerate, le categorie come etichette colorate e in fondo l'email e i social.
 
 Cursore, inclinazione e lente ci sono solo con il mouse: su telefono e tablet non compaiono.
 

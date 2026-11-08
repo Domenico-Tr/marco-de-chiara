@@ -1,15 +1,18 @@
 /* =====================================================================
-   La mostra immersiva
-   Il sito è un percorso tra sale: a ogni sezione cambia il colore di tutta
-   la pagina, all'ingresso l'inchiostro fluido si muove con il mouse o con il
-   dito, nella prima sala le opere passano di lato come lungo un corridoio.
+   La galleria notturna
+   Il sito è una galleria visitata di notte: al buio, con le luci delle
+   sale sul fondo, la polvere che galleggia nei fasci di luce e una
+   lanterna che segue il mouse o il dito. All'ingresso l'inchiostro fluido
+   si vede dove arriva la luce; nella prima sala si cammina in 3D tra le
+   opere. Un interruttore nella barra accende tutte le luci.
    Indice:
      1. Utilità
      2. L'inchiostro fluido dell'ingresso (WebGL)
-     3. Le sale: il colore della pagina cambia a ogni sezione
-     4. Il corridoio della mostra
-     5. I titoli giganti: lettere che salgono e scivolano
-     6. Avvio
+     3. Le sale: le luci di ogni sala
+     4. La lanterna, la polvere e l'interruttore
+     5. La galleria in 3D
+     6. I titoli giganti
+     7. Avvio
 ===================================================================== */
 (function () {
   "use strict";
@@ -372,7 +375,7 @@
     dimensiona();
     preparaBuffer();
 
-    const fondo = [13 / 255, 15 / 255, 12 / 255];
+    const fondo = [8 / 255, 9 / 255, 11 / 255];
     let tinta = 0;
     function prossimoColore(forza) {
       tinta = (tinta + 1) % COLORI_FLUIDO.length;
@@ -607,18 +610,19 @@
 
   /* ------------------------------------------------------------------
      3. Le sale
-     La sala che occupa il centro dello schermo dà il colore a tutta la
-     pagina (e alla barra del browser sul telefono). I colori sono in
-     css/style.css, blocco "MOSTRA IMMERSIVA".
+     Ogni sala ha le sue luci (mai un colore pieno): quando una sala arriva
+     al centro dello schermo, il suo nome va in <html data-sala="…"> e le
+     luci sul fondo cambiano colore piano piano. I colori sono in
+     css/style.css, blocco "GALLERIA NOTTURNA".
      ------------------------------------------------------------------ */
   const COLORE_BARRA = {
-    ingresso: "#0D0F0C",
-    mostra: "#C8F03C",
-    catalogo: "#F2EEE6",
-    processo: "#F5C431",
-    eventi: "#E4457F",
-    "su-misura": "#F2712B",
-    contatti: "#0D0F0C",
+    ingresso: "#0A0B12",
+    mostra: "#0E0B09",
+    catalogo: "#0D0C0B",
+    processo: "#090D10",
+    eventi: "#100A0D",
+    "su-misura": "#100B08",
+    contatti: "#080D0A",
   };
   function preparaSale() {
     const sale = $$(".sala[data-sala]");
@@ -639,12 +643,10 @@
           return;
         }
       }
-      // in fondo alla pagina vale l'ultima sala
-      if (sale.length && sale[sale.length - 1].getBoundingClientRect().bottom <= y) imposta(sale[sale.length - 1].dataset.sala);
+      if (sale[sale.length - 1].getBoundingClientRect().bottom <= y) imposta(sale[sale.length - 1].dataset.sala);
     };
     suScorrimento(aggiorna);
     window.addEventListener("resize", aggiorna);
-    // le foto che si caricano spostano le sale anche senza scorrere: si ricontrolla
     let fermo = 0;
     window.addEventListener("scroll", () => {
       clearTimeout(fermo);
@@ -652,15 +654,217 @@
     }, { passive: true });
     if ("ResizeObserver" in window) new ResizeObserver(() => requestAnimationFrame(aggiorna)).observe(document.body);
     aggiorna();
-    // subito dopo il primo colore le transizioni si accendono (niente lampi al caricamento)
     requestAnimationFrame(() => requestAnimationFrame(() => radice.classList.add("sale-pronte")));
   }
 
   /* ------------------------------------------------------------------
-     4. Il corridoio della mostra
-     Su schermi larghi la sala resta ferma mentre scorri e le opere passano
-     di lato, girandosi appena verso di te; sul telefono (e con "riduci
-     movimento") si sfogliano col dito.
+     4. La lanterna, la polvere e l'interruttore
+     La lanterna segue il mouse (o il dito): intorno c'è buio, dove passa la
+     luce i colori dell'ingresso si accendono e le lettere del nome si
+     scaldano. Se nessuno la muove, sul telefono vaga piano da sola.
+     Nella luce galleggia la polvere. L'interruttore accende tutte le luci.
+     ------------------------------------------------------------------ */
+  const Lanterna = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.4 };
+
+  function preparaLanterna() {
+    const luce = $(".lanterna");
+    if (!luce || menoMovimento()) return;
+    let tx = Lanterna.x;
+    let ty = Lanterna.y;
+    let ultimoTocco = -1e9;
+    let mouse = conMouse();
+    let ciclo = 0;
+    const ingresso = $(".ingresso");
+    const nome = $(".ingresso .nome");
+    let lettere = [];
+    let titoli = null; // [{ el, lettere }] creati da preparaTitoli
+    const accesi = new Set();
+
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        mouse = e.pointerType === "mouse";
+        tx = e.clientX;
+        ty = e.clientY;
+        if (!mouse) ultimoTocco = performance.now();
+        avvia();
+      },
+      { passive: true }
+    );
+    window.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.pointerType === "mouse") return;
+        tx = e.clientX;
+        ty = e.clientY;
+        ultimoTocco = performance.now();
+        avvia();
+      },
+      { passive: true }
+    );
+
+    function fotogramma(ora) {
+      ciclo = 0;
+      if (document.hidden) return;
+      // sul telefono, se nessuno la tocca, la luce vaga piano da sola
+      const vaga = !mouse && ora - ultimoTocco > 2600;
+      if (vaga) {
+        tx = window.innerWidth * (0.5 + Math.sin(ora * 0.00035) * 0.22);
+        ty = window.innerHeight * (0.42 + Math.cos(ora * 0.00027) * 0.12);
+      }
+      const k = vaga ? 0.04 : 0.16;
+      Lanterna.x += (tx - Lanterna.x) * k;
+      Lanterna.y += (ty - Lanterna.y) * k;
+      luce.style.setProperty("--lx", `${Lanterna.x.toFixed(1)}px`);
+      luce.style.setProperty("--ly", `${Lanterna.y.toFixed(1)}px`);
+      const H = window.innerHeight;
+      const raggio = Math.max(window.innerWidth, H) * 0.3;
+      // prima si misura tutto, poi si scrive: così il browser non ricalcola a ogni lettera
+      const scrivi = [];
+      const scalda = (lista) => {
+        const misure = lista.map((l) => l.getBoundingClientRect());
+        lista.forEach((l, i) => {
+          const m = misure[i];
+          const d = Math.hypot(m.left + m.width / 2 - Lanterna.x, m.top + m.height / 2 - Lanterna.y);
+          scrivi.push([l, Math.max(0, 1 - d / raggio)]);
+        });
+      };
+      // l'ingresso: i colori si vedono dove arriva la luce, le lettere del nome si scaldano
+      if (ingresso) {
+        const r = ingresso.getBoundingClientRect();
+        if (r.bottom > 0) {
+          scrivi.push([ingresso, null, Lanterna.x - r.left, Lanterna.y - r.top]);
+          if (nome && !lettere.length) lettere = $$(".lettera", nome);
+          scalda(lettere);
+        }
+      }
+      // i titoli delle sale vicini alla luce
+      if (!titoli) {
+        const t = $$(".titolo-sezione, .mostra-titolo").filter((el) => el.querySelector(".titolo-lettera"));
+        if (t.length) titoli = t.map((el) => ({ el, lettere: $$(".titolo-lettera", el) }));
+      }
+      (titoli || []).forEach((t) => {
+        const r = t.el.getBoundingClientRect();
+        const vicino = r.bottom > -50 && r.top < H + 50 && Lanterna.y > r.top - raggio && Lanterna.y < r.bottom + raggio;
+        if (vicino) {
+          scalda(t.lettere);
+          accesi.add(t);
+        } else if (accesi.has(t)) {
+          accesi.delete(t);
+          t.lettere.forEach((l) => scrivi.push([l, 0]));
+        }
+      });
+      for (const [el, v, mx, my] of scrivi) {
+        if (v === null) {
+          el.style.setProperty("--mx", `${mx.toFixed(1)}px`);
+          el.style.setProperty("--my", `${my.toFixed(1)}px`);
+        } else {
+          const testo = v.toFixed(3);
+          if (el._calda !== testo) {
+            el._calda = testo;
+            el.style.setProperty("--calda", testo);
+          }
+        }
+      }
+      const fermo = Math.abs(tx - Lanterna.x) + Math.abs(ty - Lanterna.y) < 0.6;
+      if (!fermo || vaga) ciclo = requestAnimationFrame(fotogramma);
+    }
+    function avvia() {
+      if (!ciclo) ciclo = requestAnimationFrame(fotogramma);
+    }
+    suScorrimento(avvia);
+    document.addEventListener("visibilitychange", avvia);
+    avvia();
+  }
+
+  function preparaPolvere() {
+    const tela = $("#polvere");
+    if (!tela || menoMovimento()) return;
+    const ctx = tela.getContext("2d");
+    const quanti = conMouse() ? 80 : 38;
+    let W = 0;
+    let H = 0;
+    const granelli = [];
+    function dimensiona() {
+      W = tela.width = window.innerWidth;
+      H = tela.height = window.innerHeight;
+    }
+    dimensiona();
+    window.addEventListener("resize", dimensiona);
+    for (let i = 0; i < quanti; i++) {
+      granelli.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: -0.03 - Math.random() * 0.1,
+        r: 0.5 + Math.random() * 1.6,
+        a: 0.12 + Math.random() * 0.3,
+        f: Math.random() * 6,
+      });
+    }
+    let ultimo = 0;
+    function fotogramma(ora) {
+      requestAnimationFrame(fotogramma);
+      if (document.hidden || ora - ultimo < 33) return; // circa 30 fotogrammi al secondo bastano
+      ultimo = ora;
+      ctx.clearRect(0, 0, W, H);
+      const accese = document.documentElement.classList.contains("luci-accese");
+      const raggio2 = Math.pow(Math.max(W, H) * 0.22, 2);
+      for (const g of granelli) {
+        g.f += 0.01;
+        g.x += g.vx + Math.sin(g.f) * 0.08;
+        g.y += g.vy;
+        if (g.y < -5) { g.y = H + 5; g.x = Math.random() * W; }
+        if (g.x < -5) g.x = W + 5;
+        if (g.x > W + 5) g.x = -5;
+        const d2 = (g.x - Lanterna.x) ** 2 + (g.y - Lanterna.y) ** 2;
+        const luce = accese ? 0.4 : 0.16 + 2.8 * Math.exp(-d2 / raggio2);
+        ctx.globalAlpha = Math.min(1, g.a * luce);
+        ctx.fillStyle = "#FFE9C8";
+        ctx.beginPath();
+        ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    requestAnimationFrame(fotogramma);
+  }
+
+  function preparaInterruttore() {
+    const b = $("#interruttore");
+    if (!b) return;
+    const radice = document.documentElement;
+    const testo = b.querySelector(".interruttore-testo");
+    const imposta = (accese, salva) => {
+      radice.classList.toggle("luci-accese", accese);
+      b.setAttribute("aria-pressed", String(accese));
+      testo.textContent = accese ? "Spegni le luci" : "Accendi le luci";
+      document.dispatchEvent(new CustomEvent("luci-cambiate"));
+      if (salva) {
+        try {
+          localStorage.setItem("luci-accese", accese ? "1" : "0");
+        } catch (e) {
+          /* il browser non salva: pazienza */
+        }
+      }
+    };
+    let iniziale = false;
+    try {
+      iniziale = localStorage.getItem("luci-accese") === "1";
+    } catch (e) {
+      iniziale = false;
+    }
+    imposta(iniziale, false);
+    b.addEventListener("click", () => imposta(!radice.classList.contains("luci-accese"), true));
+  }
+
+  /* ------------------------------------------------------------------
+     5. La galleria in 3D
+     Una sala al buio: pavimento, soffitto, pareti e pannelli con le opere,
+     disposti a zig-zag in profondità, ognuno con il suo faretto. Scorrendo
+     la pagina si cammina in avanti (con un po' di inerzia, come un passo),
+     col mouse ci si guarda intorno. Le opere lontane restano nell'ombra e
+     si accendono avvicinandosi. Con "riduci movimento" diventa una fila
+     di opere da sfogliare.
      ------------------------------------------------------------------ */
   function operePerLaMostra(opere) {
     const segnate = opere.filter((o) => o.inEvidenza && o.immagine);
@@ -668,149 +872,374 @@
     return lista.slice(0, 12);
   }
 
-  function costruisciMostra() {
+  function costruisciGalleria() {
     const V = window.Vetrina;
-    const binario = $("#mostra-binario");
+    const mondo = $("#galleria-mondo");
     const pista = $("#mostra-pista");
-    if (!V || !binario || !pista) return;
+    if (!V || !mondo || !pista) return;
     const tutte = V.opere || [];
     const lista = operePerLaMostra(tutte);
     if (!lista.length) {
       $("#mostra").hidden = true;
       return;
     }
-    binario.replaceChildren();
-    lista.forEach((o, i) => {
-      const art = document.createElement("article");
-      art.className = "mostra-opera";
-      const numero = document.createElement("span");
-      numero.className = "mostra-numero";
-      numero.setAttribute("aria-hidden", "true");
-      numero.textContent = String(i + 1).padStart(2, "0");
+    mondo.replaceChildren();
+    // la sala (pavimento, pareti, soffitto, luci) è disegnata su una tela
+    // grande quanto lo schermo, con la stessa prospettiva delle opere
+    const palco = $("#galleria-palco");
+    let tela = $(".galleria-sala", palco);
+    if (!tela) {
+      tela = document.createElement("canvas");
+      tela.className = "galleria-sala";
+      tela.setAttribute("aria-hidden", "true");
+      palco.prepend(tela);
+    }
+    const pannelli = lista.map((o, i) => {
+      const p = document.createElement("article");
+      p.className = `galleria-pannello ${i % 2 ? "is-destra" : "is-sinistra"}`;
+      p.innerHTML = '<span class="galleria-fascio" aria-hidden="true"></span><span class="galleria-alone" aria-hidden="true"></span>';
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "opera-apri mostra-apri";
+      btn.className = "opera-apri galleria-apri";
       btn.setAttribute("aria-label", `Guarda ${String(o.titolo).trim()} a schermo intero`);
       const cornice = document.createElement("span");
-      cornice.className = "mostra-cornice";
-      cornice.append(V.creaMedia(o, 900, true)); // subito: le larghezze servono per la corsa del corridoio
+      cornice.className = "galleria-cornice";
+      cornice.append(V.creaMedia(o, 900, true));
       btn.append(cornice);
       btn.addEventListener("click", () => V.apriScheda(lista, i, btn));
-      const cap = document.createElement("div");
-      cap.className = "mostra-didascalia";
+      const cartellino = document.createElement("div");
+      cartellino.className = "galleria-cartellino";
       const dettagli = [o.tecnica, o.misure].filter(Boolean).map((x) => esc(String(x).trim())).join(" · ");
-      cap.innerHTML =
-        `<div class="reazioni">${V.visteHTML(o)}${V.bottonePiace(o)}</div>` +
-        `<p class="mostra-titolo-opera"><em>${esc(String(o.titolo).trim())}</em>${o.anno ? `<span>${esc(o.anno)}</span>` : ""}</p>` +
-        (dettagli ? `<p class="mostra-dettagli">${dettagli}</p>` : "") +
-        (o.categoria ? `<p class="mostra-categoria">${esc(V.nomeCategoria(o.categoria))}</p>` : "");
-      art.append(numero, btn, cap);
-      binario.append(art);
+      cartellino.innerHTML =
+        `<span class="galleria-numero" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>` +
+        `<div class="galleria-testi"><p class="galleria-titolo-opera"><em>${esc(String(o.titolo).trim())}</em>${o.anno ? `, ${esc(o.anno)}` : ""}</p>` +
+        (dettagli ? `<p class="galleria-dettagli">${dettagli}</p>` : "") +
+        `</div><div class="reazioni">${V.visteHTML(o)}${V.bottonePiace(o)}</div>`;
+      p.append(btn, cartellino);
+      mondo.append(p);
+      return p;
     });
     const fine = document.createElement("a");
-    fine.className = "mostra-fine";
+    fine.className = "galleria-fine";
     fine.href = "#opere";
-    fine.innerHTML = `<span class="mostra-fine-testo">Tutte le ${tutte.length} opere</span><span class="mostra-fine-freccia" aria-hidden="true"></span>`;
-    binario.append(fine);
+    fine.innerHTML = `<span class="galleria-fine-luce" aria-hidden="true"></span><span class="galleria-fine-testo">Tutte le ${tutte.length} opere</span><span class="galleria-fine-freccia" aria-hidden="true">→</span>`;
+    mondo.append(fine);
     $("#mostra-totale").textContent = String(lista.length).padStart(2, "0");
-    animaMostra(pista, binario, lista.length);
+    animaGalleria(pista, mondo, pannelli, fine, tela);
   }
 
-  function animaMostra(pista, binario, quante) {
-    const vista = $(".mostra-vista");
-    const testa = $(".mostra-testa");
+  function animaGalleria(pista, mondo, pannelli, fine, tela) {
+    const palco = $("#galleria-palco");
     const barra = $("#mostra-barra");
     const conta = $("#mostra-conta");
-    const fondo = $(".mostra-fondo");
-    const carte = $$(".mostra-opera", binario);
-    let distanza = 0;
-    let agganciata = false;
-    const vuoleAggancio = () => window.matchMedia("(min-width: 761px)").matches && !menoMovimento();
+    const testa = $(".mostra-testa");
+    const n = pannelli.length;
+    const piatta = menoMovimento() || !(window.CSS && CSS.supports("transform-style", "preserve-3d"));
+    pista.classList.toggle("is-piatta", piatta);
+    if (piatta) {
+      if (testa) testa.classList.add("visibile");
+      return;
+    }
+    pista.classList.add("is-3d");
 
-    function misura() {
-      agganciata = vuoleAggancio();
-      pista.classList.toggle("is-agganciata", agganciata);
-      if (!agganciata) {
-        pista.style.height = "";
-        binario.style.transform = "";
-        return;
-      }
-      distanza = Math.max(0, binario.scrollWidth - vista.clientWidth);
-      // un po' di strada in più all'inizio e alla fine, per fermarsi a guardare
-      pista.style.height = `${Math.round(window.innerHeight + distanza * 1.05 + window.innerHeight * 0.25)}px`;
+    let G = {}; // la geometria della sala, ricalcolata quando cambia lo schermo
+    let cam = 0; // quanto si è camminato (in pixel di profondità)
+    let camMeta = 0;
+    let guardaX = 0;
+    let guardaY = 0;
+    let mx = 0;
+    let my = 0;
+    let visibile = false;
+    let ciclo = 0;
+
+    function geometria() {
+      const W = palco.clientWidth;
+      const H = palco.clientHeight;
+      const stretto = W < 760;
+      const prospettiva = stretto ? 600 : 1000;
+      const passo = stretto ? 820 : 1050;
+      const primo = stretto ? 520 : 720;
+      const largo = stretto ? W * 0.19 : Math.min(W * 0.25, 460);
+      const altezza = stretto ? Math.min(H * 0.36, 320) : Math.min(H * 0.56, 520);
+      const pavimentoY = altezza / 2 + (stretto ? 60 : 90);
+      const soffittoY = -(altezza / 2 + (stretto ? 160 : 230));
+      const profondita = primo + n * passo + 1400;
+      const fineZ = primo + n * passo + 200;
+      const camFine = fineZ - (stretto ? 560 : 780);
+      G = { W, H, stretto, prospettiva, passo, primo, largo, altezza, pavimentoY, soffittoY, profondita, fineZ, camFine, k: 1 };
+      palco.style.perspective = `${prospettiva}px`;
+      mondo.style.setProperty("--altezza-opera", `${altezza.toFixed(0)}px`);
+
+      // la tela della sala: un po' meno definita dello schermo (è luce morbida, e costa meno)
+      const k = Math.min(1.25, window.devicePixelRatio || 1) * (stretto ? 0.75 : 0.6);
+      tela.width = Math.max(1, Math.round(W * k));
+      tela.height = Math.max(1, Math.round(H * k));
+      G.k = tela.width / W;
+
+      // i pannelli a zig-zag, girati verso il centro della sala
+      pannelli.forEach((p, i) => {
+        const destra = i % 2 === 1;
+        const x = destra ? largo : -largo;
+        const z = -(primo + i * passo);
+        p.dataset.z = String(z);
+        p.style.transform = `translate3d(${x.toFixed(1)}px, ${(-altezza * 0.08).toFixed(1)}px, ${z}px) rotateY(${destra ? -24 : 24}deg) translate(-50%, -50%)`;
+      });
+      fine.dataset.z = String(-fineZ);
+      fine.style.transform = `translate3d(0, ${(-altezza * 0.05).toFixed(1)}px, ${-fineZ}px) translate(-50%, -50%)`;
+      // la pista è lunga quanto il cammino (più un respiro all'inizio e alla fine)
+      pista.style.height = `${Math.round(window.innerHeight * 1.35 + camFine * 0.72)}px`;
     }
 
-    function effetti(centroX, larghezza) {
+    // Disegna la sala vista dalla posizione attuale: stessa matematica della
+    // prospettiva CSS (rotateX, rotateY, poi il passo in avanti)
+    const ctx = tela.getContext("2d");
+    function disegnaSala(gradiX, gradiY) {
+      const { W, H, prospettiva: P, largo, pavimentoY: fy, soffittoY: sy, fineZ, passo, primo } = G;
+      const accese = document.documentElement.classList.contains("luci-accese");
+      const lum = accese ? 1.7 : 1;
+      const ox = W / 2;
+      const oy = H * 0.47;
+      const ax = (gradiX * Math.PI) / 180;
+      const ay = (gradiY * Math.PI) / 180;
+      const cx = Math.cos(ax), sx = Math.sin(ax), cy = Math.cos(ay), syy = Math.sin(ay);
+      const pr = (x, y, z) => {
+        z += cam;
+        const x1 = x * cy + z * syy;
+        const z1 = -x * syy + z * cy;
+        const y1 = y * cx - z1 * sx;
+        const z2 = y * sx + z1 * cx;
+        const d = P - z2;
+        if (d < 30) return null;
+        const f = P / d;
+        return [ox + x1 * f, oy + y1 * f, f];
+      };
+      const nebbia = (z) => limita(1 - (-(z + cam) - P * 0.6) / (passo * 5.5), 0.12, 1);
+      const X = largo * 2.4;
+      const zV = P * 0.7 - cam;
+      const zL = -(fineZ + 30);
+      const poligono = (punti) => {
+        const q = punti.map((v) => pr(v[0], v[1], v[2]));
+        if (q.some((v) => !v)) return null;
+        ctx.beginPath();
+        ctx.moveTo(q[0][0], q[0][1]);
+        for (let i = 1; i < q.length; i++) ctx.lineTo(q[i][0], q[i][1]);
+        ctx.closePath();
+        return q;
+      };
+      const lineare = (a, b, stops) => {
+        const g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+        stops.forEach(([t, c]) => g.addColorStop(t, c));
+        return g;
+      };
+      // una macchia di luce ellittica, larga rx e alta ry sullo schermo
+      const macchia = (c, rx, ry, colore, alfa) => {
+        if (!c || rx < 0.5 || ry < 0.5 || alfa <= 0.003) return;
+        ctx.save();
+        ctx.translate(c[0], c[1]);
+        ctx.scale(1, ry / rx);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+        g.addColorStop(0, `rgba(${colore}, ${alfa})`);
+        g.addColorStop(0.45, `rgba(${colore}, ${alfa * 0.45})`);
+        g.addColorStop(1, `rgba(${colore}, 0)`);
+        ctx.fillStyle = g;
+        ctx.fillRect(-rx, -rx, rx * 2, rx * 2);
+        ctx.restore();
+      };
+      const tono = (r, g, b, f = 1) => `rgb(${Math.min(255, r * lum * f) | 0}, ${Math.min(255, g * lum * f) | 0}, ${Math.min(255, b * lum * f) | 0})`;
+
+      ctx.setTransform(G.k, 0, 0, G.k, 0, 0);
+      ctx.fillStyle = "#060608";
+      ctx.fillRect(0, 0, W, H);
+
+      // il soffitto, con i binari delle luci
+      let q = poligono([[-X, sy, zV], [X, sy, zV], [X, sy, zL], [-X, sy, zL]]);
+      if (q) {
+        ctx.fillStyle = lineare(q[0], q[3], [[0, tono(16, 16, 20)], [1, tono(5, 5, 6)]]);
+        ctx.fill();
+      }
+      // il pavimento: cemento lucido, più chiaro vicino a noi
+      q = poligono([[-X, fy, zV], [X, fy, zV], [X, fy, zL], [-X, fy, zL]]);
+      if (q) {
+        const vicino = [(q[0][0] + q[1][0]) / 2, Math.min(H * 1.4, (q[0][1] + q[1][1]) / 2)];
+        const lontano = [(q[2][0] + q[3][0]) / 2, (q[2][1] + q[3][1]) / 2];
+        ctx.fillStyle = lineare(vicino, lontano, [[0, tono(38, 35, 37)], [0.5, tono(17, 16, 18)], [1, tono(6, 6, 7)]]);
+        ctx.fill();
+      }
+      // le pareti d'intonaco
+      [-X, X].forEach((xp) => {
+        const w = poligono([[xp, sy, zV], [xp, fy, zV], [xp, fy, zL], [xp, sy, zL]]);
+        if (!w) return;
+        const vicino = [(w[0][0] + w[1][0]) / 2, (w[0][1] + w[1][1]) / 2];
+        const lontano = [(w[2][0] + w[3][0]) / 2, (w[2][1] + w[3][1]) / 2];
+        ctx.fillStyle = lineare(vicino, lontano, [[0, tono(36, 33, 36)], [0.5, tono(18, 17, 20)], [1, tono(7, 7, 9)]]);
+        ctx.fill();
+      });
+      // la parete di fondo
+      q = poligono([[-X, sy, zL], [X, sy, zL], [X, fy, zL], [-X, fy, zL]]);
+      if (q) {
+        ctx.fillStyle = tono(10, 10, 12);
+        ctx.fill();
+        macchia(pr(0, sy * 0.2, zL + 5), (q[1][0] - q[0][0]) * 0.45, (q[2][1] - q[1][1]) * 0.55, "255, 214, 160", 0.12 * lum);
+      }
+      // le luci di ogni opera: la pozza sul pavimento, il faretto sul soffitto,
+      // la luce che lava la parete dal suo lato
+      const hParete = fy - sy;
+      ctx.globalCompositeOperation = "lighter";
+      pannelli.forEach((el, i) => {
+        if (el.style.visibility === "hidden" && Number(el.dataset.z) + cam > 0) return;
+        const xi = i % 2 ? largo : -largo;
+        const zi = -(primo + i * passo);
+        const n = nebbia(zi) * lum;
+        // pozza di luce sul pavimento, davanti all'opera
+        const c = pr(xi, fy, zi + 120);
+        const lato = pr(xi + largo * 1.1, fy, zi + 120);
+        const avanti = pr(xi, fy, zi + 120 + passo * 0.32);
+        const dietro = pr(xi, fy, zi + 120 - passo * 0.32);
+        if (c && lato && avanti && dietro) macchia(c, Math.abs(lato[0] - c[0]), Math.abs(avanti[1] - dietro[1]) / 2, "255, 210, 150", 0.26 * n);
+        // il riflesso dell'opera sul pavimento lucido
+        const r0 = pr(xi, fy, zi + 30);
+        const r1 = pr(xi + largo * 0.35, fy, zi + 30);
+        const r2 = pr(xi, fy, zi + 30 + passo * 0.5);
+        if (r0 && r1 && r2) macchia([r0[0], (r0[1] + r2[1]) / 2], Math.abs(r1[0] - r0[0]), Math.abs(r2[1] - r0[1]) / 2, "255, 228, 196", 0.1 * n);
+        // la parete dal suo lato
+        const xp = i % 2 ? X : -X;
+        const cw = pr(xp, sy + hParete * 0.32, zi);
+        const wa = pr(xp, sy + hParete * 0.32, zi + passo * 0.3);
+        const wd = pr(xp, sy + hParete * 0.32, zi - passo * 0.3);
+        const wt = pr(xp, sy, zi);
+        const wb = pr(xp, sy + hParete * 0.8, zi);
+        if (cw && wa && wd && wt && wb) macchia(cw, Math.abs(wa[0] - wd[0]) / 2, Math.abs(wb[1] - wt[1]) / 2, "255, 206, 150", 0.14 * n);
+        // il faretto sul soffitto
+        const f = pr(xi, sy, zi + 160);
+        if (f) {
+          macchia(f, 70 * f[2], 26 * f[2], "255, 226, 180", 0.22 * n);
+          macchia(f, 9 * f[2], 4 * f[2], "255, 246, 228", 0.95 * nebbia(zi));
+        }
+      });
+      // le strisce di luce lungo il battiscopa e i binari sul soffitto
+      const striscia = (a, b, colore, alfa, spessore) => {
+        const p1 = pr(a[0], a[1], a[2]);
+        const p2 = pr(b[0], b[1], b[2]);
+        if (!p1 || !p2) return;
+        const g = ctx.createLinearGradient(p1[0], p1[1], p2[0], p2[1]);
+        g.addColorStop(0, `rgba(${colore}, ${alfa})`);
+        g.addColorStop(1, `rgba(${colore}, 0)`);
+        ctx.strokeStyle = g;
+        ctx.lineWidth = spessore;
+        ctx.beginPath();
+        ctx.moveTo(p1[0], p1[1]);
+        ctx.lineTo(p2[0], p2[1]);
+        ctx.stroke();
+      };
+      [-X, X].forEach((xp) => striscia([xp, fy - 2, zV], [xp, fy - 2, zL], "255, 200, 140", 0.5 * lum, 2.4));
+      [-largo, largo].forEach((xp) => striscia([xp, sy, zV], [xp, sy, zL], "236, 230, 218", 0.12 * lum, 1.5));
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    function avanzamento() {
+      const r = pista.getBoundingClientRect();
+      const corsa = pista.offsetHeight - window.innerHeight;
+      return limita((-r.top - window.innerHeight * 0.15) / Math.max(1, corsa - window.innerHeight * 0.2), 0, 1);
+    }
+
+    function fotogramma() {
+      ciclo = 0;
+      if (!visibile) return;
+      const p = avanzamento();
+      camMeta = p * G.camFine;
+      cam += (camMeta - cam) * 0.09; // il passo: si arriva con un po' di inerzia
+      guardaX += (mx - guardaX) * 0.06;
+      guardaY += (my - guardaY) * 0.06;
+      const oscilla = conMouse() ? 0 : Math.sin(performance.now() * 0.0006) * 1.2;
+      const gradiX = guardaY * 4;
+      const gradiY = guardaX * 9 + oscilla;
+      mondo.style.transform = `rotateX(${gradiX.toFixed(3)}deg) rotateY(${gradiY.toFixed(3)}deg) translate3d(0, 0, ${cam.toFixed(1)}px)`;
+      // ogni opera: nell'ombra da lontano, accesa da vicino, svanisce quando la superi
       let vicina = 0;
       let minimo = Infinity;
-      carte.forEach((c, i) => {
-        const r = c.getBoundingClientRect();
-        const d = (r.left + r.width / 2 - centroX) / larghezza;
-        if (Math.abs(d) < minimo) {
-          minimo = Math.abs(d);
+      pannelli.forEach((el, i) => {
+        const rel = Number(el.dataset.z) + cam; // distanza davanti a noi (negativa)
+        const lontano = -rel;
+        if (Math.abs(lontano - G.prospettiva * 0.3) < minimo) {
+          minimo = Math.abs(lontano - G.prospettiva * 0.3);
           vicina = i;
         }
-        if (r.right < -200 || r.left > larghezza + 200) return;
-        const k = limita(d, -1.2, 1.2);
-        c.style.setProperty("--m-ry", `${(k * -16).toFixed(2)}deg`);
-        c.style.setProperty("--m-sc", (1 - Math.min(0.12, Math.abs(k) * 0.1)).toFixed(3));
-        c.style.setProperty("--m-y", `${(Math.abs(k) * 18).toFixed(1)}px`);
-        c.classList.toggle("is-centro", Math.abs(d) < 0.22);
+        const ombra = limita((lontano - G.passo) / (G.passo * 3), 0, 1);
+        const passata = limita((rel + G.prospettiva * 0.02) / (G.prospettiva * 0.3), 0, 1);
+        el.style.setProperty("--ombra", ombra.toFixed(3));
+        el.style.opacity = (1 - passata).toFixed(3);
+        el.style.visibility = passata >= 1 || lontano > G.profondita ? "hidden" : "visible";
+        el.classList.toggle("is-vicina", lontano < G.passo * 1.2 && passata < 0.5);
       });
+      const relFine = Number(fine.dataset.z) + cam;
+      fine.style.setProperty("--ombra", limita((-relFine - G.passo) / (G.passo * 2.4), 0, 1).toFixed(3));
+      disegnaSala(gradiX, gradiY);
       conta.textContent = String(vicina + 1).padStart(2, "0");
-    }
-
-    function aggiorna() {
-      // il titolo della sala entra quando la sala arriva a metà schermo
+      barra.style.transform = `scaleX(${(cam / G.camFine).toFixed(4)})`;
+      palco.style.setProperty("--nebbia", (1 - Math.min(1, cam / G.camFine) ** 1.5).toFixed(3));
       if (testa && !testa.classList.contains("visibile") && pista.getBoundingClientRect().top < window.innerHeight * 0.6) testa.classList.add("visibile");
-      if (agganciata) {
-        const r = pista.getBoundingClientRect();
-        const corsa = pista.offsetHeight - window.innerHeight;
-        const avanti = limita((-r.top - window.innerHeight * 0.12) / Math.max(1, corsa - window.innerHeight * 0.25), 0, 1);
-        binario.style.transform = `translate3d(${(-avanti * distanza).toFixed(1)}px, 0, 0)`;
-        barra.style.transform = `scaleX(${avanti.toFixed(4)})`;
-        if (fondo) fondo.style.transform = `translate3d(${(-avanti * 35).toFixed(2)}%, 0, 0)`;
-        if (r.bottom > 0 && r.top < window.innerHeight) effetti(window.innerWidth / 2, window.innerWidth);
-      } else {
-        const max = binario.scrollWidth - binario.clientWidth;
-        const avanti = max > 0 ? binario.scrollLeft / max : 0;
-        barra.style.transform = `scaleX(${avanti.toFixed(4)})`;
-        if (!menoMovimento()) effetti(binario.getBoundingClientRect().left + binario.clientWidth / 2, binario.clientWidth);
+      if (testa) testa.classList.toggle("in-cammino", cam > G.passo * 0.35);
+      // si continua finché il passo o lo sguardo non si sono fermati
+      if (Math.abs(camMeta - cam) > 0.5 || Math.abs(mx - guardaX) > 0.002 || Math.abs(my - guardaY) > 0.002 || !conMouse()) {
+        ciclo = requestAnimationFrame(fotogramma);
       }
     }
+    function avvia() {
+      if (!ciclo && visibile) ciclo = requestAnimationFrame(fotogramma);
+    }
 
-    // con la tastiera: l'opera che riceve il fuoco viene portata al centro
-    binario.addEventListener("focusin", (e) => {
-      if (!agganciata) return;
-      const carta = e.target.closest(".mostra-opera, .mostra-fine");
-      if (!carta) return;
-      const indice = [...binario.children].indexOf(carta);
-      const passo = binario.children.length > 1 ? indice / (binario.children.length - 1) : 0;
-      const corsa = pista.offsetHeight - window.innerHeight;
-      const y = pista.getBoundingClientRect().top + window.scrollY + window.innerHeight * 0.12 + passo * (corsa - window.innerHeight * 0.25);
-      window.scrollTo({ top: y, behavior: "auto" });
+    palco.addEventListener(
+      "pointermove",
+      (e) => {
+        if (e.pointerType !== "mouse") return;
+        const r = palco.getBoundingClientRect();
+        mx = limita((e.clientX - r.left) / r.width - 0.5, -0.5, 0.5);
+        my = limita((e.clientY - r.top) / r.height - 0.5, -0.5, 0.5);
+        avvia();
+      },
+      { passive: true }
+    );
+    palco.addEventListener("pointerleave", () => {
+      mx = 0;
+      my = 0;
+      avvia();
     });
-    binario.addEventListener("scroll", aggiorna, { passive: true });
-    suScorrimento(aggiorna);
+    // con la tastiera: l'opera che riceve il fuoco viene portata davanti
+    mondo.addEventListener("focusin", (e) => {
+      const el = e.target.closest(".galleria-pannello, .galleria-fine");
+      if (!el) return;
+      const voluto = limita((-Number(el.dataset.z) - G.prospettiva * 1.2) / G.camFine, 0, 1);
+      const corsa = pista.offsetHeight - window.innerHeight;
+      const y = pista.getBoundingClientRect().top + window.scrollY + window.innerHeight * 0.15 + voluto * (corsa - window.innerHeight * 0.2);
+      window.scrollTo({ top: y, behavior: "auto" });
+      cam = voluto * G.camFine;
+    });
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((v) => {
+        visibile = v[0].isIntersecting;
+        avvia();
+      }).observe(pista);
+    } else visibile = true;
+    suScorrimento(avvia);
+    document.addEventListener("luci-cambiate", () => {
+      if (!ciclo && visibile) ciclo = requestAnimationFrame(fotogramma);
+    });
     let ritardo = 0;
     window.addEventListener("resize", () => {
       clearTimeout(ritardo);
       ritardo = setTimeout(() => {
-        misura();
-        aggiorna();
-      }, 120);
+        geometria();
+        avvia();
+      }, 150);
     });
-    // le foto cambiano la larghezza del binario mentre si caricano
-    binario.querySelectorAll("img").forEach((img) => {
-      if (!img.complete) img.addEventListener("load", () => { misura(); aggiorna(); }, { once: true });
-    });
-    misura();
-    aggiorna();
-    void quante;
+    geometria();
+    cam = avanzamento() * G.camFine;
+    avvia();
   }
 
   /* ------------------------------------------------------------------
-     5. I titoli giganti
+     6. I titoli giganti
      Ogni lettera sale da sotto una linea quando la sala entra nello
      schermo; mentre scorri, il titolo scivola piano di lato.
      ------------------------------------------------------------------ */
@@ -828,13 +1257,17 @@
       });
       t.innerHTML = `<span class="visually-hidden">${esc(testo)}</span><span class="titolo-lettere" aria-hidden="true">${parole.join(" ")}</span>`;
     });
-    if (menoMovimento()) return;
+    if (menoMovimento()) {
+      const testa = $(".mostra-testa");
+      if (testa) testa.classList.add("visibile");
+      return;
+    }
     const scivola = () => {
       const h = window.innerHeight;
       titoli.forEach((t) => {
         const r = t.getBoundingClientRect();
         if (r.bottom < -100 || r.top > h + 100) return;
-        const p = (r.top + r.height / 2) / h; // 1 in basso, 0 in alto
+        const p = (r.top + r.height / 2) / h;
         t.style.setProperty("--deriva", `${((p - 0.5) * 7).toFixed(2)}vw`);
       });
     };
@@ -842,23 +1275,19 @@
     scivola();
   }
 
-  // con "riduci movimento" il titolo della mostra c'è subito
-  function osservaMostra() {
-    const testa = $(".mostra-testa");
-    if (testa && menoMovimento()) testa.classList.add("visibile");
-  }
-
   /* ------------------------------------------------------------------
-     6. Avvio
+     7. Avvio
      ------------------------------------------------------------------ */
   function prepara() {
-    document.documentElement.classList.add("mostra-immersiva");
+    document.documentElement.classList.add("galleria-notturna");
+    preparaInterruttore();
     preparaSale();
     preparaIngresso();
+    preparaLanterna();
+    preparaPolvere();
     preparaTitoli();
-    osservaMostra();
     window.addEventListener("scroll", scorri, { passive: true });
-    const conContenuti = () => costruisciMostra();
+    const conContenuti = () => costruisciGalleria();
     if (window.Vetrina && window.Vetrina.opere) conContenuti();
     else document.addEventListener("vetrina:pronta", conContenuti, { once: true });
   }

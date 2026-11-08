@@ -11,11 +11,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300..700&display=swap">
-  <meta name="theme-color" content="#0D0F0C">
+  <meta name="theme-color" content="#08090B">
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-08b">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-08c">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi -->
@@ -31,9 +31,14 @@
     })();
   </script>
 
-  <a class="salta" href="#mostra">Vai alla mostra</a>
+  <a class="salta" href="#mostra">Vai alla galleria</a>
 
-  <!-- La grana della pellicola, sopra tutto (solo decorazione) -->
+  <!-- La galleria di notte: le luci delle sale sul fondo, la polvere che
+       galleggia nei fasci, la lanterna che segue il mouse o il dito e la
+       grana della pellicola. Solo decorazione (js/mostra.js). -->
+  <div class="luci-sala" aria-hidden="true"></div>
+  <canvas class="polvere" id="polvere" aria-hidden="true"></canvas>
+  <div class="lanterna" aria-hidden="true"></div>
   <div class="grana" aria-hidden="true"></div>
 
   <!-- ============ TESTATA E MENU ============ -->
@@ -66,7 +71,7 @@
         <ul class="menu-lista">
           <!-- --pigmento è il colore della macchia e della sottolineatura a pennello
                (dai riccioli del quadro); --n l'ordine in cui compare nel menu del telefono -->
-          <li class="menu-voce" style="--pigmento: var(--acido); --n: 0"><a class="menu-link" href="#mostra">La mostra</a></li>
+          <li class="menu-voce" style="--pigmento: var(--acido); --n: 0"><a class="menu-link" href="#mostra">La galleria</a></li>
           <li class="menu-voce menu-voce--opere" style="--pigmento: var(--carta); --n: 1">
             <a class="menu-link" href="#opere">
               Opere
@@ -84,6 +89,12 @@
         <div class="menu-piede" id="menu-piede"></div>
       </nav>
 
+      <!-- L'interruttore: accende tutte le luci della galleria (per leggere comodi) -->
+      <button class="interruttore" id="interruttore" type="button" aria-pressed="false">
+        <span class="interruttore-lampada" aria-hidden="true"></span>
+        <span class="interruttore-testo">Accendi le luci</span>
+      </button>
+
       <!-- Su schermi larghi: le icone dei social in fondo alla barra -->
       <ul class="testata-social" id="testata-social" aria-label="Social"></ul>
     </div>
@@ -96,6 +107,7 @@
          da solo e segue il mouse o il dito (js/mostra.js), e il nome gigante -->
     <section class="ingresso sala" data-sala="ingresso" aria-labelledby="nome-artista">
       <canvas class="ingresso-fluido" id="fluido" aria-hidden="true"></canvas>
+      <div class="ingresso-fasci" aria-hidden="true"><span></span><span></span><span></span></div>
       <div class="ingresso-velo" aria-hidden="true"></div>
       <div class="wrap ingresso-inner">
         <p class="ingresso-occhiello"><span>Pittura</span><span>Incisione</span><span>Scultura</span></p>
@@ -103,27 +115,28 @@
         <div class="ingresso-piede">
           <p class="presentazione">Pittura, incisione e scultura. Lavoro sul colore come su un paesaggio: orizzonti bassi, superfici lente, materia che trattiene la luce.</p>
           <p class="adesso" id="adesso" hidden></p>
-          <a class="ingresso-entra" href="#mostra"><span class="ingresso-entra-testo">Entra nella mostra</span><span class="ingresso-entra-freccia" aria-hidden="true"></span></a>
+          <a class="ingresso-entra" href="#mostra"><span class="ingresso-entra-testo">Entra nella galleria</span><span class="ingresso-entra-freccia" aria-hidden="true"></span></a>
         </div>
       </div>
-      <p class="ingresso-aiuto" aria-hidden="true">Muovi il colore</p>
+      <p class="ingresso-aiuto" aria-hidden="true">Muovi la luce per scoprire i colori</p>
     </section>
 
-    <!-- ============ LA MOSTRA ============ -->
-    <!-- Un corridoio: scorrendo la pagina le opere passano di lato, come
-         camminando lungo una parete. Sono quelle con "Opera grande in apertura"
-         attivo nel pannello (se ce ne sono almeno tre), altrimenti le prime dieci.
-         Le crea js/mostra.js. -->
+    <!-- ============ LA GALLERIA ============ -->
+    <!-- Una sala al buio da attraversare: scorrendo la pagina si cammina in
+         avanti tra pannelli illuminati dai faretti; col mouse ci si guarda
+         intorno. Sono le opere con "In mostra" attivo nel pannello (se ce ne
+         sono almeno tre), altrimenti le prime dodici. Le crea js/mostra.js. -->
     <section class="mostra sala" id="mostra" data-sala="mostra" aria-labelledby="titolo-mostra">
       <div class="mostra-pista" id="mostra-pista">
         <div class="mostra-vista">
-          <div class="mostra-fondo" aria-hidden="true"><span>Mostra</span><span>Mostra</span></div>
           <header class="wrap mostra-testa">
             <p class="sala-numero">Sala 01</p>
-            <h2 class="mostra-titolo" id="titolo-mostra">La mostra</h2>
-            <p class="mostra-guida">Scorri: le opere ti passano accanto. Toccane una per guardarla da vicino.</p>
+            <h2 class="mostra-titolo" id="titolo-mostra">La galleria</h2>
+            <p class="mostra-guida">Scorri per camminare tra le opere, muovi il mouse per guardarti intorno. Toccane una per vederla da vicino.</p>
           </header>
-          <div class="mostra-binario" id="mostra-binario" tabindex="0" aria-label="Le opere della mostra"></div>
+          <div class="galleria-palco" id="galleria-palco">
+            <div class="galleria-mondo" id="galleria-mondo"></div>
+          </div>
           <div class="wrap mostra-piede" aria-hidden="true">
             <span class="mostra-conta" id="mostra-conta">01</span>
             <span class="mostra-barra"><span id="mostra-barra"></span></span>
@@ -406,9 +419,9 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/fontawesome.min.js"></script>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-08b"></script>
-  <script src="js/script.js?v=2026-11-08b"></script>
-  <script src="js/su-misura.js?v=2026-11-08b"></script>
-  <script src="js/mostra.js?v=2026-11-08b"></script>
+  <script src="js/categorie.js?v=2026-11-08c"></script>
+  <script src="js/script.js?v=2026-11-08c"></script>
+  <script src="js/su-misura.js?v=2026-11-08c"></script>
+  <script src="js/mostra.js?v=2026-11-08c"></script>
 </body>
 </html>

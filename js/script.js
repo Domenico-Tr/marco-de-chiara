@@ -1069,7 +1069,7 @@
   let operaApertura = null;
   function costruisciEvidenza() {
     const fig = $("#evidenza");
-    if (!fig) return; // nella "mostra immersiva" le opere scorrono nel corridoio (js/mostra.js)
+    if (!fig) return; // nella "galleria notturna" le opere sono nella sala in 3D (js/mostra.js)
     const lista = candidatiApertura();
     const o = lista[0] || OPERE[0];
     if (!o) {
