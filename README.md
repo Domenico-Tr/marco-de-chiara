@@ -20,7 +20,7 @@ vetrina-artista/
 ├── js/categorie.js     categorie del menu
 ├── js/script.js        funzionamento del sito
 ├── js/su-misura.js     "Proponi la tua opera": bozzetto, atelier, PDF
-├── js/mostra.js        la galleria notturna: inchiostro, luci, lanterna, sala 3D
+├── js/mostra.js        la galleria notturna: muro, luci, lanterna, sala 3D
 ├── js/lib/             jsPDF e i caratteri per il PDF (non toccarli)
 └── img/                foto delle opere
 ```
@@ -100,22 +100,33 @@ Sono in `js/categorie.js`. Se ne aggiungi o rinomini una, cambia allo stesso mod
 
 ## Icone dei social
 
-Le icone di Instagram e TikTok arrivano da Font Awesome (gratuito), caricato da internet con i due `<script>` in fondo a `index.html`. Senza connessione le icone non compaiono, ma i link funzionano lo stesso.
+Le icone di email, Instagram e TikTok sono disegnate direttamente nel sito (in `js/script.js`, `ICONE`): niente librerie da scaricare, così la pagina parte prima.
 
 ## La galleria notturna
 
 Il sito è una galleria visitata di notte: al buio, con le luci colorate delle sale sul fondo e una lanterna che segue chi visita. Tutto quello che riguarda l'aspetto sta nel blocco **GALLERIA NOTTURNA** in fondo a `css/style.css` e in `js/mostra.js`.
 
-- **Ingresso**: a tutto schermo, un inchiostro fluido nei colori dei quadri che esplode dal centro e continua a muoversi da solo; il mouse (o il dito) lo mescola. Dall'alto scendono tre fasci di luce che oscillano piano. Il nome gigante sale lettera per lettera, e il cerchio luminoso "Entra nella galleria" porta alla prima sala. È una piccola simulazione di fluido sulla scheda grafica (WebGL), ferma quando l'ingresso non si vede. Senza WebGL, o con "riduci movimento", restano macchie di colore ferme. I colori sono in `COLORI_FLUIDO` in `js/mostra.js`.
-- **La lanterna**: dove passa il mouse (o il dito) c'è luce, intorno è più buio. All'ingresso l'inchiostro si vede soprattutto vicino alla luce, e le lettere del nome e dei titoli delle sale si scaldano e brillano quando la luce passa vicino. Sul telefono, se non la tocchi, la luce vaga piano da sola. Nella luce galleggia la polvere. Quanto è buio lontano dalla lanterna: in `.galleria-notturna .lanterna`, l'ultimo numero di `rgba(5, 6, 8, 0.34)` (0 = niente buio).
+- **Ingresso, il muro al buio**: sulla parete dell'ingresso sono appese alcune opere (prima i quadri), che al buio si vedono appena. La luce del mouse o del dito le scopre una alla volta e sotto quella illuminata compare il cartellino con titolo e anno; con il mouse un clic sull'opera illuminata la apre. Muovendo la luce le opere si spostano un poco, quelle vicine più di quelle lontane, e scorrendo restano indietro come su pareti a profondità diverse. All'arrivo la luce passa da sola sulle opere finché il visitatore non la muove. Dall'alto scendono tre fasci di luce. Il nome gigante sale lettera per lettera, e il cerchio luminoso "Entra nella galleria" porta alla prima sala. Dove appendere le opere: `POSTI_LARGO` (computer) e `POSTI_STRETTO` (telefono) in `js/mostra.js`, una riga per opera: posizione orizzontale e verticale in percentuale, altezza e larghezza massime, profondità (1 vicina, 3 lontana).
+- **La lanterna**: dove passa il mouse (o il dito) c'è luce, intorno è più buio. Le lettere del nome e dei titoli delle sale si scaldano e brillano quando la luce passa vicino. Sul telefono, se non la tocchi, la luce vaga piano da sola sulle opere dell'ingresso. Nella luce galleggia la polvere. Quanto è buio lontano dalla lanterna: in `.galleria-notturna .lanterna`, l'ultimo numero di `rgba(5, 6, 8, 0.34)` (0 = niente buio); quanto è buio il muro dell'ingresso: in `.ingresso-buio`.
 - **Le luci delle sale (mai un colore pieno)**: il fondo è un muro d'intonaco al buio, illuminato da due o tre luci colorate che respirano e si spostano piano. Ogni sala ha le sue: **Ingresso** cobalto e verde acido, **Sala 01 La galleria** ambra calda e viola, **Sala 02 Opere** luce bianca calda e un blu freddo, **Sala 03 Processo** azzurro da proiettore, **Sala 04 Eventi** neon magenta e arancio, **Sala 05 Su misura** la lampada arancio, **Uscita** verde come l'insegna di un'uscita. Passando da una sala all'altra le luci cambiano colore piano piano (anche la barra del browser sul telefono). Si cambiano nelle righe `html[data-sala="…"]` all'inizio del blocco: `--luce-a`, `--luce-b`, `--luce-c` sono le tre luci, `--bagliore` il colore del bagliore delle lettere.
 - **Sala 01, la galleria in 3D**: scorrendo si cammina dentro una sala buia, tra pannelli con le opere disposti a zig-zag, ognuno con il suo faretto, la pozza di luce sul pavimento lucido e il riflesso. Le opere lontane restano nell'ombra e si accendono avvicinandosi; quelle superate scivolano di lato e svaniscono. Col mouse ci si guarda intorno. In basso il numero dell'opera e una barra di avanzamento; in fondo alla sala una parete luminosa porta al catalogo completo. Le opere sono vere (si toccano per aprire la scheda, hanno il cuore "Mi piace"); pavimento, pareti e luci sono disegnati su una tela grande quanto lo schermo, per restare leggeri anche sul telefono. Con "riduci movimento" la galleria diventa una fila di opere da sfogliare. **Quali opere**: quelle con **In mostra** attivo nel pannello (se sono almeno tre), altrimenti le prime dodici dell'elenco.
 - **Accendi le luci**: l'interruttore nella barra in alto (sul telefono è il cerchio accanto a "Menu") accende tutto: niente lanterna, sale più luminose, opere tutte illuminate. Comodo per leggere; il browser se lo ricorda alla visita successiva.
 - **La scheda dell'opera**: si apre in una stanza buia, con una luce calda sul quadro.
 - **Titoli giganti**: i titoli delle sale salgono lettera per lettera e, scorrendo, scivolano piano di lato. Sopra ogni titolo il numero della sala con un puntino luminoso, e dietro un faretto del colore della sala.
-- **Grana**: sopra tutto una grana leggera da pellicola. Per toglierla cancella la riga `<div class="grana" …>` in `index.html`; per togliere la polvere, la riga `<canvas class="polvere" …>`.
-- **Cursore**: un cerchio che inverte i colori di quello che c'è sotto; sulle opere diventa un disco con "Guarda".
+- **Grana**: sopra tutto una grana leggera e ferma da pellicola. Per toglierla cancella la riga `<div class="grana" …>` in `index.html`; per togliere la polvere, la riga `<canvas class="polvere" …>`.
+- **Cursore**: un cerchio di luce; sui link diventa un puntino verde acido, sulle opere un disco con "Guarda".
 - **Barra in alto**: trasparente sull'ingresso; scorrendo diventa vetro scuro. Le voci si sottolineano con una linea luminosa del colore della sala.
+
+## Foto leggere
+
+Le foto caricate dal pannello sono quelle del telefono: anche 2 MB l'una, più di 40 MB per tutto il catalogo. Per non far aspettare chi visita, il sito non le scarica così: le chiede a **wsrv.nl**, un servizio gratuito che le rimpicciolisce alla misura che serve (piccole sul muro dell'ingresso e nel catalogo, grandi nella scheda), le trasforma in WebP e le tiene in copia su server in tutto il mondo. Una foto da 2 MB diventa di 60-150 KB, e le opere arrivano dieci volte più in fretta.
+
+- Non c'è niente da fare: il pannello e le foto originali nel repository restano come prima. La prima volta che una foto nuova viene chiesta il servizio la prepara (qualche istante in più), poi è subito pronta per tutti.
+- Se il servizio non risponde, il sito se ne accorge da solo e usa le foto originali.
+- Quando provi il sito sul computer (indirizzo `localhost`) si usano sempre le originali, perché il servizio non può vedere i file del tuo computer.
+- La lente nella scheda dell'opera usa la foto originale, per vedere bene la pennellata.
+- Le foto della galleria in 3D partono solo quando ti avvicini all'opera.
+- Per spegnere tutto: in `js/script.js` cerca `const MINIATURE` e scrivi `attive: false`.
 
 ## Cambiare colori e caratteri
 
@@ -123,7 +134,7 @@ Il sito è una galleria visitata di notte: al buio, con le luci colorate delle s
 - **Colori delle finestre chiare** ("Provalo nella tua stanza", atelier): `--parete` (fondo), `--inchiostro` (testo) e `--grafite` (testo secondario) all'inizio del blocco GALLERIA NOTTURNA. La scheda dell'opera, buia, ha i suoi colori in `.scheda` nello stesso blocco.
 - **Caratteri**, da Google Fonts (link in `index.html`): Instrument Serif per il nome, i titoli delle sale, delle opere e degli eventi (`--font-display`); Manrope per i testi, il menu e le didascalie (`--font-testo`). Le stesse due famiglie sono in `js/lib/font` per il PDF della proposta.
 
-**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08c` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08e` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## Transizioni a pennello
 

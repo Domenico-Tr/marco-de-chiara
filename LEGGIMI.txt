@@ -1,0 +1,8 @@
+Questa cartella serve a "Proponi la tua opera" (js/su-misura.js) per creare il PDF.
+Non va modificata.
+
+jspdf.umd.min.js               jsPDF 2.5.1 — licenza MIT (https://github.com/parallax/jsPDF)
+font/instrument-serif*.ttf     Instrument Serif — SIL Open Font License 1.1 (https://github.com/Instrument/instrument-serif)
+font/manrope*.ttf              Manrope — SIL Open Font License 1.1 (https://github.com/sharanda/manrope)
+
+I caratteri sono gli stessi del sito, ridotti alle lettere latine.
