@@ -17,7 +17,7 @@
 
   <!-- ?v=… è la versione: cambiala a ogni modifica di stile o script,
        così i browser scaricano subito i file nuovi invece di usare quelli vecchi -->
-  <link rel="stylesheet" href="css/style.css?v=2026-11-08e">
+  <link rel="stylesheet" href="css/style.css?v=2026-11-08f">
 </head>
 <body>
   <!-- Prepara le animazioni prima che la pagina compaia, così non ci sono lampi -->
@@ -38,19 +38,15 @@
   <!-- La galleria di notte: le luci delle sale sul fondo, la polvere che
        galleggia nei fasci, la lanterna che segue il mouse o il dito e la
        grana della pellicola. Solo decorazione (js/mostra.js). -->
-  <div class="luci-sala" aria-hidden="true"></div>
+  <div class="luci-sala" aria-hidden="true"><span class="finestra finestra--1"></span><span class="finestra finestra--2"></span></div>
   <canvas class="polvere" id="polvere" aria-hidden="true"></canvas>
   <div class="lanterna" aria-hidden="true"></div>
   <div class="grana" aria-hidden="true"></div>
 
-  <!-- ============ TESTATA E MENU ============ -->
+  <!-- ============ TESTATA ============ -->
+  <!-- In alto solo la firma e la cordicella della luce: si tira (o si tocca)
+       per accendere e spegnere le luci della galleria (js/mostra.js) -->
   <header class="testata">
-    <!-- La pennellata scura che si stende dietro la barra quando scorri la pagina.
-         Dentro c'è anche il filo verde acido che si allunga mentre leggi. -->
-    <div class="testata-fondo" aria-hidden="true">
-      <div class="testata-colpo"><div class="testata-pennellata"></div></div>
-    </div>
-
     <div class="wrap testata-inner">
       <a class="marchio" href="#inizio">
         <span class="marchio-nome">Marco De Chiara</span>
@@ -60,47 +56,73 @@
         </svg>
       </a>
 
-      <!-- Sul telefono: tre pennellate che diventano una X -->
-      <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="menu">
-        <span class="menu-btn-testo">Menu</span>
-        <span class="menu-btn-icona" aria-hidden="true"><i></i><i></i><i></i></span>
+      <button class="cordicella" id="interruttore" type="button" aria-pressed="false">
+        <span class="cordicella-appesa" aria-hidden="true">
+          <span class="cordicella-filo"></span>
+          <span class="cordicella-pomello"></span>
+        </span>
+        <span class="cordicella-etichetta"><span class="interruttore-testo">Accendi le luci</span></span>
       </button>
-
-      <nav class="menu" id="menu" aria-label="Menu principale">
-        <!-- La macchia di colore che scivola sotto la voce indicata dal mouse
-             e si ferma sulla sezione che stai guardando -->
-        <span class="menu-segno" aria-hidden="true"></span>
-        <ul class="menu-lista">
-          <!-- --pigmento è il colore della macchia e della sottolineatura a pennello
-               (dai riccioli del quadro); --n l'ordine in cui compare nel menu del telefono -->
-          <li class="menu-voce" style="--pigmento: var(--acido); --n: 0"><a class="menu-link" href="#mostra">La galleria</a></li>
-          <li class="menu-voce menu-voce--opere" style="--pigmento: var(--carta); --n: 1">
-            <a class="menu-link" href="#opere">
-              Opere
-              <svg class="menu-freccia" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-            </a>
-            <!-- Le categorie vengono create da js/script.js leggendo js/categorie.js -->
-            <ul class="sottomenu" id="sottomenu-opere" aria-label="Categorie di opere"></ul>
-          </li>
-          <li class="menu-voce" style="--pigmento: var(--giallo); --n: 2"><a class="menu-link" href="#processo">Processo</a></li>
-          <li class="menu-voce" style="--pigmento: var(--magenta); --n: 3"><a class="menu-link" href="#eventi">Eventi</a></li>
-          <li class="menu-voce" style="--pigmento: var(--arancio); --n: 4"><a class="menu-link" href="#su-misura">Su misura</a></li>
-          <li class="menu-voce" style="--pigmento: var(--turchese); --n: 5"><a class="menu-link" href="#contatti">Contatti</a></li>
-        </ul>
-        <!-- Solo nel menu del telefono: email e social, creati da js/script.js leggendo contenuti/sito.json -->
-        <div class="menu-piede" id="menu-piede"></div>
-      </nav>
-
-      <!-- L'interruttore: accende tutte le luci della galleria (per leggere comodi) -->
-      <button class="interruttore" id="interruttore" type="button" aria-pressed="false">
-        <span class="interruttore-lampada" aria-hidden="true"></span>
-        <span class="interruttore-testo">Accendi le luci</span>
-      </button>
-
-      <!-- Su schermi larghi: le icone dei social in fondo alla barra -->
-      <ul class="testata-social" id="testata-social" aria-label="Social"></ul>
     </div>
   </header>
+
+  <!-- ============ AUDIOGUIDA (il menu) ============ -->
+  <!-- Una capsula in basso, come l'audioguida di un museo: le sale numerate,
+       una luce che scivola sotto quella in cui sei e la pianta della galleria.
+       Sul telefono mostra la sala in cui sei e il pulsante "Pianta". -->
+  <nav class="guida" id="guida" aria-label="Menu principale">
+    <button class="guida-pianta-btn" id="pianta-btn" type="button" aria-expanded="false" aria-controls="pianta">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5L3.5 20z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span class="guida-pianta-testo">Pianta</span>
+    </button>
+    <p class="guida-qui" aria-hidden="true"><span class="guida-qui-n" id="guida-qui-n">00</span><span class="guida-qui-nome" id="guida-qui-nome">Ingresso</span></p>
+    <ul class="guida-lista">
+      <li class="guida-voce" data-sala="ingresso"><a class="guida-link" href="#inizio"><span class="guida-n">00</span><span class="guida-nome">Ingresso</span></a></li>
+      <li class="guida-voce" data-sala="mostra"><a class="guida-link" href="#mostra"><span class="guida-n">01</span><span class="guida-nome">Galleria</span></a></li>
+      <li class="guida-voce guida-voce--opere" data-sala="catalogo">
+        <a class="guida-link" href="#opere"><span class="guida-n">02</span><span class="guida-nome">Opere</span></a>
+        <!-- Le categorie vengono create da js/script.js leggendo js/categorie.js -->
+        <div class="guida-tendina"><ul class="sottomenu" id="sottomenu-opere" aria-label="Categorie di opere"></ul></div>
+      </li>
+      <li class="guida-voce" data-sala="processo"><a class="guida-link" href="#processo"><span class="guida-n">03</span><span class="guida-nome">Processo</span></a></li>
+      <li class="guida-voce" data-sala="eventi"><a class="guida-link" href="#eventi"><span class="guida-n">04</span><span class="guida-nome">Eventi</span></a></li>
+      <li class="guida-voce" data-sala="su-misura"><a class="guida-link" href="#su-misura"><span class="guida-n">05</span><span class="guida-nome">Su misura</span></a></li>
+      <li class="guida-voce" data-sala="contatti"><a class="guida-link" href="#contatti"><span class="guida-n">06</span><span class="guida-nome">Contatti</span></a></li>
+    </ul>
+    <ul class="testata-social" id="testata-social" aria-label="Social"></ul>
+    <span class="guida-luce" aria-hidden="true"></span>
+    <span class="guida-progresso" aria-hidden="true"><span id="guida-progresso"></span></span>
+  </nav>
+
+  <!-- La pianta della galleria: si apre dal pulsante "Pianta" (o col tasto M) -->
+  <div class="pianta" id="pianta" hidden>
+    <div class="pianta-fondo" data-chiudi></div>
+    <section class="pianta-foglio" role="dialog" aria-modal="true" aria-labelledby="pianta-titolo">
+      <span class="pianta-maniglia" aria-hidden="true"></span>
+      <header class="pianta-testa">
+        <div>
+          <p class="pianta-occhiello">Pianta della galleria</p>
+          <h2 class="pianta-titolo" id="pianta-titolo">Dove andiamo?</h2>
+        </div>
+        <button class="pianta-chiudi" type="button" data-chiudi>Chiudi</button>
+      </header>
+      <ol class="pianta-sale" id="pianta-sale">
+        <li class="pianta-sala" data-sala="ingresso" style="--c: 1; --r: 1"><a href="#inizio"><span class="pianta-n">00</span><span class="pianta-nome">Ingresso</span></a></li>
+        <li class="pianta-sala" data-sala="mostra" style="--c: 2; --r: 1"><a href="#mostra"><span class="pianta-n">01</span><span class="pianta-nome">La galleria</span><span class="pianta-nota">in 3D</span></a></li>
+        <li class="pianta-sala" data-sala="catalogo" style="--c: 3; --r: 1"><a href="#opere"><span class="pianta-n">02</span><span class="pianta-nome">Opere</span><span class="pianta-nota" id="pianta-conta"></span></a></li>
+        <li class="pianta-sala" data-sala="processo" style="--c: 3; --r: 2"><a href="#processo"><span class="pianta-n">03</span><span class="pianta-nome">Processo</span></a></li>
+        <li class="pianta-sala" data-sala="eventi" style="--c: 2; --r: 2"><a href="#eventi"><span class="pianta-n">04</span><span class="pianta-nome">Eventi</span></a></li>
+        <li class="pianta-sala" data-sala="su-misura" style="--c: 1; --r: 2"><a href="#su-misura"><span class="pianta-n">05</span><span class="pianta-nome">Su misura</span></a></li>
+        <li class="pianta-sala pianta-sala--uscita" data-sala="contatti" style="--c: 1; --r: 3"><a href="#contatti"><span class="pianta-n">06</span><span class="pianta-nome">Contatti · Uscita</span></a></li>
+      </ol>
+      <div class="pianta-categorie" id="pianta-categorie"></div>
+      <!-- email e social, creati da js/script.js leggendo contenuti/sito.json -->
+      <div class="menu-piede" id="menu-piede"></div>
+    </section>
+  </div>
+
+  <!-- Il lampo di luce quando si accendono le luci -->
+  <div class="lampo" aria-hidden="true"></div>
 
   <main id="inizio">
 
@@ -250,6 +272,8 @@
   </main>
 
   <footer class="piede sala" data-sala="contatti">
+    <!-- Passando il mouse (o toccando) si lascia una pennellata nei colori di Marco (js/mostra.js) -->
+    <canvas class="piede-tela" id="piede-tela" aria-hidden="true"></canvas>
     <!-- La firma in grande, come in fondo a una tela -->
     <div class="wrap piede-firma" data-rivela>
       <p class="piede-nome" aria-hidden="true" data-testo="Marco De Chiara">Marco De Chiara</p>
@@ -418,9 +442,9 @@
   </dialog>
 
   <!-- Opere, eventi e contatti vengono letti dai file nella cartella "contenuti" -->
-  <script src="js/categorie.js?v=2026-11-08e"></script>
-  <script src="js/script.js?v=2026-11-08e"></script>
-  <script src="js/su-misura.js?v=2026-11-08e"></script>
-  <script src="js/mostra.js?v=2026-11-08e"></script>
+  <script src="js/categorie.js?v=2026-11-08f"></script>
+  <script src="js/script.js?v=2026-11-08f"></script>
+  <script src="js/su-misura.js?v=2026-11-08f"></script>
+  <script src="js/mostra.js?v=2026-11-08f"></script>
 </body>
 </html>

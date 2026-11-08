@@ -656,22 +656,102 @@
     ctx.restore();
   }
 
-  // Foto vera se c'è, altrimenti segnaposto dipinto
-  function creaMedia(o, lato, subito) {
+  /* Foto leggere
+     Le foto caricate dal pannello sono quelle del telefono (anche 2 MB l'una):
+     troppo pesanti per una pagina con decine di opere. Il sito le chiede
+     a wsrv.nl, un servizio gratuito che le rimpicciolisce alla misura che
+     serve, le trasforma in WebP e le tiene in copia sui suoi server sparsi
+     nel mondo: una foto da 2 MB diventa di 60-150 KB. Le originali restano
+     nel repository e si usano se il servizio non risponde (e quando provi
+     il sito sul computer). Per spegnere tutto: MINIATURE.attive = false. */
+  const MINIATURE = { attive: true, cors: true, errori: 0 };
+  try {
+    if (sessionStorage.getItem("miniature-no") === "1") MINIATURE.attive = false;
+  } catch (e) {
+    /* niente */
+  }
+  if (location.protocol === "file:" || /^(localhost|127\.|0\.0\.0\.0|\[::1\]|192\.168\.|10\.)/.test(location.hostname)) MINIATURE.attive = false;
+  const LARGHEZZE = [320, 480, 640, 800, 1000, 1200, 1600, 2000];
+  function miniatura(src, lato) {
+    if (!MINIATURE.attive || !src || /^(data|blob):/.test(src)) return src;
+    let assoluto;
+    try {
+      assoluto = new URL(src, location.href).href;
+    } catch (e) {
+      return src;
+    }
+    const voluta = Math.round((lato || 800) * Math.min(2, window.devicePixelRatio || 1));
+    const w = LARGHEZZE.find((x) => x >= voluta) || 2000;
+    return `https://wsrv.nl/?url=${encodeURIComponent(assoluto)}&w=${w}&we&output=webp&q=80`;
+  }
+
+  // le foto non ancora arrivate che aspettano il servizio
+  const inAttesa = () =>
+    [...document.querySelectorAll("img[data-originale]")].filter((x) => {
+      const sx = x.getAttribute("src") || x.dataset.src || "";
+      return sx.startsWith("https://wsrv.nl/") && !(x.complete && x.naturalWidth);
+    });
+  // il servizio non risponde: da qui in poi (e per tutta la visita) le foto originali
+  function miniatureGuaste() {
+    MINIATURE.errori++;
+    if (MINIATURE.errori < 2 || !MINIATURE.attive) return;
+    MINIATURE.attive = false;
+    try {
+      sessionStorage.setItem("miniature-no", "1");
+    } catch (e) {
+      /* niente */
+    }
+    inAttesa().forEach((x) => {
+      x.removeAttribute("crossorigin");
+      if (x.dataset.src) x.dataset.src = x.dataset.originale;
+      else x.src = x.dataset.originale;
+    });
+  }
+
+  // Foto vera se c'è, altrimenti segnaposto dipinto.
+  // dopo = true: la foto non parte subito (la carica chi la mostra, con carica(img))
+  function creaMedia(o, lato, subito, dopo) {
     if (o.immagine) {
       const img = document.createElement("img");
       img.className = "media";
       img.alt = `${o.titolo}${o.anno ? ", " + o.anno : ""}. ${o.tecnica || ""}`;
       img.loading = subito ? "eager" : "lazy";
       img.decoding = "async";
-      // Se la foto non si trova, al suo posto compare un avviso con il percorso cercato
+      img.dataset.originale = o.immagine;
+      const leggera = miniatura(o.immagine, lato);
+      // crossOrigin serve per leggere i colori della foto (alone, tavolozza dell'atelier)
+      if (leggera !== o.immagine && MINIATURE.cors) img.crossOrigin = "anonymous";
       img.addEventListener("error", () => {
+        const ora = img.getAttribute("src") || "";
+        if (ora !== o.immagine) {
+          if (MINIATURE.attive && img.crossOrigin && !img.dataset.senzaCors) {
+            // forse il servizio non permette di leggere i colori: si riprova una volta senza
+            img.dataset.senzaCors = "1";
+            img.removeAttribute("crossorigin");
+            img.src = ora;
+            return;
+          }
+          if (img.dataset.senzaCors || !img.crossOrigin) miniatureGuaste();
+          // il servizio non risponde: la foto originale
+          img.removeAttribute("crossorigin");
+          img.src = o.immagine;
+          return;
+        }
+        // Se la foto non si trova, al suo posto compare un avviso con il percorso cercato
         const avviso = document.createElement("div");
         avviso.className = "media media-mancante";
         avviso.innerHTML = `<strong>Foto non trovata</strong><span>${esc(o.immagine)}</span><span>Ricarica la foto dal pannello o controlla il nome del file</span>`;
         img.replaceWith(avviso);
+      });
+      // se senza crossOrigin la foto arriva, il problema era quello: le altre partono senza
+      img.addEventListener("load", () => {
+        if (img.dataset.senzaCors && MINIATURE.cors) {
+          MINIATURE.cors = false;
+          inAttesa().forEach((x) => x.removeAttribute("crossorigin"));
+        }
       }, { once: true });
-      img.src = o.immagine;
+      if (dopo) img.dataset.src = leggera;
+      else img.src = leggera;
       return img;
     }
     const c = document.createElement("canvas");
@@ -1025,7 +1105,8 @@
     btn.type = "button";
     btn.className = "opera-apri";
     btn.setAttribute("aria-label", `Guarda ${o.titolo} a schermo intero`);
-    const media = creaMedia(o, 760);
+    // la foto grande quanto serve: sul telefono la colonna è larga quanto lo schermo
+    const media = creaMedia(o, Math.min(760, Math.round(window.innerWidth * 0.95)));
     btn.append(media);
     btn.addEventListener("click", () => apriScheda(visibili, i, btn));
     const cap = document.createElement("div");
@@ -1120,7 +1201,7 @@
   function riempiScheda(verso = 1) {
     const o = elenco[indice];
     if (!o) return;
-    const media = creaMedia(o, 1600, true);
+    const media = creaMedia(o, Math.min(1600, Math.round(Math.max(window.innerWidth, window.innerHeight * 0.8))), true);
     media.classList.add("rivela");
     if (verso < 0) media.classList.add("rivela--indietro");
     media.style.setProperty("--durata", "0.75s");
@@ -1194,7 +1275,7 @@
     const prendiSorgente = () => {
       if (sorgente !== null) return sorgente;
       try {
-        sorgente = media.tagName === "IMG" ? media.currentSrc || media.src : media.toDataURL("image/jpeg", 0.92);
+        sorgente = media.tagName === "IMG" ? media.dataset.originale || media.currentSrc || media.src : media.toDataURL("image/jpeg", 0.92);
       } catch (e) {
         sorgente = "";
       }
@@ -1294,6 +1375,10 @@
       ? `<a class="evento-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.indirizzo)}" target="_blank" rel="noopener">Apri in Google Maps</a>`
       : "";
     const sito = ev.link ? `<a class="evento-link" href="${esc(ev.link)}" target="_blank" rel="noopener">Pagina dell'evento</a>` : "";
+    const calendario =
+      st.tipo !== "passato"
+        ? `<button type="button" class="evento-calendario" data-indice="${EVENTI.indexOf(ev)}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3v4M16 3v4M12 12.5v5M9.5 15h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Aggiungi al calendario</button>`
+        : "";
     return `
       <li class="evento" data-rivela style="--i: ${Math.min(n, 6)}">
         <p class="evento-data">
@@ -1309,11 +1394,56 @@
             ${ev.indirizzo ? `<span>${esc(ev.indirizzo)}</span>` : ""}
             ${ev.note ? `<span>${esc(ev.note)}</span>` : ""}
           </p>
-          ${mappa}${sito}
+          <p class="evento-azioni">${mappa}${sito}${calendario}</p>
         </div>
         ${pill ? `<p class="evento-stato">${pill}</p>` : ""}
       </li>`;
   }
+
+  // Crea un file di calendario (.ics) per l'evento: tutto il giorno, dal primo all'ultimo giorno
+  function scaricaCalendario(ev) {
+    const a = leggiData(ev.inizio);
+    const b = leggiData(ev.fine || ev.inizio);
+    const giornoIcs = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    const dopo = new Date(b.getFullYear(), b.getMonth(), b.getDate() + 1);
+    const testo = (v) => String(v || "").replace(/\\/g, "\\\\").replace(/([,;])/g, "\\$1").replace(/\r?\n/g, "\\n");
+    const dove = [ev.luogo, ev.indirizzo, ev.citta].filter(Boolean).join(", ");
+    const ora = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+    const righe = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Marco De Chiara//Eventi//IT",
+      "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      `UID:${giornoIcs(a)}-${testo(ev.titolo).replace(/[^a-z0-9]/gi, "").slice(0, 30)}@marcodechiara`,
+      `DTSTAMP:${ora}`,
+      `DTSTART;VALUE=DATE:${giornoIcs(a)}`,
+      `DTEND;VALUE=DATE:${giornoIcs(dopo)}`,
+      `SUMMARY:${testo(ev.titolo + (ev.tipo ? " – " + ev.tipo : ""))}`,
+      dove ? `LOCATION:${testo(dove)}` : "",
+      `DESCRIPTION:${testo([ev.note, "Marco De Chiara", location.href.split("#")[0]].filter(Boolean).join("\n"))}`,
+      ev.link ? `URL:${ev.link}` : "",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].filter(Boolean);
+    const file = new Blob([righe.join("\r\n") + "\r\n"], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${String(ev.titolo).trim().replace(/[^\w\sàèéìòù-]/gi, "").replace(/\s+/g, "-").toLowerCase() || "evento"}.ics`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest(".evento-calendario");
+    if (!b) return;
+    const ev = EVENTI[Number(b.dataset.indice)];
+    if (ev) scaricaCalendario(ev);
+    b.classList.add("is-fatto");
+    setTimeout(() => b.classList.remove("is-fatto"), 1600);
+  });
 
   function costruisciEventi() {
     const prossimi = EVENTI.filter((e) => statoEvento(e).tipo !== "passato")
@@ -1539,12 +1669,14 @@
   /* ------------------------------------------------------------------
      6. Contatti
      ------------------------------------------------------------------ */
-  // Busta per l'email, disegnata qui; Instagram e TikTok usano le icone di Font Awesome
+  // Le icone sono disegnate qui (niente librerie da scaricare: il sito parte prima)
   const ICONE = {
     email:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="1.5"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg>',
-    instagram: '<i class="fa-brands fa-instagram" aria-hidden="true"></i>',
-    tiktok: '<i class="fa-brands fa-tiktok" aria-hidden="true"></i>',
+    instagram:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.2"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.4" cy="6.6" r="1.15" fill="currentColor" stroke="none"/></svg>',
+    tiktok:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.6 3.2v11.6a3.7 3.7 0 1 1-3.7-3.7"/><path d="M13.6 3.2c.5 2.9 2.4 4.7 5.3 5"/></svg>',
   };
 
   function costruisciContatti() {
@@ -1664,6 +1796,18 @@
   function preparaMenu() {
     const radice = document.documentElement;
     const btn = $("#menu-btn");
+    if (!btn) {
+      // la galleria notturna ha la sua audioguida (js/mostra.js): qui restano la firma e la barra
+      const t = $(".testata");
+      if (t) {
+        const su = () => t.classList.toggle("is-scrolled", window.scrollY > 24);
+        window.addEventListener("scroll", su, { passive: true });
+        su();
+      }
+      const m = $(".marchio");
+      if (m) m.addEventListener("mouseenter", () => disegnaFirma());
+      return;
+    }
     const testoBtn = btn.querySelector(".menu-btn-testo");
     const menu = $("#menu");
     const telefono = window.matchMedia("(max-width: 760px)");
@@ -3724,6 +3868,7 @@
       bottonePiace,
       visteHTML,
       creaMedia,
+      miniatura,
       osservaRivelazioni,
       transizione: Pittura.transizione,
       nomeCategoria: (id) => NOMI_CATEGORIE[id] || "",

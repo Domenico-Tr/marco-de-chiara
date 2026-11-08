@@ -2,12 +2,13 @@
    La galleria notturna
    Il sito è una galleria visitata di notte: al buio, con le luci delle
    sale sul fondo, la polvere che galleggia nei fasci di luce e una
-   lanterna che segue il mouse o il dito. All'ingresso l'inchiostro fluido
-   si vede dove arriva la luce; nella prima sala si cammina in 3D tra le
-   opere. Un interruttore nella barra accende tutte le luci.
+   lanterna che segue il mouse o il dito. All'ingresso, sulla parete al
+   buio, sono appese alcune opere che la luce scopre una alla volta; nella
+   prima sala si cammina in 3D tra le opere. Un interruttore nella barra
+   accende tutte le luci.
    Indice:
      1. Utilità
-     2. L'inchiostro fluido dell'ingresso (WebGL)
+     2. Il muro dell'ingresso
      3. Le sale: le luci di ogni sala
      4. La lanterna, la polvere e l'interruttore
      5. La galleria in 3D
@@ -44,568 +45,81 @@
   }
 
   /* ------------------------------------------------------------------
-     2. L'inchiostro fluido
-     Una piccola simulazione di fluido sulla scheda grafica: il colore viene
-     trasportato dalla velocità del fluido, che si arriccia in vortici.
-     Al caricamento esplode in macchie di colore, poi ogni tanto ne nasce una
-     nuova; il mouse (o il dito) lo mescola. Senza WebGL, o con "riduci
-     movimento", resta una composizione ferma di sfumature in CSS.
+     2. Il muro dell'ingresso
+     Sulla parete al buio dell'ingresso sono appese alcune opere di Marco.
+     Si vedono appena: la lanterna (il mouse o il dito) le illumina una alla
+     volta e sotto quella illuminata compare il cartellino. Muovendo la luce
+     le opere si spostano un poco, quelle vicine più di quelle lontane, come
+     su pareti a profondità diverse. Con il mouse un clic sull'opera la apre.
+     È leggero: poche foto piccole e una sfumatura che segue la luce.
      ------------------------------------------------------------------ */
-  const COLORI_FLUIDO = [
-    [0.78, 0.94, 0.24], // verde acido
-    [0.95, 0.44, 0.17], // arancio
-    [0.89, 0.27, 0.5], // magenta
-    [0.18, 0.29, 0.86], // cobalto
-    [0.96, 0.77, 0.19], // giallo
-    [0.18, 0.77, 0.71], // turchese
+  // dove appendere le opere: [centro x %, alto y %, altezza massima vh, larghezza massima vw, profondità 1-3]
+  const POSTI_LARGO = [
+    [8, 10, 18, 12, 3],
+    [26, 9, 23, 14, 2],
+    [45, 12, 20, 13, 3],
+    [63, 9, 30, 16, 1],
+    [84, 14, 36, 18, 1],
+    [96, 58, 22, 12, 3],
+    [58, 76, 14, 10, 3],
   ];
+  const POSTI_STRETTO = [
+    [18, 9, 16, 30, 1],
+    [52, 7, 12, 24, 3],
+    [82, 12, 17, 28, 2],
+    [47, 21, 8, 16, 3],
+    [95, 44, 9, 20, 3],
+  ];
+  const Muro = { opere: [], piani: [], stretto: null };
 
-  const VERTICE = `
-    precision highp float;
-    attribute vec2 aPosition;
-    varying vec2 vUv, vL, vR, vT, vB;
-    uniform vec2 texelSize;
-    void main () {
-      vUv = aPosition * 0.5 + 0.5;
-      vL = vUv - vec2(texelSize.x, 0.0);
-      vR = vUv + vec2(texelSize.x, 0.0);
-      vT = vUv + vec2(0.0, texelSize.y);
-      vB = vUv - vec2(0.0, texelSize.y);
-      gl_Position = vec4(aPosition, 0.0, 1.0);
-    }`;
-  const FRAMMENTI = {
-    svuota: `
-      precision mediump float;
-      varying highp vec2 vUv;
-      uniform sampler2D uTexture;
-      uniform float value;
-      void main () { gl_FragColor = value * texture2D(uTexture, vUv); }`,
-    schermo: `
-      precision highp float;
-      varying vec2 vUv, vL, vR, vT, vB;
-      uniform sampler2D uTexture;
-      uniform vec3 uFondo;
-      uniform vec2 texelSize;
-      void main () {
-        vec3 c = texture2D(uTexture, vUv).rgb;
-        float dx = length(texture2D(uTexture, vR).rgb) - length(texture2D(uTexture, vL).rgb);
-        float dy = length(texture2D(uTexture, vT).rgb) - length(texture2D(uTexture, vB).rgb);
-        vec3 n = normalize(vec3(dx, dy, length(texelSize)));
-        float luce = clamp(dot(n, vec3(0.0, 0.0, 1.0)) + 0.72, 0.72, 1.0);
-        c *= luce;
-        float a = clamp(max(c.r, max(c.g, c.b)), 0.0, 1.0);
-        vec3 col = uFondo * (1.0 - a * 0.9) + c;
-        gl_FragColor = vec4(min(col, vec3(1.0)), 1.0);
-      }`,
-    macchia: `
-      precision highp float;
-      varying vec2 vUv;
-      uniform sampler2D uTarget;
-      uniform float aspectRatio;
-      uniform vec3 color;
-      uniform vec2 point;
-      uniform float radius;
-      void main () {
-        vec2 p = vUv - point.xy;
-        p.x *= aspectRatio;
-        vec3 splat = exp(-dot(p, p) / radius) * color;
-        gl_FragColor = vec4(texture2D(uTarget, vUv).xyz + splat, 1.0);
-      }`,
-    trasporto: `
-      precision highp float;
-      varying vec2 vUv;
-      uniform sampler2D uVelocity;
-      uniform sampler2D uSource;
-      uniform vec2 texelSize;
-      uniform float dt;
-      uniform float dissipation;
-      void main () {
-        vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
-        gl_FragColor = texture2D(uSource, coord) / (1.0 + dissipation * dt);
-      }`,
-    divergenza: `
-      precision mediump float;
-      varying highp vec2 vUv, vL, vR, vT, vB;
-      uniform sampler2D uVelocity;
-      void main () {
-        float L = texture2D(uVelocity, vL).x;
-        float R = texture2D(uVelocity, vR).x;
-        float T = texture2D(uVelocity, vT).y;
-        float B = texture2D(uVelocity, vB).y;
-        vec2 C = texture2D(uVelocity, vUv).xy;
-        if (vL.x < 0.0) { L = -C.x; }
-        if (vR.x > 1.0) { R = -C.x; }
-        if (vT.y > 1.0) { T = -C.y; }
-        if (vB.y < 0.0) { B = -C.y; }
-        gl_FragColor = vec4(0.5 * (R - L + T - B), 0.0, 0.0, 1.0);
-      }`,
-    rotore: `
-      precision mediump float;
-      varying highp vec2 vUv, vL, vR, vT, vB;
-      uniform sampler2D uVelocity;
-      void main () {
-        float L = texture2D(uVelocity, vL).y;
-        float R = texture2D(uVelocity, vR).y;
-        float T = texture2D(uVelocity, vT).x;
-        float B = texture2D(uVelocity, vB).x;
-        gl_FragColor = vec4(0.5 * (R - L - T + B), 0.0, 0.0, 1.0);
-      }`,
-    vortici: `
-      precision highp float;
-      varying vec2 vUv, vL, vR, vT, vB;
-      uniform sampler2D uVelocity;
-      uniform sampler2D uCurl;
-      uniform float curl;
-      uniform float dt;
-      void main () {
-        float L = texture2D(uCurl, vL).x;
-        float R = texture2D(uCurl, vR).x;
-        float T = texture2D(uCurl, vT).x;
-        float B = texture2D(uCurl, vB).x;
-        float C = texture2D(uCurl, vUv).x;
-        vec2 force = 0.5 * vec2(abs(T) - abs(B), abs(R) - abs(L));
-        force /= length(force) + 0.0001;
-        force *= curl * C;
-        force.y *= -1.0;
-        vec2 v = texture2D(uVelocity, vUv).xy + force * dt;
-        gl_FragColor = vec4(clamp(v, -1000.0, 1000.0), 0.0, 1.0);
-      }`,
-    pressione: `
-      precision mediump float;
-      varying highp vec2 vUv, vL, vR, vT, vB;
-      uniform sampler2D uPressure;
-      uniform sampler2D uDivergence;
-      void main () {
-        float L = texture2D(uPressure, vL).x;
-        float R = texture2D(uPressure, vR).x;
-        float T = texture2D(uPressure, vT).x;
-        float B = texture2D(uPressure, vB).x;
-        float d = texture2D(uDivergence, vUv).x;
-        gl_FragColor = vec4((L + R + B + T - d) * 0.25, 0.0, 0.0, 1.0);
-      }`,
-    gradiente: `
-      precision mediump float;
-      varying highp vec2 vUv, vL, vR, vT, vB;
-      uniform sampler2D uPressure;
-      uniform sampler2D uVelocity;
-      void main () {
-        float L = texture2D(uPressure, vL).x;
-        float R = texture2D(uPressure, vR).x;
-        float T = texture2D(uPressure, vT).x;
-        float B = texture2D(uPressure, vB).x;
-        vec2 v = texture2D(uVelocity, vUv).xy - vec2(R - L, T - B);
-        gl_FragColor = vec4(v, 0.0, 1.0);
-      }`,
-  };
-
-  function avviaFluido(canvas, area) {
-    const piccolo = Math.min(window.innerWidth, window.innerHeight) < 700 || !conMouse();
-    const C = {
-      SIM: 128,
-      COLORE: piccolo ? 640 : 1024,
-      DISSIPA_COLORE: 0.42,
-      DISSIPA_VELOCITA: 0.28,
-      PRESSIONE: 0.8,
-      ITERAZIONI: piccolo ? 12 : 20,
-      VORTICI: 24,
-      RAGGIO: 0.26,
-      FORZA: 5200,
-    };
-    const opzioni = { alpha: false, depth: false, stencil: false, antialias: false, preserveDrawingBuffer: false, powerPreference: "high-performance" };
-    let gl = canvas.getContext("webgl2", opzioni);
-    const webgl2 = !!gl;
-    if (!gl) gl = canvas.getContext("webgl", opzioni) || canvas.getContext("experimental-webgl", opzioni);
-    if (!gl) return null;
-
-    // formati: mezzi float, con filtro lineare
-    let tipo;
-    let lineare;
-    if (webgl2) {
-      gl.getExtension("EXT_color_buffer_float");
-      gl.getExtension("EXT_color_buffer_half_float");
-      tipo = gl.HALF_FLOAT;
-      lineare = true;
-    } else {
-      const mezzo = gl.getExtension("OES_texture_half_float");
-      lineare = !!gl.getExtension("OES_texture_half_float_linear");
-      if (!mezzo) return null;
-      tipo = mezzo.HALF_FLOAT_OES;
-    }
-    if (!lineare) return null;
-    gl.clearColor(0, 0, 0, 1);
-
-    function renderizzabile(interno, formato) {
-      const t = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, t);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texImage2D(gl.TEXTURE_2D, 0, interno, 4, 4, 0, formato, tipo, null);
-      const f = gl.createFramebuffer();
-      gl.bindFramebuffer(gl.FRAMEBUFFER, f);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
-      const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
-      gl.deleteFramebuffer(f);
-      gl.deleteTexture(t);
-      return ok;
-    }
-    function formato(interno, fmt) {
-      if (!webgl2) return renderizzabile(interno, fmt) ? { interno, fmt } : null;
-      if (renderizzabile(interno, fmt)) return { interno, fmt };
-      if (interno === gl.R16F) return formato(gl.RG16F, gl.RG);
-      if (interno === gl.RG16F) return formato(gl.RGBA16F, gl.RGBA);
-      return null;
-    }
-    const fRGBA = webgl2 ? formato(gl.RGBA16F, gl.RGBA) : formato(gl.RGBA, gl.RGBA);
-    const fRG = webgl2 ? formato(gl.RG16F, gl.RG) : fRGBA;
-    const fR = webgl2 ? formato(gl.R16F, gl.RED) : fRGBA;
-    if (!fRGBA || !fRG || !fR) return null;
-
-    // programmi
-    function compila(tipoShader, sorgente) {
-      const s = gl.createShader(tipoShader);
-      gl.shaderSource(s, sorgente);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-      return s;
-    }
-    const vertice = compila(gl.VERTEX_SHADER, VERTICE);
-    function programma(frammento) {
-      const p = gl.createProgram();
-      gl.attachShader(p, vertice);
-      gl.attachShader(p, compila(gl.FRAGMENT_SHADER, frammento));
-      gl.bindAttribLocation(p, 0, "aPosition");
-      gl.linkProgram(p);
-      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-      const u = {};
-      const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
-      for (let i = 0; i < n; i++) {
-        const nome = gl.getActiveUniform(p, i).name;
-        u[nome] = gl.getUniformLocation(p, nome);
-      }
-      return { p, u, usa: () => gl.useProgram(p) };
-    }
-    const P = {};
-    try {
-      Object.keys(FRAMMENTI).forEach((k) => (P[k] = programma(FRAMMENTI[k])));
-    } catch (e) {
-      return null;
-    }
-
-    // il quadrato che copre tutto lo schermo
-    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 0, 2, 3]), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(0);
-    function disegna(bersaglio) {
-      if (bersaglio) {
-        gl.viewport(0, 0, bersaglio.w, bersaglio.h);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, bersaglio.fbo);
-      } else {
-        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      }
-      gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
-    }
-
-    function fbo(w, h, f, filtro) {
-      gl.activeTexture(gl.TEXTURE0);
-      const tex = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filtro);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filtro);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texImage2D(gl.TEXTURE_2D, 0, f.interno, w, h, 0, f.fmt, tipo, null);
-      const buf = gl.createFramebuffer();
-      gl.bindFramebuffer(gl.FRAMEBUFFER, buf);
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-      gl.viewport(0, 0, w, h);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      return {
-        fbo: buf, w, h, tx: 1 / w, ty: 1 / h,
-        lega(i) {
-          gl.activeTexture(gl.TEXTURE0 + i);
-          gl.bindTexture(gl.TEXTURE_2D, tex);
-          return i;
-        },
-      };
-    }
-    function doppio(w, h, f, filtro) {
-      let a = fbo(w, h, f, filtro);
-      let b = fbo(w, h, f, filtro);
-      return {
-        w, h, tx: 1 / w, ty: 1 / h,
-        get leggi() { return a; },
-        get scrivi() { return b; },
-        scambia() { const t = a; a = b; b = t; },
-      };
-    }
-    function risoluzione(r) {
-      let rapporto = gl.drawingBufferWidth / gl.drawingBufferHeight;
-      if (rapporto < 1) rapporto = 1 / rapporto;
-      const min = Math.round(r);
-      const max = Math.round(r * rapporto);
-      return gl.drawingBufferWidth > gl.drawingBufferHeight ? { w: max, h: min } : { w: min, h: max };
-    }
-
-    let colore, velocita, divergenza, rotore, pressione;
-    function preparaBuffer() {
-      const s = risoluzione(C.SIM);
-      const c = risoluzione(C.COLORE);
-      colore = doppio(c.w, c.h, fRGBA, gl.LINEAR);
-      velocita = doppio(s.w, s.h, fRG, gl.LINEAR);
-      divergenza = fbo(s.w, s.h, fR, gl.NEAREST);
-      rotore = fbo(s.w, s.h, fR, gl.NEAREST);
-      pressione = doppio(s.w, s.h, fR, gl.NEAREST);
-    }
-
-    function dimensiona() {
-      const dpr = Math.min(window.devicePixelRatio || 1, piccolo ? 1 : 1.5);
-      const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      if (canvas.width === w && canvas.height === h) return false;
-      canvas.width = w;
-      canvas.height = h;
-      return true;
-    }
-    dimensiona();
-    preparaBuffer();
-
-    const fondo = [8 / 255, 9 / 255, 11 / 255];
-    let tinta = 0;
-    function prossimoColore(forza) {
-      tinta = (tinta + 1) % COLORI_FLUIDO.length;
-      const c = COLORI_FLUIDO[tinta];
-      return [c[0] * forza, c[1] * forza, c[2] * forza];
-    }
-
-    function macchia(x, y, dx, dy, col, raggio = C.RAGGIO) {
-      const rapporto = canvas.width / canvas.height;
-      let r = raggio / 100;
-      if (rapporto > 1) r *= rapporto;
-      P.macchia.usa();
-      gl.uniform1i(P.macchia.u.uTarget, velocita.leggi.lega(0));
-      gl.uniform1f(P.macchia.u.aspectRatio, rapporto);
-      gl.uniform2f(P.macchia.u.point, x, y);
-      gl.uniform3f(P.macchia.u.color, dx, dy, 0);
-      gl.uniform1f(P.macchia.u.radius, r);
-      disegna(velocita.scrivi);
-      velocita.scambia();
-      gl.uniform1i(P.macchia.u.uTarget, colore.leggi.lega(0));
-      gl.uniform3f(P.macchia.u.color, col[0], col[1], col[2]);
-      disegna(colore.scrivi);
-      colore.scambia();
-    }
-
-    function passo(dt) {
-      gl.disable(gl.BLEND);
-      const tx = velocita.tx;
-      const ty = velocita.ty;
-      P.rotore.usa();
-      gl.uniform2f(P.rotore.u.texelSize, tx, ty);
-      gl.uniform1i(P.rotore.u.uVelocity, velocita.leggi.lega(0));
-      disegna(rotore);
-
-      P.vortici.usa();
-      gl.uniform2f(P.vortici.u.texelSize, tx, ty);
-      gl.uniform1i(P.vortici.u.uVelocity, velocita.leggi.lega(0));
-      gl.uniform1i(P.vortici.u.uCurl, rotore.lega(1));
-      gl.uniform1f(P.vortici.u.curl, C.VORTICI);
-      gl.uniform1f(P.vortici.u.dt, dt);
-      disegna(velocita.scrivi);
-      velocita.scambia();
-
-      P.divergenza.usa();
-      gl.uniform2f(P.divergenza.u.texelSize, tx, ty);
-      gl.uniform1i(P.divergenza.u.uVelocity, velocita.leggi.lega(0));
-      disegna(divergenza);
-
-      P.svuota.usa();
-      gl.uniform1i(P.svuota.u.uTexture, pressione.leggi.lega(0));
-      gl.uniform1f(P.svuota.u.value, C.PRESSIONE);
-      disegna(pressione.scrivi);
-      pressione.scambia();
-
-      P.pressione.usa();
-      gl.uniform2f(P.pressione.u.texelSize, tx, ty);
-      gl.uniform1i(P.pressione.u.uDivergence, divergenza.lega(0));
-      for (let i = 0; i < C.ITERAZIONI; i++) {
-        gl.uniform1i(P.pressione.u.uPressure, pressione.leggi.lega(1));
-        disegna(pressione.scrivi);
-        pressione.scambia();
-      }
-
-      P.gradiente.usa();
-      gl.uniform2f(P.gradiente.u.texelSize, tx, ty);
-      gl.uniform1i(P.gradiente.u.uPressure, pressione.leggi.lega(0));
-      gl.uniform1i(P.gradiente.u.uVelocity, velocita.leggi.lega(1));
-      disegna(velocita.scrivi);
-      velocita.scambia();
-
-      P.trasporto.usa();
-      gl.uniform2f(P.trasporto.u.texelSize, tx, ty);
-      const v = velocita.leggi.lega(0);
-      gl.uniform1i(P.trasporto.u.uVelocity, v);
-      gl.uniform1i(P.trasporto.u.uSource, v);
-      gl.uniform1f(P.trasporto.u.dt, dt);
-      gl.uniform1f(P.trasporto.u.dissipation, C.DISSIPA_VELOCITA);
-      disegna(velocita.scrivi);
-      velocita.scambia();
-
-      gl.uniform1i(P.trasporto.u.uVelocity, velocita.leggi.lega(0));
-      gl.uniform1i(P.trasporto.u.uSource, colore.leggi.lega(1));
-      gl.uniform1f(P.trasporto.u.dissipation, C.DISSIPA_COLORE);
-      disegna(colore.scrivi);
-      colore.scambia();
-    }
-
-    function mostra() {
-      P.schermo.usa();
-      gl.uniform2f(P.schermo.u.texelSize, 1 / gl.drawingBufferWidth, 1 / gl.drawingBufferHeight);
-      gl.uniform1i(P.schermo.u.uTexture, colore.leggi.lega(0));
-      gl.uniform3f(P.schermo.u.uFondo, fondo[0], fondo[1], fondo[2]);
-      disegna(null);
-    }
-
-    // l'esplosione iniziale: macchie che partono dal centro verso fuori
-    function esplosione() {
-      const quante = 9;
-      for (let i = 0; i < quante; i++) {
-        const a = (i / quante) * Math.PI * 2 + Math.random() * 0.4;
-        const forza = 900 + Math.random() * 700;
-        const x = 0.5 + Math.cos(a) * 0.08;
-        const y = 0.55 + Math.sin(a) * 0.1;
-        macchia(x, y, Math.cos(a) * forza, Math.sin(a) * forza, prossimoColore(0.55), C.RAGGIO * 1.6);
-      }
-    }
-    function macchiaACaso() {
-      const x = 0.15 + Math.random() * 0.7;
-      const y = 0.2 + Math.random() * 0.65;
-      const a = Math.random() * Math.PI * 2;
-      const f = 500 + Math.random() * 600;
-      macchia(x, y, Math.cos(a) * f, Math.sin(a) * f, prossimoColore(0.38), C.RAGGIO * (1 + Math.random()));
-    }
-
-    // il mouse (o il dito) mescola il colore
-    let ultimo = null;
-    let ultimoMovimento = 0;
-    const coda = [];
-    function posizione(e) {
-      const r = canvas.getBoundingClientRect();
-      return [(e.clientX - r.left) / r.width, 1 - (e.clientY - r.top) / r.height];
-    }
-    area.addEventListener(
-      "pointermove",
-      (e) => {
-        const [x, y] = posizione(e);
-        if (ultimo) {
-          const dx = (x - ultimo[0]) * C.FORZA;
-          const dy = (y - ultimo[1]) * C.FORZA;
-          if (Math.abs(dx) + Math.abs(dy) > 1) coda.push([x, y, dx, dy]);
-        }
-        ultimo = [x, y];
-        ultimoMovimento = performance.now();
-      },
-      { passive: true }
-    );
-    area.addEventListener("pointerleave", () => (ultimo = null));
-    area.addEventListener(
-      "pointerdown",
-      (e) => {
-        const [x, y] = posizione(e);
-        ultimo = [x, y];
-        ultimoMovimento = performance.now();
-        coda.push([x, y, (Math.random() - 0.5) * 600, 600, true]);
-      },
-      { passive: true }
-    );
-
-    let attivo = false;
-    let ciclo = 0;
-    let prima = performance.now();
-    let prossimaACaso = performance.now() + 2600;
-    let coloreMouse = prossimoColore(0.16);
-    let cambioColore = performance.now();
-    let partito = false;
-
-    function fotogramma(ora) {
-      if (!attivo) {
-        ciclo = 0;
-        return;
-      }
-      const dt = Math.min((ora - prima) / 1000, 1 / 60);
-      prima = ora;
-      if (dimensiona()) preparaBuffer();
-      if (!partito) {
-        partito = true;
-        esplosione();
-      }
-      if (ora - cambioColore > 900) {
-        coloreMouse = prossimoColore(0.16);
-        cambioColore = ora;
-      }
-      while (coda.length) {
-        const [x, y, dx, dy, tocco] = coda.shift();
-        macchia(x, y, dx, dy, tocco ? prossimoColore(0.45) : coloreMouse, tocco ? C.RAGGIO * 1.5 : C.RAGGIO);
-      }
-      // se nessuno lo tocca, il colore continua a muoversi da solo
-      if (ora > prossimaACaso && ora - ultimoMovimento > 1800) {
-        macchiaACaso();
-        prossimaACaso = ora + 1500 + Math.random() * 1400;
-      }
-      passo(dt);
-      mostra();
-      ciclo = requestAnimationFrame(fotogramma);
-    }
-
-    return {
-      avvia() {
-        if (attivo) return;
-        attivo = true;
-        prima = performance.now();
-        ciclo = requestAnimationFrame(fotogramma);
-      },
-      ferma() {
-        attivo = false;
-        if (ciclo) cancelAnimationFrame(ciclo);
-        ciclo = 0;
-      },
-    };
+  function operePerIlMuro(opere, quante) {
+    const conFoto = opere.filter((o) => o.immagine);
+    // prima i quadri, che al buio fanno più effetto quando si accendono
+    const quadri = conFoto.filter((o) => o.categoria === "quadri");
+    const altre = conFoto.filter((o) => o.categoria !== "quadri");
+    return quadri.concat(altre).slice(0, quante);
   }
 
-  function preparaIngresso() {
-    const sezione = $(".ingresso");
-    const tela = $("#fluido");
-    if (!sezione || !tela) return;
-    if (menoMovimento()) {
-      sezione.classList.add("senza-fluido");
-      return;
-    }
-    let fluido = null;
-    try {
-      fluido = avviaFluido(tela, sezione);
-    } catch (e) {
-      fluido = null;
-    }
-    if (!fluido) {
-      sezione.classList.add("senza-fluido");
-      return;
-    }
-    sezione.classList.add("con-fluido");
-    let visibile = true;
-    const aggiorna = () => (visibile && !document.hidden ? fluido.avvia() : fluido.ferma());
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver((v) => {
-        visibile = v[0].isIntersecting;
-        aggiorna();
-      }).observe(sezione);
-    }
-    document.addEventListener("visibilitychange", aggiorna);
-    aggiorna();
+  function costruisciMuro() {
+    const V = window.Vetrina;
+    const muro = $("#ingresso-muro");
+    if (!V || !muro) return;
+    const stretto = window.innerWidth < 760;
+    if (Muro.stretto === stretto) return;
+    Muro.stretto = stretto;
+    muro.replaceChildren();
+    const posti = stretto ? POSTI_STRETTO : POSTI_LARGO;
+    const lista = operePerIlMuro(V.opere || [], posti.length);
+    if (!lista.length) return;
+    const piani = [1, 2, 3].map((d) => {
+      const p = document.createElement("div");
+      p.className = `muro-piano muro-piano--${d}`;
+      muro.append(p);
+      return p;
+    });
+    lista.forEach((o, i) => {
+      const [x, y, h, w, d] = posti[i];
+      const f = document.createElement("figure");
+      f.className = "muro-opera";
+      f.style.cssText = `--x: ${x}%; --y: ${y}%; --h: ${h}vh; --w: ${w}vw; --i: ${i}; --storto: ${((Math.random() - 0.5) * 3).toFixed(2)}deg`;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.tabIndex = -1; // solo decorazione: con la tastiera le stesse opere sono nella galleria
+      btn.className = "muro-apri";
+      const cornice = document.createElement("span");
+      cornice.className = "muro-cornice";
+      cornice.append(V.creaMedia(o, Math.round(stretto ? Math.max(200, window.innerHeight * 0.2) : Math.max(300, window.innerHeight * 0.38, window.innerWidth * 0.18)), true));
+      btn.append(cornice);
+      btn.addEventListener("click", () => V.apriScheda(lista, i, btn));
+      const cartellino = document.createElement("figcaption");
+      cartellino.className = "muro-cartellino";
+      cartellino.innerHTML = `<em>${esc(String(o.titolo).trim())}</em>${o.anno ? `, ${esc(o.anno)}` : ""}`;
+      f.append(btn, cartellino);
+      piani[d - 1].append(f);
+    });
+    Muro.opere = $$(".muro-opera", muro);
+    Muro.piani = piani;
+    requestAnimationFrame(() => muro.classList.add("is-pronto"));
   }
 
   /* ------------------------------------------------------------------
@@ -629,11 +143,18 @@
     if (!sale.length) return;
     const radice = document.documentElement;
     const meta = $('meta[name="theme-color"]');
+    const coloreBarra = () => {
+      if (!meta) return;
+      const nome = radice.dataset.sala;
+      if (radice.classList.contains("luci-accese")) meta.setAttribute("content", "#F1ECE3");
+      else if (COLORE_BARRA[nome]) meta.setAttribute("content", COLORE_BARRA[nome]);
+    };
     const imposta = (nome) => {
       if (radice.dataset.sala === nome) return;
       radice.dataset.sala = nome;
-      if (meta && COLORE_BARRA[nome]) meta.setAttribute("content", COLORE_BARRA[nome]);
+      coloreBarra();
     };
+    document.addEventListener("luci-cambiate", coloreBarra);
     const aggiorna = () => {
       const y = window.innerHeight * 0.52;
       for (const s of sale) {
@@ -660,8 +181,9 @@
   /* ------------------------------------------------------------------
      4. La lanterna, la polvere e l'interruttore
      La lanterna segue il mouse (o il dito): intorno c'è buio, dove passa la
-     luce i colori dell'ingresso si accendono e le lettere del nome si
-     scaldano. Se nessuno la muove, sul telefono vaga piano da sola.
+     luce le opere del muro si accendono e le lettere del nome e dei titoli
+     si scaldano. All'arrivo, finché nessuno la muove, la luce passa da
+     sola sulle opere; sul telefono riprende a vagare se non la tocchi.
      Nella luce galleggia la polvere. L'interruttore accende tutte le luci.
      ------------------------------------------------------------------ */
   const Lanterna = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.4 };
@@ -672,13 +194,18 @@
     let tx = Lanterna.x;
     let ty = Lanterna.y;
     let ultimoTocco = -1e9;
+    let mosso = false; // il visitatore ha già mosso la luce?
     let mouse = conMouse();
     let ciclo = 0;
+    let ingressoVisibile = true;
     const ingresso = $(".ingresso");
+    const buio = $(".ingresso-buio");
     const nome = $(".ingresso .nome");
     let lettere = [];
     let titoli = null; // [{ el, lettere }] creati da preparaTitoli
     const accesi = new Set();
+    const AMPIEZZA = [26, 14, 6]; // quanto si spostano le pareti (vicina, media, lontana)
+    const SCORRE = [0.1, 0.2, 0.3]; // quanto restano indietro scorrendo
 
     window.addEventListener(
       "pointermove",
@@ -686,6 +213,7 @@
         mouse = e.pointerType === "mouse";
         tx = e.clientX;
         ty = e.clientY;
+        mosso = true;
         if (!mouse) ultimoTocco = performance.now();
         avvia();
       },
@@ -697,28 +225,35 @@
         if (e.pointerType === "mouse") return;
         tx = e.clientX;
         ty = e.clientY;
+        mosso = true;
         ultimoTocco = performance.now();
         avvia();
       },
       { passive: true }
     );
+    if (ingresso && "IntersectionObserver" in window) {
+      new IntersectionObserver((v) => {
+        ingressoVisibile = v[0].isIntersecting;
+        avvia();
+      }).observe(ingresso);
+    }
 
     function fotogramma(ora) {
       ciclo = 0;
       if (document.hidden) return;
-      // sul telefono, se nessuno la tocca, la luce vaga piano da sola
-      const vaga = !mouse && ora - ultimoTocco > 2600;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      // all'arrivo (e sul telefono quando nessuno la tocca) la luce passa da sola sulle opere
+      const vaga = ingressoVisibile && (!mosso || (!mouse && ora - ultimoTocco > 2600));
       if (vaga) {
-        tx = window.innerWidth * (0.5 + Math.sin(ora * 0.00035) * 0.22);
-        ty = window.innerHeight * (0.42 + Math.cos(ora * 0.00027) * 0.12);
+        const stretto = W < 760;
+        tx = W * (0.52 + Math.sin(ora * 0.00042 - 1.3) * (stretto ? 0.32 : 0.36));
+        ty = H * (stretto ? 0.18 + Math.sin(ora * 0.00067 + 0.4) * 0.08 : 0.3 + Math.sin(ora * 0.00071 + 0.4) * 0.12);
       }
-      const k = vaga ? 0.04 : 0.16;
+      const k = vaga ? 0.05 : 0.16;
       Lanterna.x += (tx - Lanterna.x) * k;
       Lanterna.y += (ty - Lanterna.y) * k;
-      luce.style.setProperty("--lx", `${Lanterna.x.toFixed(1)}px`);
-      luce.style.setProperty("--ly", `${Lanterna.y.toFixed(1)}px`);
-      const H = window.innerHeight;
-      const raggio = Math.max(window.innerWidth, H) * 0.3;
+      const raggio = Math.max(W, H) * 0.3;
       // prima si misura tutto, poi si scrive: così il browser non ricalcola a ogni lettera
       const scrivi = [];
       const scalda = (lista) => {
@@ -729,11 +264,15 @@
           scrivi.push([l, Math.max(0, 1 - d / raggio)]);
         });
       };
-      // l'ingresso: i colori si vedono dove arriva la luce, le lettere del nome si scaldano
+      let muroScritto = null;
       if (ingresso) {
         const r = ingresso.getBoundingClientRect();
         if (r.bottom > 0) {
-          scrivi.push([ingresso, null, Lanterna.x - r.left, Lanterna.y - r.top]);
+          // il muro: le pareti si spostano un poco con la luce e restano indietro scorrendo
+          const dx = Lanterna.x / W - 0.5;
+          const dy = Lanterna.y / H - 0.5;
+          const sy = Math.min(H, Math.max(0, -r.top));
+          muroScritto = { r, dx, dy, sy, accese: Muro.opere.map((f) => f.getBoundingClientRect()) };
           if (nome && !lettere.length) lettere = $$(".lettera", nome);
           scalda(lettere);
         }
@@ -754,16 +293,34 @@
           t.lettere.forEach((l) => scrivi.push([l, 0]));
         }
       });
-      for (const [el, v, mx, my] of scrivi) {
-        if (v === null) {
-          el.style.setProperty("--mx", `${mx.toFixed(1)}px`);
-          el.style.setProperty("--my", `${my.toFixed(1)}px`);
-        } else {
-          const testo = v.toFixed(3);
-          if (el._calda !== testo) {
-            el._calda = testo;
-            el.style.setProperty("--calda", testo);
-          }
+
+      // ora si scrive
+      luce.style.setProperty("--lx", `${Lanterna.x.toFixed(1)}px`);
+      luce.style.setProperty("--ly", `${Lanterna.y.toFixed(1)}px`);
+      if (muroScritto) {
+        const { r, dx, dy, sy, accese } = muroScritto;
+        // solo sul velo di buio: messe sulla sezione, il browser ricalcolerebbe tutto quello che contiene
+        if (buio) {
+          buio.style.setProperty("--mx", `${(Lanterna.x - r.left).toFixed(1)}px`);
+          buio.style.setProperty("--my", `${(Lanterna.y - r.top).toFixed(1)}px`);
+        }
+        Muro.piani.forEach((p, i) => {
+          p.style.transform = `translate3d(${(-dx * AMPIEZZA[i]).toFixed(2)}px, ${(-dy * AMPIEZZA[i] * 0.6 + sy * SCORRE[i]).toFixed(2)}px, 0)`;
+        });
+        // l'opera sotto la luce si accende e mostra il cartellino
+        Muro.opere.forEach((f, i) => {
+          const m = accese[i];
+          const fuoriX = Math.max(m.left - Lanterna.x, 0, Lanterna.x - m.right);
+          const fuoriY = Math.max(m.top - Lanterna.y, 0, Lanterna.y - m.bottom);
+          f.classList.toggle("is-accesa", Math.hypot(fuoriX, fuoriY) < 36);
+        });
+      }
+      for (const [el, v] of scrivi) {
+        // a scatti di 1/20: le lettere si ridisegnano solo quando la luce cambia davvero
+        const testo = (Math.round(v * 20) / 20).toFixed(2);
+        if (el._calda !== testo) {
+          el._calda = testo;
+          el.style.setProperty("--calda", testo);
         }
       }
       const fermo = Math.abs(tx - Lanterna.x) + Math.abs(ty - Lanterna.y) < 0.6;
@@ -781,7 +338,7 @@
     const tela = $("#polvere");
     if (!tela || menoMovimento()) return;
     const ctx = tela.getContext("2d");
-    const quanti = conMouse() ? 80 : 38;
+    const quanti = conMouse() ? 70 : 26;
     let W = 0;
     let H = 0;
     const granelli = [];
@@ -818,43 +375,15 @@
         if (g.x < -5) g.x = W + 5;
         if (g.x > W + 5) g.x = -5;
         const d2 = (g.x - Lanterna.x) ** 2 + (g.y - Lanterna.y) ** 2;
-        const luce = accese ? 0.4 : 0.16 + 2.8 * Math.exp(-d2 / raggio2);
+        const luce = accese ? 0.75 : 0.16 + 2.8 * Math.exp(-d2 / raggio2);
         ctx.globalAlpha = Math.min(1, g.a * luce);
-        ctx.fillStyle = "#FFE9C8";
+        ctx.fillStyle = accese ? "#C08A2E" : "#FFE9C8";
         ctx.beginPath();
         ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
         ctx.fill();
       }
     }
     requestAnimationFrame(fotogramma);
-  }
-
-  function preparaInterruttore() {
-    const b = $("#interruttore");
-    if (!b) return;
-    const radice = document.documentElement;
-    const testo = b.querySelector(".interruttore-testo");
-    const imposta = (accese, salva) => {
-      radice.classList.toggle("luci-accese", accese);
-      b.setAttribute("aria-pressed", String(accese));
-      testo.textContent = accese ? "Spegni le luci" : "Accendi le luci";
-      document.dispatchEvent(new CustomEvent("luci-cambiate"));
-      if (salva) {
-        try {
-          localStorage.setItem("luci-accese", accese ? "1" : "0");
-        } catch (e) {
-          /* il browser non salva: pazienza */
-        }
-      }
-    };
-    let iniziale = false;
-    try {
-      iniziale = localStorage.getItem("luci-accese") === "1";
-    } catch (e) {
-      iniziale = false;
-    }
-    imposta(iniziale, false);
-    b.addEventListener("click", () => imposta(!radice.classList.contains("luci-accese"), true));
   }
 
   /* ------------------------------------------------------------------
@@ -904,7 +433,7 @@
       btn.setAttribute("aria-label", `Guarda ${String(o.titolo).trim()} a schermo intero`);
       const cornice = document.createElement("span");
       cornice.className = "galleria-cornice";
-      cornice.append(V.creaMedia(o, 900, true));
+      cornice.append(V.creaMedia(o, 640, true, true)); // la foto parte quando ci si avvicina
       btn.append(cornice);
       btn.addEventListener("click", () => V.apriScheda(lista, i, btn));
       const cartellino = document.createElement("div");
@@ -936,7 +465,16 @@
     const n = pannelli.length;
     const piatta = menoMovimento() || !(window.CSS && CSS.supports("transform-style", "preserve-3d"));
     pista.classList.toggle("is-piatta", piatta);
+    // le foto delle opere partono solo quando servono
+    const carica = (el, pigra) => {
+      const img = el.querySelector("img[data-src]");
+      if (!img) return;
+      if (pigra) img.loading = "lazy";
+      img.src = img.dataset.src;
+      delete img.dataset.src;
+    };
     if (piatta) {
+      pannelli.forEach((el) => carica(el, true));
       if (testa) testa.classList.add("visibile");
       return;
     }
@@ -996,7 +534,8 @@
     function disegnaSala(gradiX, gradiY) {
       const { W, H, prospettiva: P, largo, pavimentoY: fy, soffittoY: sy, fineZ, passo, primo } = G;
       const accese = document.documentElement.classList.contains("luci-accese");
-      const lum = accese ? 1.7 : 1;
+      const lum = 1;
+      // con le luci accese la sala diventa bianca, di giorno: pavimento di rovere chiaro, lucernari
       const ox = W / 2;
       const oy = H * 0.47;
       const ax = (gradiX * Math.PI) / 180;
@@ -1048,13 +587,13 @@
       const tono = (r, g, b, f = 1) => `rgb(${Math.min(255, r * lum * f) | 0}, ${Math.min(255, g * lum * f) | 0}, ${Math.min(255, b * lum * f) | 0})`;
 
       ctx.setTransform(G.k, 0, 0, G.k, 0, 0);
-      ctx.fillStyle = "#060608";
+      ctx.fillStyle = accese ? "#E4DED3" : "#060608";
       ctx.fillRect(0, 0, W, H);
 
       // il soffitto, con i binari delle luci
       let q = poligono([[-X, sy, zV], [X, sy, zV], [X, sy, zL], [-X, sy, zL]]);
       if (q) {
-        ctx.fillStyle = lineare(q[0], q[3], [[0, tono(16, 16, 20)], [1, tono(5, 5, 6)]]);
+        ctx.fillStyle = lineare(q[0], q[3], accese ? [[0, "#FAF8F3"], [1, "#DDD7CC"]] : [[0, tono(16, 16, 20)], [1, tono(5, 5, 6)]]);
         ctx.fill();
       }
       // il pavimento: cemento lucido, più chiaro vicino a noi
@@ -1062,7 +601,7 @@
       if (q) {
         const vicino = [(q[0][0] + q[1][0]) / 2, Math.min(H * 1.4, (q[0][1] + q[1][1]) / 2)];
         const lontano = [(q[2][0] + q[3][0]) / 2, (q[2][1] + q[3][1]) / 2];
-        ctx.fillStyle = lineare(vicino, lontano, [[0, tono(38, 35, 37)], [0.5, tono(17, 16, 18)], [1, tono(6, 6, 7)]]);
+        ctx.fillStyle = lineare(vicino, lontano, accese ? [[0, "#C9B79A"], [0.5, "#D6C8B1"], [1, "#E3DACB"]] : [[0, tono(38, 35, 37)], [0.5, tono(17, 16, 18)], [1, tono(6, 6, 7)]]);
         ctx.fill();
       }
       // le pareti d'intonaco
@@ -1071,20 +610,20 @@
         if (!w) return;
         const vicino = [(w[0][0] + w[1][0]) / 2, (w[0][1] + w[1][1]) / 2];
         const lontano = [(w[2][0] + w[3][0]) / 2, (w[2][1] + w[3][1]) / 2];
-        ctx.fillStyle = lineare(vicino, lontano, [[0, tono(36, 33, 36)], [0.5, tono(18, 17, 20)], [1, tono(7, 7, 9)]]);
+        ctx.fillStyle = lineare(vicino, lontano, accese ? [[0, "#F4F0E9"], [0.5, "#EAE4DA"], [1, "#DDD7CC"]] : [[0, tono(36, 33, 36)], [0.5, tono(18, 17, 20)], [1, tono(7, 7, 9)]]);
         ctx.fill();
       });
       // la parete di fondo
       q = poligono([[-X, sy, zL], [X, sy, zL], [X, fy, zL], [-X, fy, zL]]);
       if (q) {
-        ctx.fillStyle = tono(10, 10, 12);
+        ctx.fillStyle = accese ? "#EDE8DF" : tono(10, 10, 12);
         ctx.fill();
         macchia(pr(0, sy * 0.2, zL + 5), (q[1][0] - q[0][0]) * 0.45, (q[2][1] - q[1][1]) * 0.55, "255, 214, 160", 0.12 * lum);
       }
       // le luci di ogni opera: la pozza sul pavimento, il faretto sul soffitto,
       // la luce che lava la parete dal suo lato
       const hParete = fy - sy;
-      ctx.globalCompositeOperation = "lighter";
+      ctx.globalCompositeOperation = accese ? "source-over" : "lighter";
       pannelli.forEach((el, i) => {
         if (el.style.visibility === "hidden" && Number(el.dataset.z) + cam > 0) return;
         const xi = i % 2 ? largo : -largo;
@@ -1095,12 +634,12 @@
         const lato = pr(xi + largo * 1.1, fy, zi + 120);
         const avanti = pr(xi, fy, zi + 120 + passo * 0.32);
         const dietro = pr(xi, fy, zi + 120 - passo * 0.32);
-        if (c && lato && avanti && dietro) macchia(c, Math.abs(lato[0] - c[0]), Math.abs(avanti[1] - dietro[1]) / 2, "255, 210, 150", 0.26 * n);
+        if (c && lato && avanti && dietro) macchia(c, Math.abs(lato[0] - c[0]), Math.abs(avanti[1] - dietro[1]) / 2, accese ? "255, 252, 244" : "255, 210, 150", accese ? 0.45 * n : 0.26 * n);
         // il riflesso dell'opera sul pavimento lucido
         const r0 = pr(xi, fy, zi + 30);
         const r1 = pr(xi + largo * 0.35, fy, zi + 30);
         const r2 = pr(xi, fy, zi + 30 + passo * 0.5);
-        if (r0 && r1 && r2) macchia([r0[0], (r0[1] + r2[1]) / 2], Math.abs(r1[0] - r0[0]), Math.abs(r2[1] - r0[1]) / 2, "255, 228, 196", 0.1 * n);
+        if (r0 && r1 && r2) macchia([r0[0], (r0[1] + r2[1]) / 2], Math.abs(r1[0] - r0[0]), Math.abs(r2[1] - r0[1]) / 2, accese ? "90, 70, 45" : "255, 228, 196", accese ? 0.14 * n : 0.1 * n);
         // la parete dal suo lato
         const xp = i % 2 ? X : -X;
         const cw = pr(xp, sy + hParete * 0.32, zi);
@@ -1108,12 +647,17 @@
         const wd = pr(xp, sy + hParete * 0.32, zi - passo * 0.3);
         const wt = pr(xp, sy, zi);
         const wb = pr(xp, sy + hParete * 0.8, zi);
-        if (cw && wa && wd && wt && wb) macchia(cw, Math.abs(wa[0] - wd[0]) / 2, Math.abs(wb[1] - wt[1]) / 2, "255, 206, 150", 0.14 * n);
+        if (cw && wa && wd && wt && wb) macchia(cw, Math.abs(wa[0] - wd[0]) / 2, Math.abs(wb[1] - wt[1]) / 2, accese ? "255, 236, 200" : "255, 206, 150", accese ? 0.3 * n : 0.14 * n);
         // il faretto sul soffitto
         const f = pr(xi, sy, zi + 160);
         if (f) {
-          macchia(f, 70 * f[2], 26 * f[2], "255, 226, 180", 0.22 * n);
-          macchia(f, 9 * f[2], 4 * f[2], "255, 246, 228", 0.95 * nebbia(zi));
+          if (accese) {
+            // un lucernario: un rettangolo di cielo chiaro nel soffitto
+            macchia(f, 90 * f[2], 22 * f[2], "255, 255, 255", 0.85 * nebbia(zi));
+          } else {
+            macchia(f, 70 * f[2], 26 * f[2], "255, 226, 180", 0.22 * n);
+            macchia(f, 9 * f[2], 4 * f[2], "255, 246, 228", 0.95 * nebbia(zi));
+          }
         }
       });
       // le strisce di luce lungo il battiscopa e i binari sul soffitto
@@ -1131,7 +675,7 @@
         ctx.lineTo(p2[0], p2[1]);
         ctx.stroke();
       };
-      [-X, X].forEach((xp) => striscia([xp, fy - 2, zV], [xp, fy - 2, zL], "255, 200, 140", 0.5 * lum, 2.4));
+      [-X, X].forEach((xp) => striscia([xp, fy - 2, zV], [xp, fy - 2, zL], accese ? "120, 100, 75" : "255, 200, 140", accese ? 0.35 : 0.5 * lum, 2.4));
       [-largo, largo].forEach((xp) => striscia([xp, sy, zV], [xp, sy, zL], "236, 230, 218", 0.12 * lum, 1.5));
       ctx.globalCompositeOperation = "source-over";
     }
@@ -1150,9 +694,8 @@
       cam += (camMeta - cam) * 0.09; // il passo: si arriva con un po' di inerzia
       guardaX += (mx - guardaX) * 0.06;
       guardaY += (my - guardaY) * 0.06;
-      const oscilla = conMouse() ? 0 : Math.sin(performance.now() * 0.0006) * 1.2;
       const gradiX = guardaY * 4;
-      const gradiY = guardaX * 9 + oscilla;
+      const gradiY = guardaX * 9;
       mondo.style.transform = `rotateX(${gradiX.toFixed(3)}deg) rotateY(${gradiY.toFixed(3)}deg) translate3d(0, 0, ${cam.toFixed(1)}px)`;
       // ogni opera: nell'ombra da lontano, accesa da vicino, svanisce quando la superi
       let vicina = 0;
@@ -1164,6 +707,7 @@
           minimo = Math.abs(lontano - G.prospettiva * 0.3);
           vicina = i;
         }
+        if (lontano < G.passo * 4.2 || i < 2) carica(el);
         const ombra = limita((lontano - G.passo) / (G.passo * 3), 0, 1);
         const passata = limita((rel + G.prospettiva * 0.02) / (G.prospettiva * 0.3), 0, 1);
         el.style.setProperty("--ombra", ombra.toFixed(3));
@@ -1180,7 +724,7 @@
       if (testa && !testa.classList.contains("visibile") && pista.getBoundingClientRect().top < window.innerHeight * 0.6) testa.classList.add("visibile");
       if (testa) testa.classList.toggle("in-cammino", cam > G.passo * 0.35);
       // si continua finché il passo o lo sguardo non si sono fermati
-      if (Math.abs(camMeta - cam) > 0.5 || Math.abs(mx - guardaX) > 0.002 || Math.abs(my - guardaY) > 0.002 || !conMouse()) {
+      if (Math.abs(camMeta - cam) > 0.5 || Math.abs(mx - guardaX) > 0.002 || Math.abs(my - guardaY) > 0.002) {
         ciclo = requestAnimationFrame(fotogramma);
       }
     }
@@ -1276,18 +820,676 @@
   }
 
   /* ------------------------------------------------------------------
+     6b. La cordicella della luce
+     In alto a destra pende una cordicella: si tira giù (o si tocca, o si
+     preme L) per accendere le luci. Accese, la galleria diventa chiara,
+     di giorno: la luce si allarga a cerchio partendo dalla cordicella
+     (dove il browser lo permette), con un piccolo sfarfallio prima.
+     ------------------------------------------------------------------ */
+  function preparaInterruttore() {
+    const b = $("#interruttore");
+    if (!b) return;
+    const radice = document.documentElement;
+    const testo = b.querySelector(".interruttore-testo");
+    const appesa = b.querySelector(".cordicella-appesa");
+    const pomello = b.querySelector(".cordicella-pomello");
+    const applica = (accese) => {
+      radice.classList.toggle("luci-accese", accese);
+      b.setAttribute("aria-pressed", String(accese));
+      testo.textContent = accese ? "Spegni le luci" : "Accendi le luci";
+      document.dispatchEvent(new CustomEvent("luci-cambiate"));
+    };
+    const salva = (accese) => {
+      try {
+        localStorage.setItem("luci-accese", accese ? "1" : "0");
+      } catch (e) {
+        /* il browser non salva: pazienza */
+      }
+    };
+    let iniziale = false;
+    try {
+      iniziale = localStorage.getItem("luci-accese") === "1";
+    } catch (e) {
+      iniziale = false;
+    }
+    applica(iniziale);
+
+    // la cordicella ha un po' di fisica: si allunga quando la tiri e dondola
+    let ang = 0;
+    let vAng = 0;
+    let tiro = 0;
+    let vTiro = 0;
+    let ciclo = 0;
+    let presa = null;
+    function passo() {
+      ciclo = 0;
+      if (!presa) {
+        vTiro += -tiro * 0.2;
+        vTiro *= 0.7;
+        tiro += vTiro;
+        vAng += -ang * 0.045;
+        vAng *= 0.94;
+        ang += vAng;
+      }
+      appesa.style.setProperty("--tiro", `${Math.max(-6, tiro).toFixed(1)}px`);
+      appesa.style.setProperty("--ang", `${ang.toFixed(2)}deg`);
+      if (presa || Math.abs(tiro) > 0.2 || Math.abs(vTiro) > 0.2 || Math.abs(ang) > 0.05 || Math.abs(vAng) > 0.05) {
+        ciclo = requestAnimationFrame(passo);
+      }
+    }
+    const muovi = () => {
+      if (!ciclo) ciclo = requestAnimationFrame(passo);
+    };
+    const strattone = () => {
+      vTiro = 10;
+      vAng += (Math.random() - 0.5) * 3;
+      muovi();
+    };
+
+    // il lampo di luce che si spegne piano dopo l'accensione
+    const lampo = $(".lampo");
+    function bagliore(x, y) {
+      if (!lampo || !lampo.animate || menoMovimento()) return;
+      lampo.style.setProperty("--x", `${x}px`);
+      lampo.style.setProperty("--y", `${y}px`);
+      lampo.animate([{ opacity: 0.85 }, { opacity: 0 }], { duration: 1100, easing: "cubic-bezier(0.2, 0.7, 0.2, 1)" });
+    }
+
+    let inCorso = false;
+    function accendi(accese) {
+      if (inCorso) return;
+      salva(accese);
+      const r = pomello.getBoundingClientRect();
+      const x = Math.round(r.left + r.width / 2);
+      const y = Math.round(r.top + r.height / 2);
+      if (menoMovimento() || !document.startViewTransition) {
+        applica(accese);
+        if (accese) bagliore(x, y);
+        return;
+      }
+      inCorso = true;
+      const parti = () => {
+        let t;
+        try {
+          t = document.startViewTransition(() => applica(accese));
+        } catch (e) {
+          applica(accese);
+          inCorso = false;
+          return;
+        }
+        t.ready
+          .then(() => {
+            const R = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+            radice.animate(
+              { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${Math.ceil(R)}px at ${x}px ${y}px)`] },
+              { duration: accese ? 1150 : 850, easing: "cubic-bezier(0.7, 0, 0.2, 1)", pseudoElement: "::view-transition-new(root)" }
+            );
+          })
+          .catch(() => {});
+        t.finished
+          .then(() => {
+            if (accese) bagliore(x, y);
+          })
+          .catch(() => {})
+          .finally(() => {
+            inCorso = false;
+          });
+      };
+      if (accese) {
+        // la lampadina sfarfalla un attimo prima di accendersi
+        b.classList.add("sfarfalla");
+        setTimeout(() => {
+          b.classList.remove("sfarfalla");
+          parti();
+        }, 420);
+      } else parti();
+    }
+    const cambia = () => accendi(!radice.classList.contains("luci-accese"));
+
+    // col mouse sopra dondola un poco
+    b.addEventListener("pointerenter", (e) => {
+      if (e.pointerType !== "mouse" || menoMovimento()) return;
+      vAng += (Math.random() > 0.5 ? 1 : -1) * 1.4;
+      muovi();
+    });
+    // si può tirare davvero: giù di almeno 2 cm e si accende
+    b.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      presa = { x0: e.clientX, y0: e.clientY, mossa: false };
+      try {
+        b.setPointerCapture(e.pointerId);
+      } catch (err) {
+        /* niente */
+      }
+      muovi();
+    });
+    b.addEventListener("pointermove", (e) => {
+      if (!presa) return;
+      const dy = e.clientY - presa.y0;
+      const dx = e.clientX - presa.x0;
+      if (Math.abs(dy) > 5 || Math.abs(dx) > 5) presa.mossa = true;
+      tiro = limita(dy * 0.85, -4, 80);
+      ang = limita(-dx * 0.3, -28, 28);
+    });
+    const lascia = () => {
+      if (!presa) return;
+      const p = presa;
+      presa = null;
+      if (p.mossa) {
+        b._senzaClic = true;
+        setTimeout(() => (b._senzaClic = false), 350);
+        if (tiro > 24) cambia();
+        vTiro = 0;
+      }
+      muovi();
+    };
+    b.addEventListener("pointerup", lascia);
+    b.addEventListener("pointercancel", lascia);
+    b.addEventListener("click", () => {
+      if (b._senzaClic) return; // l'ha già tirata col dito o col mouse
+      strattone();
+      cambia();
+    });
+    // il tasto L accende e spegne
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "l" && e.key !== "L") return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) return;
+      if (document.querySelector("dialog[open]")) return;
+      strattone();
+      cambia();
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     6c. L'audioguida e la pianta
+     La capsula in basso segna la sala in cui sei con una luce che
+     scivola; passando col mouse la luce segue la voce. Sul telefono
+     mostra solo la sala e il pulsante "Pianta", che apre la pianta della
+     galleria dal basso (si chiude anche trascinandola giù, o con Esc).
+     ------------------------------------------------------------------ */
+  function preparaGuida() {
+    const guida = $("#guida");
+    if (!guida) return;
+    const radice = document.documentElement;
+    const voci = $$(".guida-voce", guida);
+    const lista = $(".guida-lista", guida);
+    const luce = $(".guida-luce", guida);
+    const quiN = $("#guida-qui-n");
+    const quiNome = $("#guida-qui-nome");
+    const barra = $("#guida-progresso");
+    let indicata = null;
+
+    const vocePer = (sala) => voci.find((v) => v.dataset.sala === sala) || voci[0];
+    const corrente = () => vocePer(radice.dataset.sala);
+    function sposta() {
+      const v = indicata || corrente();
+      voci.forEach((x) => x.classList.toggle("is-qui", x === corrente()));
+      const c = corrente();
+      if (c && quiN) {
+        quiN.textContent = $(".guida-n", c).textContent;
+        quiNome.textContent = $(".guida-nome", c).textContent;
+      }
+      if (!v || !lista || lista.offsetParent === null || getComputedStyle(lista).display === "none") {
+        luce.classList.remove("visibile");
+        return;
+      }
+      const a = $(".guida-link", v).getBoundingClientRect();
+      const g = guida.getBoundingClientRect();
+      luce.style.setProperty("--x", `${(a.left - g.left).toFixed(1)}px`);
+      luce.style.setProperty("--w", `${a.width.toFixed(1)}px`);
+      luce.dataset.sala = v.dataset.sala;
+      luce.classList.add("visibile");
+    }
+    voci.forEach((v) => {
+      v.addEventListener("mouseenter", () => {
+        indicata = v;
+        sposta();
+      });
+      v.addEventListener("focusin", () => {
+        indicata = v;
+        sposta();
+      });
+    });
+    guida.addEventListener("mouseleave", () => {
+      indicata = null;
+      sposta();
+    });
+    guida.addEventListener("focusout", (e) => {
+      if (guida.contains(e.relatedTarget)) return;
+      indicata = null;
+      sposta();
+    });
+    new MutationObserver(sposta).observe(radice, { attributes: true, attributeFilter: ["data-sala"] });
+    window.addEventListener("resize", sposta);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(sposta);
+
+    // quanto della visita hai fatto
+    suScorrimento(() => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (barra) barra.style.transform = `scaleX(${max > 0 ? limita(window.scrollY / max, 0, 1).toFixed(4) : 0})`;
+    });
+
+    // le sale chiuse (per esempio Processo senza video) non compaiono
+    const sistemaSale = () => {
+      const chiusa = (id) => {
+        const s = document.getElementById(id);
+        return !s || s.hidden || getComputedStyle(s).display === "none";
+      };
+      voci.forEach((v) => {
+        const a = $(".guida-link", v);
+        const id = a.getAttribute("href").slice(1);
+        v.hidden = id !== "inizio" && chiusa(id);
+      });
+      $$(".pianta-sala").forEach((p) => {
+        const id = $("a", p).getAttribute("href").slice(1);
+        p.classList.toggle("is-chiusa", id !== "inizio" && chiusa(id));
+      });
+      sposta();
+    };
+    sistemaSale();
+    document.addEventListener("vetrina:pronta", () => setTimeout(sistemaSale, 50));
+    setTimeout(() => guida.classList.add("is-pronta"), menoMovimento() ? 0 : 900);
+
+    /* --- La pianta --- */
+    const pianta = $("#pianta");
+    const btn = $("#pianta-btn");
+    if (!pianta || !btn) return;
+    const foglio = $(".pianta-foglio", pianta);
+    const fuori = () => [$("main"), $(".piede"), $(".testata"), guida].filter(Boolean);
+    let chiusura = 0;
+    function apri() {
+      clearTimeout(chiusura);
+      sistemaSale();
+      // la sala in cui sei, con il puntino "Sei qui"
+      $$(".pianta-sala", pianta).forEach((p) => p.classList.toggle("is-qui", p.dataset.sala === (radice.dataset.sala || "ingresso")));
+      // le categorie delle opere, copiate dal menu
+      const cat = $("#sottomenu-opere");
+      const dove = $("#pianta-categorie");
+      if (cat && dove) dove.innerHTML = cat.children.length ? `<p class="pianta-occhiello">Opere per categoria</p><ul class="pianta-cat">${cat.innerHTML}</ul>` : "";
+      const conta = $("#pianta-conta");
+      if (conta && window.Vetrina && window.Vetrina.opere) conta.textContent = `${window.Vetrina.opere.length} opere`;
+      pianta.hidden = false;
+      foglio.style.transform = "";
+      requestAnimationFrame(() => requestAnimationFrame(() => pianta.classList.add("is-aperta")));
+      btn.setAttribute("aria-expanded", "true");
+      radice.classList.add("pianta-aperta");
+      fuori().forEach((el) => (el.inert = true));
+      const qui = $(".pianta-sala.is-qui a", pianta) || $(".pianta-sala a", pianta);
+      setTimeout(() => qui && qui.focus({ preventScroll: true }), 60);
+    }
+    function chiudi(rimetti) {
+      if (pianta.hidden) return;
+      pianta.classList.remove("is-aperta");
+      btn.setAttribute("aria-expanded", "false");
+      radice.classList.remove("pianta-aperta");
+      fuori().forEach((el) => (el.inert = false));
+      chiusura = setTimeout(() => (pianta.hidden = true), menoMovimento() ? 0 : 420);
+      if (rimetti) btn.focus({ preventScroll: true });
+    }
+    btn.addEventListener("click", () => (pianta.hidden ? apri() : chiudi(true)));
+    pianta.addEventListener("click", (e) => {
+      if (e.target.closest("[data-chiudi]")) chiudi(true);
+      else if (e.target.closest("a")) chiudi(false); // il passaggio alla sala lo fa js/script.js
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !pianta.hidden) {
+        chiudi(true);
+        return;
+      }
+      if ((e.key === "m" || e.key === "M") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) return;
+        if (document.querySelector("dialog[open]")) return;
+        if (pianta.hidden) apri();
+        else chiudi(true);
+      }
+    });
+    // si chiude anche trascinandola giù
+    const testa = $(".pianta-testa", pianta);
+    const maniglia = $(".pianta-maniglia", pianta);
+    let presa = null;
+    [testa, maniglia].filter(Boolean).forEach((el) =>
+      el.addEventListener("pointerdown", (e) => {
+        if (e.target.closest("button, a")) return;
+        presa = { y0: e.clientY, dy: 0 };
+        foglio.style.transition = "none";
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch (err) {
+          /* niente */
+        }
+      })
+    );
+    window.addEventListener("pointermove", (e) => {
+      if (!presa) return;
+      presa.dy = Math.max(0, e.clientY - presa.y0);
+      foglio.style.transform = `translateY(${presa.dy}px)`;
+    });
+    const lascia = () => {
+      if (!presa) return;
+      const dy = presa.dy;
+      presa = null;
+      foglio.style.transition = "";
+      foglio.style.transform = "";
+      if (dy > 90) chiudi(true);
+    };
+    window.addEventListener("pointerup", lascia);
+    window.addEventListener("pointercancel", lascia);
+  }
+
+  /* ------------------------------------------------------------------
+     6d. Altre interazioni
+     - Ombre: con le luci accese la luce viene dal mouse, e quadri e
+       titoli gettano l'ombra dalla parte opposta.
+     - I quadri del muro sono appesi a un chiodo: se la luce li sfiora
+       veloce dondolano, e piano piano tornano fermi.
+     - Calamite: i bottoni si lasciano attirare un poco dal mouse.
+     - Biglietti: gli eventi si inclinano sotto il mouse, con un riflesso.
+     - Pennellate: nel piede, passando il mouse si dipinge nei colori di
+       Marco (sul telefono un tocco lascia una macchia); il colore svanisce.
+     ------------------------------------------------------------------ */
+  function preparaOmbre() {
+    if (!conMouse() || menoMovimento()) return;
+    const radice = document.documentElement;
+    let tx = 0;
+    let ty = 0.4;
+    let x = 0;
+    let y = 0.4;
+    let ciclo = 0;
+    function passo() {
+      ciclo = 0;
+      x += (tx - x) * 0.12;
+      y += (ty - y) * 0.12;
+      radice.style.setProperty("--sx", x.toFixed(3));
+      radice.style.setProperty("--sy", y.toFixed(3));
+      if (Math.abs(tx - x) + Math.abs(ty - y) > 0.004) ciclo = requestAnimationFrame(passo);
+    }
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        if (e.pointerType !== "mouse" || !radice.classList.contains("luci-accese")) return;
+        tx = limita((window.innerWidth / 2 - e.clientX) / (window.innerWidth / 2), -1, 1);
+        ty = limita((window.innerHeight * 0.3 - e.clientY) / (window.innerHeight / 2), -1, 1);
+        if (!ciclo) ciclo = requestAnimationFrame(passo);
+      },
+      { passive: true }
+    );
+  }
+
+  function preparaOscillazioni() {
+    if (menoMovimento()) return;
+    const ingresso = $(".ingresso");
+    if (!ingresso) return;
+    const stato = new Map(); // opera -> { a, v }
+    let visibile = true;
+    let ciclo = 0;
+    let px = Lanterna.x;
+    let py = Lanterna.y;
+    function passo() {
+      ciclo = 0;
+      if (!visibile || document.hidden || !Muro.opere.length) return;
+      const dx = Lanterna.x - px;
+      const dy = Lanterna.y - py;
+      px = Lanterna.x;
+      py = Lanterna.y;
+      const veloce = Math.abs(dx) + Math.abs(dy) > 1.2;
+      const misure = veloce ? Muro.opere.map((f) => f.getBoundingClientRect()) : null;
+      Muro.opere.forEach((f, i) => {
+        let s = stato.get(f);
+        if (!s) {
+          s = { a: 0, v: 0 };
+          stato.set(f, s);
+        }
+        if (veloce) {
+          const r = misure[i];
+          if (Lanterna.x > r.left && Lanterna.x < r.right && Lanterna.y > r.top - 20 && Lanterna.y < r.bottom) {
+            // la spinta dipende da quanto veloce passa la luce e da dove la tocca
+            s.v += limita(dx * 0.035, -1.4, 1.4) * (Lanterna.y < r.top + r.height * 0.6 ? 1 : 1.4);
+          }
+        }
+        s.v += -s.a * 0.035; // la molla del filo
+        s.v *= 0.965; // l'aria lo frena
+        s.a = limita(s.a + s.v, -14, 14);
+        const t = s.a.toFixed(2);
+        if (f._oscilla !== t) {
+          f._oscilla = t;
+          f.style.setProperty("--oscilla", `${t}deg`);
+        }
+      });
+      // pochi calcoli: resta in ascolto finché l'ingresso si vede (le misure solo quando la luce corre)
+      ciclo = requestAnimationFrame(passo);
+    }
+    const avvia = () => {
+      if (!ciclo && visibile) ciclo = requestAnimationFrame(passo);
+    };
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver((v) => {
+        visibile = v[0].isIntersecting;
+        avvia();
+      }).observe(ingresso);
+    }
+    // sul telefono un tocco su un quadro lo fa dondolare
+    ingresso.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.pointerType === "mouse") return;
+        Muro.opere.forEach((f) => {
+          const r = f.getBoundingClientRect();
+          if (e.clientX > r.left && e.clientX < r.right && e.clientY > r.top && e.clientY < r.bottom) {
+            const s = stato.get(f) || { a: 0, v: 0 };
+            s.v += e.clientX < r.left + r.width / 2 ? 1.6 : -1.6;
+            stato.set(f, s);
+          }
+        });
+        avvia();
+      },
+      { passive: true }
+    );
+    document.addEventListener("visibilitychange", avvia);
+    avvia();
+  }
+
+  function preparaMagneti() {
+    if (!conMouse() || menoMovimento()) return;
+    const SEL = ".bottone, .ingresso-entra, .filtro, .guida-link, .evento-calendario, .galleria-fine-freccia, .pianta-chiudi";
+    let attivo = null;
+    const lascia = (el) => {
+      el.style.transition = "translate 0.6s cubic-bezier(0.2, 0.9, 0.2, 1)";
+      el.style.translate = "";
+      clearTimeout(el._calamita);
+      el._calamita = setTimeout(() => (el.style.transition = ""), 650);
+    };
+    document.addEventListener(
+      "pointermove",
+      (e) => {
+        if (e.pointerType !== "mouse") return;
+        const el = e.target.closest && e.target.closest(SEL);
+        if (attivo && attivo !== el) {
+          lascia(attivo);
+          attivo = null;
+        }
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const forza = el.classList.contains("ingresso-entra") ? 0.32 : 0.2;
+        const dx = (e.clientX - (r.left + r.width / 2)) * forza;
+        const dy = (e.clientY - (r.top + r.height / 2)) * forza;
+        clearTimeout(el._calamita);
+        el.style.transition = "translate 0.15s ease-out";
+        el.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+        attivo = el;
+      },
+      { passive: true }
+    );
+    document.addEventListener("pointerleave", () => attivo && lascia(attivo));
+  }
+
+  function preparaBiglietti() {
+    if (!conMouse() || menoMovimento()) return;
+    let attivo = null;
+    const lascia = (ev) => {
+      ev.style.removeProperty("--rx");
+      ev.style.removeProperty("--ry");
+      ev.classList.remove("is-inclinato");
+    };
+    document.addEventListener(
+      "pointermove",
+      (e) => {
+        const ev = e.target.closest && e.target.closest(".evento");
+        if (attivo && attivo !== ev) {
+          lascia(attivo);
+          attivo = null;
+        }
+        if (!ev || e.pointerType !== "mouse") return;
+        const r = ev.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        ev.style.setProperty("--rx", `${((0.5 - py) * 7).toFixed(2)}deg`);
+        ev.style.setProperty("--ry", `${((px - 0.5) * 5).toFixed(2)}deg`);
+        ev.style.setProperty("--px", `${(px * 100).toFixed(1)}%`);
+        ev.classList.add("is-inclinato");
+        attivo = ev;
+      },
+      { passive: true }
+    );
+  }
+
+  function preparaPennellate() {
+    const tela = $("#piede-tela");
+    const piede = $(".piede");
+    if (!tela || !piede || menoMovimento()) return;
+    const ctx = tela.getContext("2d");
+    const COLORI = ["#C8F03C", "#E4457F", "#F2712B", "#2EC4B6", "#F5C431", "#2F4BDB"];
+    let k = 1;
+    let colore = Math.floor(Math.random() * COLORI.length);
+    let ultimo = null;
+    let ultimaVolta = 0;
+    let svanisce = 0;
+    function dimensiona() {
+      k = Math.min(2, window.devicePixelRatio || 1);
+      tela.width = Math.max(1, Math.round(piede.clientWidth * k));
+      tela.height = Math.max(1, Math.round(piede.clientHeight * k));
+      ctx.setTransform(k, 0, 0, k, 0, 0);
+    }
+    dimensiona();
+    if ("ResizeObserver" in window) new ResizeObserver(dimensiona).observe(piede);
+    // l'invito, sopra il "Torna su"
+    const su = $(".piede-su");
+    if (su && !$(".piede-invito")) {
+      const p = document.createElement("p");
+      p.className = "piede-invito";
+      p.textContent = conMouse() ? "Passa il mouse qui: lascia una pennellata" : "Tocca qui: lascia una macchia di colore";
+      su.before(p);
+    }
+    const locale = (e) => {
+      const r = piede.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() };
+    };
+    function tratto(a, b) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const l = Math.hypot(dx, dy);
+      if (l < 0.5) return;
+      const v = l / Math.max(8, b.t - a.t); // pixel al millisecondo
+      const largo = limita(30 - v * 9, 8, 30);
+      const nx = -dy / l;
+      const ny = dx / l;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = COLORI[colore];
+      for (let i = 0; i < 9; i++) {
+        const o = (i / 8 - 0.5) * largo + (Math.random() - 0.5) * 2;
+        ctx.globalAlpha = 0.35 + Math.random() * 0.5;
+        ctx.lineWidth = 1.2 + Math.random() * 3.2;
+        ctx.beginPath();
+        ctx.moveTo(a.x + nx * o, a.y + ny * o);
+        ctx.lineTo(b.x + nx * o, b.y + ny * o);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      segna();
+    }
+    function macchia(p) {
+      ctx.fillStyle = COLORI[colore];
+      for (let i = 0; i < 26; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const d = Math.pow(Math.random(), 1.6) * 38;
+        ctx.globalAlpha = 0.3 + Math.random() * 0.6;
+        ctx.beginPath();
+        ctx.arc(p.x + Math.cos(ang) * d, p.y + Math.sin(ang) * d, 2 + Math.random() * (i < 6 ? 16 : 6), 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      colore = (colore + 1) % COLORI.length;
+      segna();
+    }
+    // il colore svanisce piano, e il ciclo si ferma quando la tela è pulita
+    function segna() {
+      ultimaVolta = performance.now();
+      if (!svanisce) svanisce = requestAnimationFrame(sbiadisci);
+    }
+    let conta = 0;
+    function sbiadisci(ora) {
+      svanisce = 0;
+      if (++conta % 3 === 0) {
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.045)";
+        ctx.fillRect(0, 0, tela.width, tela.height);
+        ctx.restore();
+      }
+      if (ora - ultimaVolta < 9000) svanisce = requestAnimationFrame(sbiadisci);
+      else ctx.clearRect(0, 0, tela.width, tela.height);
+    }
+    piede.addEventListener(
+      "pointermove",
+      (e) => {
+        if (e.pointerType !== "mouse") return;
+        const p = locale(e);
+        if (ultimo && p.t - ultimo.t < 120) tratto(ultimo, p);
+        ultimo = p;
+      },
+      { passive: true }
+    );
+    piede.addEventListener("pointerleave", () => {
+      ultimo = null;
+      colore = (colore + 1) % COLORI.length;
+    });
+    piede.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (e.pointerType === "mouse" || e.target.closest("a, button")) return;
+        macchia(locale(e));
+      },
+      { passive: true }
+    );
+  }
+
+  /* ------------------------------------------------------------------
      7. Avvio
      ------------------------------------------------------------------ */
   function prepara() {
     document.documentElement.classList.add("galleria-notturna");
     preparaInterruttore();
     preparaSale();
-    preparaIngresso();
+    preparaGuida();
     preparaLanterna();
     preparaPolvere();
     preparaTitoli();
+    preparaOmbre();
+    preparaOscillazioni();
+    preparaMagneti();
+    preparaBiglietti();
+    preparaPennellate();
     window.addEventListener("scroll", scorri, { passive: true });
-    const conContenuti = () => costruisciGalleria();
+    const conContenuti = () => {
+      costruisciMuro();
+      costruisciGalleria();
+      let ritardo = 0;
+      window.addEventListener("resize", () => {
+        clearTimeout(ritardo);
+        ritardo = setTimeout(costruisciMuro, 200);
+      });
+    };
     if (window.Vetrina && window.Vetrina.opere) conContenuti();
     else document.addEventListener("vetrina:pronta", conContenuti, { once: true });
   }

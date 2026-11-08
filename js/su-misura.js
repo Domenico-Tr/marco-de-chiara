@@ -1866,7 +1866,7 @@
     ).join("");
     const ispirazione = st.ispirazione
       ? `<div class="ispirazione">
-          ${st.ispirazione.immagine ? `<img src="${esc(st.ispirazione.immagine)}" alt="">` : ""}
+          ${st.ispirazione.immagine ? `<img src="${esc(window.Vetrina && window.Vetrina.miniatura ? window.Vetrina.miniatura(st.ispirazione.immagine, 160) : st.ispirazione.immagine)}" alt="" onerror="this.onerror=null;this.src='${esc(st.ispirazione.immagine)}'">` : ""}
           <p>Ispirata a <em>${esc(st.ispirazione.titolo)}</em>${st.ispirazione.anno ? `, ${esc(st.ispirazione.anno)}` : ""}. Ho ripreso i suoi colori e le sue misure: puoi cambiare tutto.</p>
           <button type="button" class="link-bottone" data-azione="togli-ispirazione">Togli</button>
         </div>`
@@ -2733,7 +2733,10 @@
     if (st.ispirazione) {
       const I = st.ispirazione;
       sezione("Ispirata a", [["Opera", `«${I.titolo}»${I.anno ? ", " + I.anno : ""}`], ["Tecnica", I.tecnica], ["Misure", I.misure]]);
-      const foto = $(`img[src$="${CSS.escape(I.immagine || "##")}"]`);
+      // una foto dell'opera già caricata nella pagina (le foto arrivano rimpicciolite: si cerca l'originale)
+      const foto = [...document.querySelectorAll("img")].find(
+        (x) => x.complete && x.naturalWidth && (x.dataset.originale === I.immagine || (x.getAttribute("src") || "").endsWith(I.immagine || "##"))
+      );
       if (foto && foto.complete && foto.naturalWidth) {
         try {
           const k = Math.min(1, 600 / Math.max(foto.naturalWidth, foto.naturalHeight));
