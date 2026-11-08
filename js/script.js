@@ -121,7 +121,8 @@
       ? "Hai aperto index.html con un doppio clic: in questo modo il browser non permette di leggere i file della cartella <code>contenuti</code>. Aprilo con Live Server in VS Code (tasto destro su index.html, Open with Live Server) oppure dal sito pubblicato."
       : `Controlla che la cartella <code>contenuti</code> sia stata caricata insieme al sito e che i file JSON non contengano errori. Dettaglio: ${esc(errore && errore.message)}`;
     $("#opere-griglia").innerHTML = `<p class="avviso-contenuti"><strong>Le opere non si possono caricare.</strong> ${motivo}</p>`;
-    $("#evidenza").hidden = true;
+    const evidenza = $("#evidenza");
+    if (evidenza) evidenza.hidden = true;
   }
 
   /* ------------------------------------------------------------------
@@ -1068,6 +1069,7 @@
   let operaApertura = null;
   function costruisciEvidenza() {
     const fig = $("#evidenza");
+    if (!fig) return; // nella "mostra immersiva" le opere scorrono nel corridoio (js/mostra.js)
     const lista = candidatiApertura();
     const o = lista[0] || OPERE[0];
     if (!o) {
@@ -2147,6 +2149,7 @@
 
   // Nastro delle categorie: tutte quelle del menu, ripetute quanto basta a riempire lo schermo
   function costruisciNastro() {
+    if (!$("#nastro")) return;
     const voci = CATEGORIE.map((c, n) => ({ ...c, quante: conta(c.id), pigmento: PIGMENTI[n % PIGMENTI.length] }));
     if (!voci.length) return;
 
@@ -3713,8 +3716,18 @@
     preparaAcquerello();
     requestAnimationFrame(() => aggiornaScorrimento());
     // i mi piace e le visualizzazioni di tutti, se nel pannello è collegato Firebase
-    // js/su-misura.js legge da qui l'email di Marco
-    window.Vetrina = { contatti: CONTATTI, opere: OPERE };
+    // js/su-misura.js e js/mostra.js leggono da qui contenuti e funzioni
+    window.Vetrina = {
+      contatti: CONTATTI,
+      opere: OPERE,
+      apriScheda,
+      bottonePiace,
+      visteHTML,
+      creaMedia,
+      osservaRivelazioni,
+      transizione: Pittura.transizione,
+      nomeCategoria: (id) => NOMI_CATEGORIE[id] || "",
+    };
     document.dispatchEvent(new CustomEvent("vetrina:pronta"));
     Firebase.configura({ progetto: CONTATTI.firebaseProgetto, chiave: CONTATTI.firebaseChiave });
     Piace.avvia();

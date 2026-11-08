@@ -1342,7 +1342,7 @@
       ctx.moveTo(x0, y0 - t); ctx.lineTo(x0, y0 + t); ctx.moveTo(x1, y1 - t); ctx.lineTo(x1, y1 + t);
     }
     ctx.stroke();
-    ctx.font = `500 ${Math.max(10, Math.min(13, 11 * k * 3))}px Jost, sans-serif`;
+    ctx.font = `500 ${Math.max(10, Math.min(13, 11 * k * 3))}px Manrope, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const mx = (x0 + x1) / 2;
@@ -1444,7 +1444,7 @@
     }
     sagomaPersona(ctx, xPersona, y0, k, "rgba(18,38,26,0.82)");
     ctx.fillStyle = "#5B6A5F";
-    ctx.font = "400 11px Jost, sans-serif";
+    ctx.font = "400 11px Manrope, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("170 cm", xPersona, y0 - 178 * k);
   }
@@ -2563,26 +2563,27 @@
 
   async function creaPdf() {
     const jsPDF = await caricaJsPdf();
-    const [corsivo, corsivoForte, jost, jostMedio] = await Promise.all([
-      caricaFont("cormorant-corsivo.ttf"),
-      caricaFont("cormorant-corsivo-forte.ttf"),
-      caricaFont("jost.ttf"),
-      caricaFont("jost-medio.ttf"),
+    const [serif, corsivo, testo, testoForte] = await Promise.all([
+      caricaFont("instrument-serif.ttf"),
+      caricaFont("instrument-serif-corsivo.ttf"),
+      caricaFont("manrope.ttf"),
+      caricaFont("manrope-forte.ttf"),
     ]);
     await Bozzetto.caricaTrama();
     const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
-    doc.addFileToVFS("Cormorant-Italic.ttf", corsivo);
-    doc.addFont("Cormorant-Italic.ttf", "Cormorant", "italic");
-    doc.addFileToVFS("Cormorant-SemiBoldItalic.ttf", corsivoForte);
-    doc.addFont("Cormorant-SemiBoldItalic.ttf", "Cormorant", "bolditalic");
-    doc.addFileToVFS("Jost-Regular.ttf", jost);
-    doc.addFont("Jost-Regular.ttf", "Jost", "normal");
-    doc.addFileToVFS("Jost-Medium.ttf", jostMedio);
-    doc.addFont("Jost-Medium.ttf", "Jost", "bold");
+    // i caratteri del sito: Instrument Serif per i titoli, Manrope per i testi
+    doc.addFileToVFS("InstrumentSerif-Regular.ttf", serif);
+    doc.addFont("InstrumentSerif-Regular.ttf", "Display", "normal");
+    doc.addFileToVFS("InstrumentSerif-Italic.ttf", corsivo);
+    doc.addFont("InstrumentSerif-Italic.ttf", "Display", "italic");
+    doc.addFileToVFS("Manrope-Regular.ttf", testo);
+    doc.addFont("Manrope-Regular.ttf", "Testo", "normal");
+    doc.addFileToVFS("Manrope-SemiBold.ttf", testoForte);
+    doc.addFont("Manrope-SemiBold.ttf", "Testo", "bold");
 
     const C = {
-      parete: [250, 250, 247], inchiostro: [18, 38, 26], grafite: [91, 106, 95], linea: [221, 226, 217],
-      accento: [31, 90, 46], acido: [195, 234, 54], fascia: "#0B2316",
+      parete: [242, 238, 230], inchiostro: [13, 15, 12], grafite: [95, 94, 88], linea: [214, 209, 198],
+      accento: [13, 15, 12], acido: [200, 240, 60], fascia: "#0D0F0C",
     };
     const v = valori();
     const ora = new Date();
@@ -2606,13 +2607,13 @@
     const tratto = document.createElement("canvas");
     tratto.width = 900;
     tratto.height = 90;
-    Bozzetto.fascia(tratto, "#C3EA36", 9, 0.55);
+    Bozzetto.fascia(tratto, "#C8F03C", 9, 0.55);
     doc.addImage(tratto.toDataURL("image/png"), "PNG", M + 1, 26.6, 54, 5.4);
-    doc.setFont("Cormorant", "italic");
-    doc.setFontSize(27);
+    doc.setFont("Display", "normal");
+    doc.setFontSize(30);
     doc.setTextColor(...C.parete);
     doc.text("Marco De Chiara", M, 27.5);
-    doc.setFont("Jost", "bold");
+    doc.setFont("Testo", "bold");
     doc.setFontSize(7.2);
     doc.setTextColor(...C.acido);
     doc.setCharSpace(0.55);
@@ -2621,13 +2622,13 @@
 
     // Titolo dell'opera
     let y = 58;
-    doc.setFont("Cormorant", "italic");
-    doc.setFontSize(25);
+    doc.setFont("Display", "italic");
+    doc.setFontSize(30);
     doc.setTextColor(...C.inchiostro);
     const titolo = pulisci(`${v.tipo}${v.tecnica && v.tecnica !== "Lascio scegliere a Marco" ? ", " + v.tecnica.toLowerCase() : ""}`);
     doc.text(doc.splitTextToSize(titolo, LARGO)[0], M, y);
     y += 7;
-    doc.setFont("Jost", "normal");
+    doc.setFont("Testo", "normal");
     doc.setFontSize(9);
     doc.setTextColor(...C.grafite);
     doc.text(pulisci(`${v.misure}  ·  proposta di ${st.nome.trim()}  ·  ${dataTesto}  ·  n. ${codice}`), M, y);
@@ -2657,13 +2658,13 @@
     doc.rect(fx, ys, fw, fh, "F");
     doc.addImage(boz.toDataURL("image/jpeg", 0.86), "JPEG", fx + 5, ys + 5, bw, bh);
     ys += fh + 4.5;
-    doc.setFont("Jost", "normal");
+    doc.setFont("Testo", "normal");
     doc.setFontSize(7);
     doc.setTextColor(...C.grafite);
     doc.text("Bozzetto indicativo creato dal sito: proporzioni e colori, non l'opera finale.", xs + ls / 2, ys, { align: "center", maxWidth: ls });
     ys += 9;
     const etichetta = (testo, x, yy) => {
-      doc.setFont("Jost", "bold");
+      doc.setFont("Testo", "bold");
       doc.setFontSize(7);
       doc.setTextColor(...C.accento);
       doc.setCharSpace(0.45);
@@ -2671,7 +2672,7 @@
       doc.setCharSpace(0);
     };
     etichetta("Tavolozza", xs, ys);
-    doc.setFont("Jost", "normal");
+    doc.setFont("Testo", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...C.grafite);
     doc.text(pulisci(`${v.tavolozza} · tono ${v.tono.toLowerCase()}`), xs + ls, ys, { align: "right" });
@@ -2692,7 +2693,7 @@
     const scala = document.createElement("canvas");
     disegnaScala(scala, st, boz, 640, 400);
     etichetta("In scala", xs, ys);
-    doc.setFont("Jost", "normal");
+    doc.setFont("Testo", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...C.grafite);
     doc.text("accanto a una persona alta 170 cm", xs + ls, ys, { align: "right" });
@@ -2714,7 +2715,7 @@
       doc.line(xd, yd, xd + ld, yd);
       yd += 5;
       valide.forEach(([k, val]) => {
-        doc.setFont("Jost", "normal");
+        doc.setFont("Testo", "normal");
         doc.setFontSize(7.6);
         doc.setTextColor(...C.grafite);
         doc.text(k, xd, yd);
@@ -2762,16 +2763,16 @@
     const blocco = (titoloB, testoB) => {
       const t = pulisci(testoB);
       if (!t) return;
-      doc.setFont("Jost", "normal");
+      doc.setFont("Testo", "normal");
       doc.setFontSize(10);
       const righe = doc.splitTextToSize(t, LARGO);
       if (y + 12 + righe.length * 5 > 280) nuovaPagina();
-      doc.setFont("Cormorant", "bolditalic");
+      doc.setFont("Display", "normal");
       doc.setFontSize(15);
       doc.setTextColor(...C.inchiostro);
       doc.text(titoloB, M, y);
       y += 6.5;
-      doc.setFont("Jost", "normal");
+      doc.setFont("Testo", "normal");
       doc.setFontSize(10);
       doc.setTextColor(...C.inchiostro);
       righe.forEach((riga) => {
@@ -2787,7 +2788,7 @@
       const lato = (LARGO - 3 * 6) / 4;
       const alto = Math.max(...st.riferimenti.map((r) => Math.min(lato * 1.35, lato * (r.h / r.w))));
       if (y + 10 + alto > 282) nuovaPagina();
-      doc.setFont("Cormorant", "bolditalic");
+      doc.setFont("Display", "normal");
       doc.setFontSize(15);
       doc.setTextColor(...C.inchiostro);
       doc.text("Immagini di riferimento", M, y);
@@ -2812,7 +2813,7 @@
       doc.setDrawColor(...C.linea);
       doc.setLineWidth(0.2);
       doc.line(M, 286, 210 - M, 286);
-      doc.setFont("Jost", "normal");
+      doc.setFont("Testo", "normal");
       doc.setFontSize(7);
       doc.setTextColor(...C.grafite);
       doc.text(pulisci(`Proposta preparata sul sito di Marco De Chiara${indirizzo ? " · " + indirizzo : ""}`), M, 290.5);
