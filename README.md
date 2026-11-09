@@ -158,7 +158,7 @@ Sul telefono alcune cose sono più leggere, perché lo scorrimento resti liscio:
 - **Colori delle finestre chiare** ("Provalo nella tua stanza", atelier): `--parete` (fondo), `--inchiostro` (testo) e `--grafite` (testo secondario) all'inizio del blocco GALLERIA NOTTURNA. La scheda dell'opera, buia, ha i suoi colori in `.scheda` nello stesso blocco.
 - **Caratteri**, da Google Fonts (link in `index.html`): Instrument Serif per il nome, i titoli delle sale, delle opere e degli eventi (`--font-display`); Manrope per i testi, il menu e le didascalie (`--font-testo`). Le stesse due famiglie sono in `js/lib/font` per il PDF della proposta.
 
-**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-08j` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
+**Dopo ogni modifica a `style.css` o ai file `.js`** cambia il numero di versione `?v=…` nei link in fondo e in cima a `index.html` (ad esempio da `?v=2026-11-09a` a `?v=2026-11-10`). Così chi ha già visitato il sito vede subito la versione nuova invece di quella salvata nel browser.
 
 ## L'ingresso nella galleria e il logo MDC Art Studio
 

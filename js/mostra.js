@@ -778,13 +778,13 @@
       pista.classList.add("in-corridoio");
       stato("corridoio", c.id);
     }
+    let viaDalBivio = [];
     function lasciaVestibolo() {
       vest.hidden = true;
       vest.classList.remove("verso-corridoio");
-      $$(".bivio-arco", vest).forEach((a) => {
-        a.classList.remove("scelto");
-        a.style.removeProperty("--verso");
-      });
+      viaDalBivio.forEach((x) => x.cancel());
+      viaDalBivio = [];
+      $$(".bivio-arco", vest).forEach((a) => a.classList.remove("scelto"));
     }
     function entra(id) {
       const c = corridoi.find((x) => x.id === id);
@@ -817,12 +817,14 @@
         return;
       }
       // dal bivio: dentro l'arco scelto compare il corridoio vero, l'arco si
-      // allarga fino a diventare la sala e intanto si cammina in avanti
+      // allarga fino a diventare la sala e intanto si cammina in avanti.
+      // La sala si allinea in cima allo schermo scivolando, senza scatti.
+      const scarto = pista.getBoundingClientRect().top;
       aCapo();
+      const scivola = scarto - pista.getBoundingClientRect().top;
       const arco = $(`.bivio-arco[data-corridoio="${id}"]`, vest);
       const archi = $$(".bivio-arco", vest);
       const qui = archi.indexOf(arco);
-      archi.forEach((a, i) => i !== qui && a.style.setProperty("--verso", i < qui ? -1 : 1));
       const rp = palco.getBoundingClientRect();
       const rv = $(".bivio-varco", arco).getBoundingClientRect();
       const R = (rv.width / 2).toFixed(1);
@@ -830,6 +832,24 @@
       const tutto = "inset(0px 0px 0px 0px round 0px 0px 0px 0px)";
       arco.classList.add("scelto");
       vest.classList.add("verso-corridoio");
+      // gli altri due archi scivolano via ai lati
+      viaDalBivio = archi
+        .filter((x) => x !== arco)
+        .map((x) =>
+          x.animate(
+            [
+              { opacity: 1, transform: "none" },
+              { opacity: 0, transform: `translateX(${archi.indexOf(x) < qui ? -14 : 14}vw) scale(0.94)` },
+            ],
+            { duration: 700, easing: "cubic-bezier(0.5, 0, 0.3, 1)", fill: "forwards" }
+          )
+        );
+      if (Math.abs(scivola) > 1) {
+        vista.animate([{ transform: `translateY(${scivola.toFixed(1)}px)` }, { transform: "translateY(0px)" }], {
+          duration: 750,
+          easing: "cubic-bezier(0.3, 0, 0.2, 1)",
+        });
+      }
       inCorridoio(c, dati);
       const varco = palco.animate([{ clipPath: da }, { clipPath: da, offset: 0.28 }, { clipPath: tutto }], {
         duration: 1600,
@@ -1733,6 +1753,16 @@
       indicata = null;
       sposta();
     });
+    // cliccata una voce col mouse o col dito, la tendina delle opere si chiude
+    // (e non resta aperta solo perché il link ha ancora il fuoco)
+    const opere = $(".guida-voce--opere", guida);
+    guida.addEventListener("click", (e) => {
+      const a = e.target.closest("a");
+      if (!a || e.detail === 0) return;
+      a.blur();
+      if (opere && opere.contains(a)) opere.classList.add("tendina-chiusa");
+    });
+    if (opere) opere.addEventListener("mouseleave", () => opere.classList.remove("tendina-chiusa"));
     guida.addEventListener("focusout", (e) => {
       if (guida.contains(e.relatedTarget)) return;
       indicata = null;
